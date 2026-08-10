@@ -92,6 +92,7 @@
         @php
             $club = \App\Models\Club::first();
         @endphp
+        @if($club)
         <section id="live-widgets" style="padding: 2rem 2rem 4rem; max-width: 1100px; margin: 0 auto;">
             <div class="lane-stripe" style="margin-bottom: 3rem;"></div>
             <h2 style="font-family: var(--font-header); text-align: center; text-transform: uppercase; font-size: 2rem; margin-bottom: 3rem;">Live at the Club</h2>
@@ -138,6 +139,7 @@
 
             </div>
         </section>
+        @endif
 
         <section id="features" style="padding: 5rem 2rem; max-width: 1100px; margin: 0 auto;">
             <div class="lane-stripe" style="margin-bottom: 3rem;"></div>
@@ -190,6 +192,7 @@
 
         <script>
         (function() {
+            @if($club)
             var barOpen = '{{ $club->bar_open_hours }}';
             var barClose = '{{ $club->bar_close_hours }}';
 
@@ -234,6 +237,7 @@
 
             updateBar();
             setInterval(updateBar, 1000);
+            @endif
 
             var statusColors = {
                 'open': { bg: 'var(--sky)', border: 'var(--sky-dark)', text: 'var(--navy)' },
