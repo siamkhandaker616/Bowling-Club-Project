@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Component Test - The Tenth Frame</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Bungee&family=Righteous&family=Manrope:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+    --sky:#a8d8ea;--sky-light:#c5e8f5;--sky-dark:#7ab8d4;
+    --cloud:#f5f8fa;--mist:#eef3f7;
+    --navy:#1a2a3a;--slate:#6b7a8d;--fog:#b0b8c1;
+    --gold:#d4a84c;--gold-light:#e8c878;--gold-dust:#987529;
+    --coral:#e86c6c;--coral-light:#f09090;--coral-dark:#682c2c;
+    --lane-wood:#c9a86c;--lane-wood-dark:#a8874a;--lane-wood-light:#dcc28e;
+    --pin-white:#f8f6f0;--rubber:#3a3a3a;
+    --font-display:'Bowlby One SC';--font-header:'Bungee';
+    --font-sub:'Righteous';--font-body:'Manrope';--font-mono:'Share Tech Mono';
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);color:var(--navy);background:var(--sky);background-image:repeating-linear-gradient(90deg,transparent 0px,transparent 59px,rgba(201,168,108,0.12) 59px,rgba(201,168,108,0.12) 61px),radial-gradient(circle,rgba(212,168,76,0.15) 2px,transparent 2px),radial-gradient(circle,rgba(255,255,255,0.25) 1.5px,transparent 1.5px);background-size:100% 100%,32px 32px,32px 32px;background-position:0 0,0 0,16px 16px;line-height:1.6}
+
+.page-header{background:var(--navy);padding:2rem;text-align:center;border-bottom:4px solid var(--gold)}
+.page-header h1{font-family:var(--font-display);color:var(--pin-white);font-size:1.8rem;text-transform:uppercase;letter-spacing:2px}
+.page-header p{font-family:var(--font-sub);color:var(--fog);font-size:0.9rem;margin-top:0.25rem}
+.section{max-width:1100px;margin:2.5rem auto;padding:0 1.5rem}
+.section-title{font-family:var(--font-header);font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:3px solid var(--navy);display:inline-block}
+.section-desc{font-size:0.85rem;color:var(--slate);margin-bottom:1rem}
+.component-row{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem}
+.component-label{font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.4rem}
+.text-center{text-align:center}
+
+/* 1. LANE CARD */
+.lane-card{position:relative;width:260px;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(26,42,58,0.15);transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;text-decoration:none;color:var(--navy);display:block}
+.lane-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(26,42,58,0.2)}
+.lc-gl,.lc-gr{position:absolute;top:0;bottom:0;width:8px;background:var(--rubber);z-index:2}
+.lc-gl{left:0;border-radius:10px 0 0 10px}.lc-gr{right:0;border-radius:0 10px 10px 0}
+.lc-lane{background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 5px),linear-gradient(180deg,var(--lane-wood-light),var(--lane-wood));padding:0.75rem 1.25rem 0}
+.lc-arrows{display:flex;justify-content:center;gap:16px;padding:6px 0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 5px),linear-gradient(180deg,var(--lane-wood),var(--lane-wood-dark))}
+.lc-arrow{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:9px solid rgba(26,42,58,0.25)}
+.lc-arrow.center{border-bottom-color:var(--coral)}
+.foul-line{height:3px;background:var(--navy)}
+.lc-body{padding:1rem 1.25rem;background:var(--pin-white)}
+.lc-body h3{font-family:var(--font-header);font-size:0.85rem;margin-bottom:0.2rem}
+.lc-body p{font-size:0.75rem;color:var(--slate)}
+.lc-num{font-family:var(--font-mono);font-size:0.55rem;color:var(--navy);opacity:0.5;text-transform:uppercase}
+
+/* 2. SHOE TAG */
+.shoe-tag{width:180px;text-decoration:none;color:var(--navy);display:block;transition:transform 0.2s}
+.shoe-tag:hover{transform:translateY(-3px) rotate(-1deg)}
+.st-shape{width:100%;aspect-ratio:3/4;background:var(--gold);border:3px solid var(--navy);clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem 2.5rem;position:relative}
+.st-shape::before{content:'';position:absolute;top:10px;width:12px;height:12px;border-radius:50%;border:2px solid var(--navy);background:var(--sky-light)}
+.st-icon{font-size:2rem;margin:0.75rem 0 0.5rem}
+.st-shape h4{font-family:var(--font-header);font-size:0.75rem;text-transform:uppercase}
+.st-shape p{font-size:0.65rem;color:var(--slate);margin-top:0.15rem}
+.shoe-tag.white .st-shape{background:var(--pin-white)}
+.shoe-tag.coral .st-shape{background:var(--coral-light)}
+
+/* 3. PIN STATUS */
+.pin-row{display:flex;gap:14px;align-items:flex-end}
+.pin{display:flex;flex-direction:column;align-items:center;transition:all 0.3s}
+.pin-head{width:14px;height:14px;border-radius:50%;background:var(--pin-white);border:2px solid var(--navy);z-index:1}
+.pin-neck{width:6px;height:5px;background:var(--pin-white);border-left:2px solid var(--navy);border-right:2px solid var(--navy);margin-top:-3px;z-index:1}
+.pin-body{width:18px;height:26px;background:var(--pin-white);border:2px solid var(--navy);border-radius:3px 3px 6px 6px;margin-top:-1px;position:relative;overflow:hidden}
+.pin-body::before{content:'';position:absolute;top:4px;left:0;right:0;height:3px;background:var(--coral)}
+.pin-body::after{content:'';position:absolute;top:10px;left:0;right:0;height:3px;background:var(--coral)}
+.pin-label{font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);text-align:center;margin-top:3px;width:36px;margin-left:-9px}
+.pin.knocked{transform:rotate(20deg) translateY(5px);opacity:0.7}
+.pin.knocked .pin-head,.pin.knocked .pin-neck,.pin.knocked .pin-body{border-color:var(--slate);background:var(--slate)}
+.pin.knocked .pin-body::before,.pin.knocked .pin-body::after{background:var(--fog);opacity:0.5}
+.pin.standing{animation:pinWobble 4s ease-in-out infinite}
+.pin.standing:nth-child(2){animation-delay:0.6s}
+.pin.standing:nth-child(3){animation-delay:1.2s}
+.pin.standing:nth-child(4){animation-delay:1.8s}
+@keyframes pinWobble{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-2deg)}96%{transform:rotate(2deg)}}
+
+/* 4. SCORECARD */
+.scorecard{display:flex;border:3px solid var(--navy);border-radius:8px;overflow:hidden;background:var(--pin-white);box-shadow:0 4px 12px rgba(26,42,58,0.1);width:fit-content}
+.sc-frame{border-right:1px solid var(--navy);text-align:center;min-width:48px}
+.sc-frame:last-child{border-right:none;min-width:66px;background:var(--mist)}
+.sc-num{background:var(--navy);color:var(--pin-white);font-family:var(--font-mono);font-size:0.55rem;padding:2px 0}
+.sc-rolls{display:flex;justify-content:center;gap:1px;padding:3px 2px;border-bottom:1px solid var(--fog);min-height:24px;align-items:center}
+.sc-roll{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.65rem;font-weight:700}
+.sc-roll.strike{color:var(--coral)}.sc-roll.spare{color:var(--sky-dark)}
+.sc-total{font-family:var(--font-mono);font-size:1rem;font-weight:700;padding:4px 0}
+
+/* 5. BALL AVATAR */
+.ball-avatar{border-radius:50%;position:relative;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset -3px -3px 10px rgba(0,0,0,0.2),inset 2px 2px 6px rgba(255,255,255,0.25),0 3px 8px rgba(26,42,58,0.2)}
+.ball-holes{position:absolute;top:20%;left:50%;transform:translateX(-50%);display:flex;gap:3px}
+.ball-holes span{width:4px;height:4px;border-radius:50%;background:rgba(0,0,0,0.3);box-shadow:inset 0 1px 2px rgba(0,0,0,0.4)}
+.ball-holes span:nth-child(2){transform:translateY(-4px)}
+.ball-initials{font-family:var(--font-header);color:rgba(255,255,255,0.9);text-shadow:0 1px 3px rgba(0,0,0,0.3);position:relative;top:5px}
+.ball-sm{width:36px;height:36px}.ball-sm .ball-initials{font-size:0.6rem}
+.ball-md{width:52px;height:52px}.ball-md .ball-initials{font-size:0.8rem}
+.ball-lg{width:72px;height:72px}.ball-lg .ball-initials{font-size:1rem}
+.ball-sky{background:radial-gradient(circle at 35% 35%,#d4ecf7,#a8d8ea 40%,#7ab8d4 80%,#5a98b4)}
+.ball-coral{background:radial-gradient(circle at 35% 35%,#f7b5b5,#e86c6c 40%,#c44e4e 80%,#a33a3a)}
+.ball-gold{background:radial-gradient(circle at 35% 35%,#f0d898,#d4a84c 40%,#b08a30 80%,#8e6e20)}
+.ball-navy{background:radial-gradient(circle at 35% 35%,#4a5a6a,#1a2a3a 40%,#0d1a28 80%,#060e16)}
+.ball-rubber{background:radial-gradient(circle at 35% 35%,#6a6a6a,#3a3a3a 40%,#252525 80%,#1a1a1a)}
+.ball-pin{background:radial-gradient(circle at 35% 35%,#fff,#f8f6f0 40%,#e8e4d8 80%,#d0c8b0)}
+
+/* 6. DIVIDERS */
+.lane-divider{height:12px;border-radius:6px;margin:1.5rem 0;position:relative}
+.lane-divider::before{content:'';position:absolute;inset:0;border-radius:6px;background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 5px),linear-gradient(180deg,var(--lane-wood-light),var(--lane-wood),var(--lane-wood-dark));border:2px solid var(--navy)}
+.gutter-divider{height:6px;background:var(--rubber);border-radius:3px;margin:1.5rem 0;box-shadow:inset 0 1px 2px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.1)}
+.pin-dot-divider{display:flex;align-items:center;gap:10px;margin:1.5rem 0}
+.pin-dot-divider::before,.pin-dot-divider::after{content:'';flex:1;height:2px;background:var(--navy);opacity:0.15}
+.pin-dot{width:7px;height:7px;border-radius:50%;background:var(--pin-white);border:2px solid var(--navy)}
+.pin-dot.gold{background:var(--gold)}.pin-dot.coral{background:var(--coral)}
+
+/* 7. BADGES */
+.badge-strike{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--coral);color:var(--pin-white);font-family:var(--font-header);font-size:1.1rem;border-radius:50%;box-shadow:0 2px 8px rgba(232,108,108,0.3)}
+.badge-spare{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--sky-dark);color:var(--pin-white);font-family:var(--font-header);font-size:1rem;border-radius:50%}
+.badge-gutter{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--fog);color:var(--slate);font-family:var(--font-header);font-size:0.9rem;border-radius:50%}
+.badge-role{display:inline-block;padding:4px 12px;border-radius:50px;font-family:var(--font-sub);font-size:0.65rem;text-transform:uppercase;letter-spacing:1px}
+.badge-role.manager{background:var(--gold);color:var(--navy)}
+.badge-role.steward{background:var(--sky);color:var(--navy);border:2px solid var(--sky-dark)}
+.badge-role.caretaker{background:var(--coral-light);color:var(--navy)}
+.badge-role.member{background:var(--sky-light);color:var(--coral-light)}
+
+/* 8. BUTTONS */
+.btn-ball{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset -3px -3px 8px rgba(0,0,0,0.2),inset 1px 1px 4px rgba(255,255,255,0.2),0 3px 8px rgba(26,42,58,0.2);transition:transform 0.15s,box-shadow 0.15s}
+.btn-ball:hover{transform:scale(1.1);box-shadow:inset -3px -3px 8px rgba(0,0,0,0.2),inset 1px 1px 4px rgba(255,255,255,0.2),0 6px 16px rgba(26,42,58,0.25)}
+.btn-ball:active{transform:scale(0.95)}
+.btn-ball svg{width:18px;height:18px}
+.btn-lane{padding:10px 28px;border:3px solid var(--navy);border-radius:50px;font-family:var(--font-header);font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s;text-decoration:none;display:inline-block}
+.btn-lane::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 5px);opacity:0.5}
+.btn-lane:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(26,42,58,0.15)}
+.btn-lane.primary{background:var(--gold);color:var(--navy)}
+.btn-lane.secondary{background:var(--pin-white);color:var(--navy)}
+.btn-lane.danger{background:var(--coral);color:var(--pin-white);border-color:var(--coral)}
+.btn-lane.solid{background:var(--navy);color:var(--pin-white)}
+
+/* 9. PIN DECK */
+.pin-deck{display:flex;flex-direction:column;align-items:center;gap:2px;padding:1rem;background:var(--pin-white);border:3px solid var(--navy);border-radius:12px;width:140px}
+.pd-row{display:flex;gap:5px;justify-content:center}
+.mp{width:10px;height:10px;border-radius:50% 50% 40% 40%;background:var(--pin-white);border:1.5px solid var(--navy)}
+.mp.knocked{background:var(--slate);border-color:var(--slate);opacity:0.65;transform:rotate(30deg)}
+.pd-label{font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:0.4rem;text-transform:uppercase}
+
+/* 10. LANE PERSPECTIVE */
+.lane-perspective{position:relative;padding:2rem 1.5rem;background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 5px),linear-gradient(180deg,var(--lane-wood-light),var(--lane-wood));border-left:12px solid var(--rubber);border-right:12px solid var(--rubber)}
+.lp-content{background:var(--coral);border-radius:12px;padding:1.25rem;border:2px solid var(--navy)}
+
+/* 11. BALL RETURN */
+.ball-return{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background:var(--rubber);border-radius:30px;box-shadow:inset 0 2px 6px rgba(0,0,0,0.3)}
+.mini-ball{width:24px;height:24px;border-radius:50%;box-shadow:inset -2px -2px 5px rgba(0,0,0,0.2),inset 1px 1px 3px rgba(255,255,255,0.15)}
+.br-text{font-family:var(--font-mono);font-size:0.7rem;color:var(--pin-white)}
+
+/* 12. MOCK DASHBOARD */
+.mock-dash{background:var(--sky);border:3px solid var(--navy);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(26,42,58,0.15)}
+.mock-nav{background:var(--navy);padding:0.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold)}
+.mn-logo{display:flex;align-items:center;gap:8px}
+.mn-ball{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#d4ecf7,#7ab8d4);box-shadow:inset -2px -2px 4px rgba(0,0,0,0.2)}
+.mn-title{font-family:var(--font-display);color:var(--pin-white);font-size:0.85rem;text-transform:uppercase}
+.mn-links{display:flex;gap:1.5rem}
+.mn-links a{font-family:var(--font-sub);font-size:0.75rem;color:var(--fog);text-decoration:none}
+.mn-links a.active{color:var(--gold)}
+.mn-role{font-family:var(--font-mono);font-size:0.65rem;color:var(--fog)}
+.mock-body{padding:1.25rem}
+.mock-title{font-family:var(--font-header);font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
+.mock-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem}
+.mock-stat{background:var(--pin-white);border:2px solid var(--navy);border-radius:10px;padding:0.75rem;text-align:center;position:relative;overflow:hidden}
+.mock-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.mock-stat:nth-child(1)::before{background:var(--sky-dark)}
+.mock-stat:nth-child(2)::before{background:var(--gold)}
+.mock-stat:nth-child(3)::before{background:var(--coral)}
+.mock-stat:nth-child(4)::before{background:var(--lane-wood)}
+.mock-stat-num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;line-height:1}
+.mock-stat-label{font-family:var(--font-sub);font-size:0.6rem;color:var(--slate);margin-top:0.15rem}
+.mock-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>The Tenth Frame</h1>
+    <p>Visual Component Test - agree on the look before building</p>
+</div>
+
+<!-- 1. LANE CARD -->
+<div class="section">
+    <div class="section-title">1. Lane Card</div>
+    <p class="section-desc">Card shaped like a bowling lane from above - wood grain, rubber gutters, arrow markers, foul line.</p>
+    <div class="component-row">
+        <a href="#" class="lane-card">
+            <div class="lc-gl"></div><div class="lc-gr"></div>
+            <div class="lc-lane"><span class="lc-num">Lane 01</span></div>
+            <div class="lc-arrows"><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow center"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div></div>
+            <div class="foul-line"></div>
+            <div class="lc-body"><h3>Staff Management</h3><p>Hire, schedule, and manage caretaker staff.</p></div>
+        </a>
+        <a href="#" class="lane-card">
+            <div class="lc-gl"></div><div class="lc-gr"></div>
+            <div class="lc-lane"><span class="lc-num">Lane 02</span></div>
+            <div class="lc-arrows"><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow center"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div></div>
+            <div class="foul-line"></div>
+            <div class="lc-body"><h3>Lane Operations</h3><p>Monitor bookings, maintenance, and availability.</p></div>
+        </a>
+        <a href="#" class="lane-card">
+            <div class="lc-gl"></div><div class="lc-gr"></div>
+            <div class="lc-lane"><span class="lc-num">Lane 03</span></div>
+            <div class="lc-arrows"><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow center"></div><div class="lc-arrow"></div><div class="lc-arrow"></div><div class="lc-arrow"></div></div>
+            <div class="foul-line"></div>
+            <div class="lc-body"><h3>Fixtures and Leagues</h3><p>Create leagues and manage team standings.</p></div>
+        </a>
+    </div>
+</div>
+
+<!-- 2. SHOE TAG -->
+<div class="section">
+    <div class="section-title">2. Shoe Tag Card</div>
+    <p class="section-desc">Pentagonal card shaped like a bowling shoe rental tag - hole punch at top, pointed bottom.</p>
+    <div class="component-row">
+        <a href="#" class="shoe-tag"><div class="st-shape"><div class="st-icon">&#127923;</div><h4>Book a Lane</h4><p>Reserve your slot</p></div></a>
+        <a href="#" class="shoe-tag white"><div class="st-shape"><div class="st-icon">&#128197;</div><h4>Fixtures</h4><p>View upcoming matches</p></div></a>
+        <a href="#" class="shoe-tag coral"><div class="st-shape"><div class="st-icon">&#127881;</div><h4>Events</h4><p>RSVP to club events</p></div></a>
+    </div>
+</div>
+
+<!-- 3. PIN STATUS -->
+<div class="section">
+    <div class="section-title">3. Pin Status</div>
+    <p class="section-desc">Bowling pins as status indicators - standing = active, knocked = inactive. Subtle wobble on standing pins.</p>
+    <div class="component-row" style="gap:3rem">
+        <div>
+            <div class="component-label">All Active</div>
+            <div class="pin-row">
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Lane 1</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Lane 2</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Lane 3</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Lane 4</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Lane 5</div></div>
+            </div>
+        </div>
+        <div>
+            <div class="component-label">Mixed Status</div>
+            <div class="pin-row">
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Siam</div></div>
+                <div class="pin knocked"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Rafi</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Nusa</div></div>
+                <div class="pin standing"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Tasnim</div></div>
+                <div class="pin knocked"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div><div class="pin-label">Zarif</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. SCORECARD -->
+<div class="section">
+    <div class="section-title">4. Scorecard Display</div>
+    <p class="section-desc">Classic 10-frame bowling scorecard - usable for stats, progress, or any tabular data.</p>
+    <div class="component-row">
+        <div class="scorecard">
+            <div class="sc-frame"><div class="sc-num">1</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">20</div></div>
+            <div class="sc-frame"><div class="sc-num">2</div><div class="sc-rolls"><span class="sc-roll">7</span><span class="sc-roll spare">/</span></div><div class="sc-total">37</div></div>
+            <div class="sc-frame"><div class="sc-num">3</div><div class="sc-rolls"><span class="sc-roll">9</span><span class="sc-roll">-</span></div><div class="sc-total">46</div></div>
+            <div class="sc-frame"><div class="sc-num">4</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">66</div></div>
+            <div class="sc-frame"><div class="sc-num">5</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">86</div></div>
+            <div class="sc-frame"><div class="sc-num">6</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">106</div></div>
+            <div class="sc-frame"><div class="sc-num">7</div><div class="sc-rolls"><span class="sc-roll">8</span><span class="sc-roll spare">/</span></div><div class="sc-total">123</div></div>
+            <div class="sc-frame"><div class="sc-num">8</div><div class="sc-rolls"><span class="sc-roll">9</span><span class="sc-roll">-</span></div><div class="sc-total">132</div></div>
+            <div class="sc-frame"><div class="sc-num">9</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">152</div></div>
+            <div class="sc-frame"><div class="sc-num">10</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll strike">X</span><span class="sc-roll strike">X</span></div><div class="sc-total">182</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. BALL AVATARS -->
+<div class="section">
+    <div class="section-title">5. Ball Avatars</div>
+    <p class="section-desc">3D bowling ball avatars with finger holes - color variants for different roles.</p>
+    <div class="component-row" style="align-items:center;gap:2rem">
+        <div class="text-center"><div class="ball-avatar ball-sm ball-sky"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div><div class="component-label" style="margin-top:6px">Small</div></div>
+        <div class="text-center"><div class="ball-avatar ball-md ball-sky"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div><div class="component-label" style="margin-top:6px">Medium</div></div>
+        <div class="text-center"><div class="ball-avatar ball-lg ball-sky"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div><div class="component-label" style="margin-top:6px">Sky</div></div>
+        <div class="text-center"><div class="ball-avatar ball-lg ball-coral"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">NR</span></div><div class="component-label" style="margin-top:6px">Coral</div></div>
+        <div class="text-center"><div class="ball-avatar ball-lg ball-gold"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">AD</span></div><div class="component-label" style="margin-top:6px">Gold</div></div>
+        <div class="text-center"><div class="ball-avatar ball-lg ball-navy"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SM</span></div><div class="component-label" style="margin-top:6px">Navy</div></div>
+        <div class="text-center"><div class="ball-avatar ball-lg ball-pin"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials" style="color:var(--navy);text-shadow:none">CT</span></div><div class="component-label" style="margin-top:6px">Pin White</div></div>
+    </div>
+</div>
+
+<!-- 6. DIVIDERS -->
+<div class="section">
+    <div class="section-title">6. Dividers</div>
+    <p class="section-desc">Bowling-themed section separators.</p>
+    <div class="component-label">Lane Divider</div>
+    <div class="lane-divider"></div>
+    <div class="component-label">Gutter Divider</div>
+    <div class="gutter-divider"></div>
+    <div class="component-label">Pin Dots Divider</div>
+    <div class="pin-dot-divider"><div class="pin-dot"></div><div class="pin-dot gold"></div><div class="pin-dot"></div><div class="pin-dot coral"></div><div class="pin-dot"></div></div>
+</div>
+
+<!-- 7. BADGES -->
+<div class="section">
+    <div class="section-title">7. Badges</div>
+    <p class="section-desc">Bowling-themed status and role badges.</p>
+    <div class="component-row" style="align-items:center;gap:1.5rem">
+        <div class="text-center"><div class="badge-strike">X</div><div class="component-label" style="margin-top:4px">Strike</div></div>
+        <div class="text-center"><div class="badge-spare">/</div><div class="component-label" style="margin-top:4px">Spare</div></div>
+        <div class="text-center"><div class="badge-gutter">-</div><div class="component-label" style="margin-top:4px">Gutter</div></div>
+        <div style="width:1px;height:36px;background:var(--fog)"></div>
+        <div class="text-center"><span class="badge-role manager">Manager</span><div class="component-label" style="margin-top:4px">Admin</div></div>
+        <div class="text-center"><span class="badge-role steward">Steward</span><div class="component-label" style="margin-top:4px">Steward</div></div>
+        <div class="text-center"><span class="badge-role caretaker">Caretaker</span><div class="component-label" style="margin-top:4px">Caretaker</div></div>
+        <div class="text-center"><span class="badge-role member">Member</span><div class="component-label" style="margin-top:4px">Customer (updated)</div></div>
+    </div>
+</div>
+
+<!-- 8. BUTTONS -->
+<div class="section">
+    <div class="section-title">8. Buttons</div>
+    <p class="section-desc">Bowling ball action buttons and lane-textured pill buttons.</p>
+    <div class="component-row" style="align-items:center;gap:2rem">
+        <div>
+            <div class="component-label">Ball Buttons</div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <button class="btn-ball ball-navy" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                <button class="btn-ball ball-coral" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                <button class="btn-ball ball-gold" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            </div>
+        </div>
+        <div style="width:1px;height:48px;background:var(--fog)"></div>
+        <div>
+            <div class="component-label">Lane Buttons</div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <a href="#" class="btn-lane primary">Book Now</a>
+                <a href="#" class="btn-lane secondary">View All</a>
+                <a href="#" class="btn-lane danger">Cancel</a>
+                <a href="#" class="btn-lane solid">Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 9. PIN DECK -->
+<div class="section">
+    <div class="section-title">9. Pin Deck Status</div>
+    <p class="section-desc">Triangular pin arrangement showing status - 10 pins in standard bowling formation.</p>
+    <div class="component-row" style="gap:2rem">
+        <div class="text-center">
+            <div class="pin-deck">
+                <div class="pd-row"><div class="mp"></div><div class="mp"></div><div class="mp"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp"></div><div class="mp"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp"></div></div>
+                <div class="pd-label">All Active</div>
+            </div>
+        </div>
+        <div class="text-center">
+            <div class="pin-deck">
+                <div class="pd-row"><div class="mp knocked"></div><div class="mp"></div><div class="mp knocked"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp"></div><div class="mp knocked"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp knocked"></div><div class="mp"></div></div>
+                <div class="pd-row"><div class="mp knocked"></div></div>
+                <div class="pd-label">5 of 10 Active</div>
+            </div>
+        </div>
+        <div class="text-center">
+            <div class="pin-deck">
+                <div class="pd-row"><div class="mp knocked"></div><div class="mp knocked"></div><div class="mp knocked"></div><div class="mp knocked"></div></div>
+                <div class="pd-row"><div class="mp knocked"></div><div class="mp knocked"></div><div class="mp knocked"></div></div>
+                <div class="pd-row"><div class="mp knocked"></div><div class="mp knocked"></div></div>
+                <div class="pd-row"><div class="mp knocked"></div></div>
+                <div class="pd-label">Strike! All Down</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 10. LANE PERSPECTIVE -->
+<div class="section">
+    <div class="section-title">10. Lane Perspective Section</div>
+    <p class="section-desc">Full-width section with rubber gutters and wood grain - like looking down a lane.</p>
+    <div class="lane-perspective">
+        <div class="lp-content">
+            <h3 style="font-family:var(--font-header);font-size:0.95rem;margin-bottom:0.3rem;color:var(--pin-white)">Today's Shift Overview</h3>
+            <p style="font-size:0.8rem;color:rgba(248,246,240,0.85)">3 caretakers on duty, 2 on break, 1 absent. Next shift change at 6:00 PM.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 11. BALL RETURN -->
+<div class="section">
+    <div class="section-title">11. Ball Return Notification</div>
+    <p class="section-desc">Notification bar styled like a ball return chute.</p>
+    <div class="component-row" style="gap:1rem;align-items:center">
+        <div class="ball-return"><div class="mini-ball ball-coral"></div><span class="br-text">New complaint from Nusrat</span></div>
+        <div class="ball-return"><div class="mini-ball ball-gold"></div><span class="br-text">Shift starts in 15 min</span></div>
+    </div>
+</div>
+
+<!-- 12. MOCK DASHBOARD — ARCADE CONSOLE (2-col, no speech panel) -->
+<div class="section">
+    <div class="section-title">12. Manager Dashboard — Arcade Console</div>
+    <p class="section-desc">2-column: sidebar + center. Staff dialogue is triggered via notification bell, not a permanent panel. Inventory uses progress bars, not ball avatars.</p>
+    <div class="mock-dash">
+
+        <!-- TOP BAR -->
+        <div class="mock-nav">
+            <div class="mn-logo"><div class="mn-ball"></div><span class="mn-title">The Tenth Frame</span></div>
+            <div style="display:flex;align-items:center;gap:1rem">
+                <div style="display:flex;gap:6px">
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.1);color:var(--pin-white)">L1 OPEN</span>
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--gold);color:var(--navy)">L2 BUSY</span>
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--coral);color:var(--pin-white)">L3 JAMMED</span>
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.1);color:var(--pin-white)">L4 OPEN</span>
+                </div>
+                <div style="width:1px;height:20px;background:var(--slate)"></div>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gold)">DAY 14</span>
+                <button style="font-family:var(--font-header);font-size:0.6rem;padding:4px 10px;border:2px solid var(--gold);border-radius:4px;background:transparent;color:var(--gold);cursor:pointer">ADVANCE &#9654;</button>
+                <div style="width:1px;height:20px;background:var(--slate)"></div>
+                <!-- Notification bell with staff issues -->
+                <div style="position:relative;cursor:pointer" title="2 pending confrontations">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pin-white)" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <div style="position:absolute;top:-4px;right:-6px;width:14px;height:14px;border-radius:50%;background:var(--coral);font-family:var(--font-mono);font-size:0.5rem;color:white;display:flex;align-items:center;justify-content:center">2</div>
+                </div>
+            </div>
+            <span class="mn-role">Admin</span>
+        </div>
+
+        <!-- MAIN: 2-column -->
+        <div style="display:grid;grid-template-columns:200px 1fr;min-height:400px">
+
+            <!-- LEFT SIDEBAR -->
+            <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;gap:6px">
+                <div class="component-label" style="margin-bottom:4px">Modules</div>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;background:var(--navy);color:var(--pin-white);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center">&#127918; Overview</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#128101; Staff</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#128230; Inventory</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#128197; Fixtures</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#127903; Bookings</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#9878; Complaints</a>
+                <a href="#" style="display:block;padding:8px 12px;border-radius:6px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.7rem;text-decoration:none;text-align:center;color:var(--navy)">&#9881; Settings</a>
+                <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog)">
+                    <div style="text-align:center"><div class="ball-avatar ball-sm ball-navy" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
+                    <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px">Siam K.</div>
+                    <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px">Manager</span></div>
+                </div>
+            </div>
+
+            <!-- CENTER -->
+            <div style="padding:1.25rem;overflow:hidden">
+
+                <!-- Lane Status Overhead -->
+                <div style="margin-bottom:1.25rem">
+                    <div class="component-label" style="margin-bottom:6px">Lane Status Overhead</div>
+                    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L1</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:32px;background:var(--sky-dark);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--sky-dark)">85%</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">OPEN</div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--gold);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L2</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:40px;background:var(--gold);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gold)">100%</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--gold)">BUSY</div>
+                        </div>
+                        <div style="background:var(--coral-light);border:2px solid var(--coral);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L3</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:6px;background:var(--coral);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--coral-dark)">0%!</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--coral-dark)">JAMMED</div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L4</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:36px;background:var(--sky-dark);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--sky-dark)">90%</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">BUSY</div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L5</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:40px;background:var(--gold);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gold)">100%</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--gold)">BUSY</div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:8px;padding:8px;text-align:center">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">L6</div>
+                            <div style="height:40px;display:flex;align-items:flex-end;justify-content:center;margin:4px 0"><div style="width:16px;height:18px;background:var(--lane-wood);border-radius:2px 2px 0 0"></div></div>
+                            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--lane-wood)">45%</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--lane-wood)">OIL LOW</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Scorecard -->
+                <div style="margin-bottom:1.25rem">
+                    <div class="component-label" style="margin-bottom:6px">Club Revenue Scorecard</div>
+                    <div class="scorecard" style="width:100%">
+                        <div class="sc-frame" style="flex:1"><div class="sc-num">Revenue</div><div class="sc-rolls" style="flex-direction:column"><span class="sc-roll strike" style="font-size:1rem">$12.4k</span></div><div class="sc-total" style="font-size:0.75rem">F1</div></div>
+                        <div class="sc-frame" style="flex:1"><div class="sc-num">Expenses</div><div class="sc-rolls" style="flex-direction:column"><span class="sc-roll" style="font-size:1rem;color:var(--coral)">-$3.1k</span></div><div class="sc-total" style="font-size:0.75rem">F2</div></div>
+                        <div class="sc-frame" style="flex:1"><div class="sc-num">Repairs</div><div class="sc-rolls" style="flex-direction:column"><span class="sc-roll spare" style="font-size:1rem">88%</span></div><div class="sc-total" style="font-size:0.75rem">F3</div></div>
+                        <div class="sc-frame" style="flex:1"><div class="sc-num">Requests</div><div class="sc-rolls" style="flex-direction:column"><span class="sc-roll" style="font-size:1rem">3</span></div><div class="sc-total" style="font-size:0.75rem">F4</div></div>
+                        <div class="sc-frame" style="flex:1.2"><div class="sc-num">Net</div><div class="sc-rolls" style="flex-direction:column"><span class="sc-roll strike" style="font-size:1.1rem">$9.3k</span></div><div class="sc-total">TOTAL</div></div>
+                    </div>
+                </div>
+
+                <!-- Inventory: progress bars, NOT ball avatars -->
+                <div>
+                    <div class="component-label" style="margin-bottom:6px">Inventory Status</div>
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px 24px">
+                        <!-- Shoes -->
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-family:var(--font-sub);font-size:0.7rem">&#128098; Bowling Shoes</span>
+                                <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--gold)">42/50</span>
+                            </div>
+                            <div style="height:8px;background:var(--fog);border-radius:4px;overflow:hidden">
+                                <div style="width:84%;height:100%;background:var(--gold);border-radius:4px"></div>
+                            </div>
+                        </div>
+                        <!-- Oil -->
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-family:var(--font-sub);font-size:0.7rem">&#128167; Lane Oil</span>
+                                <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--coral)">12% LOW</span>
+                            </div>
+                            <div style="height:8px;background:var(--fog);border-radius:4px;overflow:hidden">
+                                <div style="width:12%;height:100%;background:var(--coral);border-radius:4px"></div>
+                            </div>
+                        </div>
+                        <!-- Beer -->
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-family:var(--font-sub);font-size:0.7rem">&#127866; Beer Kegs</span>
+                                <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--sky-dark)">8/10</span>
+                            </div>
+                            <div style="height:8px;background:var(--fog);border-radius:4px;overflow:hidden">
+                                <div style="width:80%;height:100%;background:var(--sky-dark);border-radius:4px"></div>
+                            </div>
+                        </div>
+                        <!-- Pins -->
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-family:var(--font-sub);font-size:0.7rem">&#127936; Spare Pins</span>
+                                <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--lane-wood)">30 units</span>
+                            </div>
+                            <div style="height:8px;background:var(--fog);border-radius:4px;overflow:hidden">
+                                <div style="width:60%;height:100%;background:var(--lane-wood);border-radius:4px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 13. FM-STYLE CONFRONTATION MODAL -->
+<div class="section">
+    <div class="section-title">13. Confrontation Modal (Football Manager Style)</div>
+    <p class="section-desc">Triggered by the notification bell. Staff makes a statement, you pick ONE of 3 forced responses. No free dialogue. Each option has consequences.</p>
+    <div style="max-width:480px;margin:0 auto;background:var(--navy);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(26,42,58,0.3)">
+        <!-- Modal header -->
+        <div style="background:var(--coral);padding:10px 20px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-family:var(--font-header);font-size:0.75rem;color:var(--pin-white);text-transform:uppercase">Confrontation</span>
+            <span style="font-family:var(--font-mono);font-size:0.6rem;color:rgba(248,246,240,0.7)">PENDING</span>
+        </div>
+        <!-- Staff info -->
+        <div style="padding:20px 24px 0;display:flex;align-items:center;gap:12px">
+            <div class="ball-avatar ball-lg ball-coral"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">JK</span></div>
+            <div>
+                <div style="font-family:var(--font-header);font-size:0.9rem;color:var(--pin-white)">Jake Morrison</div>
+                <div style="display:flex;gap:6px;align-items:center;margin-top:2px">
+                    <span class="badge-role caretaker" style="font-size:0.5rem;padding:2px 8px">Caretaker</span>
+                    <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog)">Happiness: 45/100</span>
+                </div>
+            </div>
+        </div>
+        <!-- Speech bubble -->
+        <div style="padding:16px 24px">
+            <div style="position:relative;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 16px">
+                <p style="font-size:0.85rem;color:var(--pin-white);font-style:italic;line-height:1.5">"Boss, the oil machine jammed on Lane 3 again... I know I was supposed to maintain it but I got busy with the bar cleanup. I swear it won't happen again!"</p>
+                <div style="position:absolute;top:-6px;left:20px;width:12px;height:12px;background:rgba(255,255,255,0.08);border-left:1px solid rgba(255,255,255,0.15);border-top:1px solid rgba(255,255,255,0.15);transform:rotate(45deg)"></div>
+            </div>
+        </div>
+        <!-- Response options (FORCED CHOICE, FM style) -->
+        <div style="padding:0 24px 20px;display:flex;flex-direction:column;gap:8px">
+            <div class="component-label" style="color:var(--fog);margin-bottom:2px">Choose your response:</div>
+            <!-- Option A -->
+            <button style="display:block;width:100%;text-align:left;padding:12px 16px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);border-radius:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;font-family:inherit;color:inherit" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(212,168,76,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.background='rgba(255,255,255,0.06)'">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-family:var(--font-sub);font-size:0.8rem;color:var(--pin-white)">&#128564; "Just get it fixed. No excuses."</span>
+                    <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog)">-5 happiness</span>
+                </div>
+            </button>
+            <!-- Option B -->
+            <button style="display:block;width:100%;text-align:left;padding:12px 16px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);border-radius:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;font-family:inherit;color:inherit" onmouseover="this.style.borderColor='var(--sky-dark)';this.style.background='rgba(122,184,212,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.background='rgba(255,255,255,0.06)'">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-family:var(--font-sub);font-size:0.8rem;color:var(--pin-white)">&#129309; "Alright, but next time prioritize maintenance first."</span>
+                    <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog)">neutral</span>
+                </div>
+            </button>
+            <!-- Option C -->
+            <button style="display:block;width:100%;text-align:left;padding:12px 16px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);border-radius:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;font-family:inherit;color:inherit" onmouseover="this.style.borderColor='var(--coral)';this.style.background='rgba(232,108,108,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.background='rgba(255,255,255,0.06)'">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-family:var(--font-sub);font-size:0.8rem;color:var(--pin-white)">&#128176; "That's coming out of your paycheck."</span>
+                    <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog)">-$50, -15 happiness</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 14. STEWARD DASHBOARD — FRONT DESK -->
+<div class="section">
+    <div class="section-title">14. Steward Dashboard — Front Desk</div>
+    <p class="section-desc">3-column: schedule timeline + member directory/events + quick actions. Stewards greet, book, and manage members — no confrontation access.</p>
+    <div class="mock-dash">
+
+        <!-- TOP BAR -->
+        <div class="mock-nav">
+            <div class="mn-logo"><div class="mn-ball"></div><span class="mn-title">The Tenth Frame</span></div>
+            <div style="display:flex;align-items:center;gap:1rem">
+                <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--pin-white)">12 members checked in</span>
+                <div style="width:1px;height:20px;background:var(--slate)"></div>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gold)">SAT · DAY 14</span>
+            </div>
+            <span class="badge-role steward">Steward</span>
+        </div>
+
+        <!-- MAIN: 3-column -->
+        <div style="display:grid;grid-template-columns:220px 1fr 180px;min-height:420px">
+
+            <!-- LEFT: Today's Schedule -->
+            <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column">
+                <div class="component-label" style="margin-bottom:8px">Today's Schedule</div>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                    <!-- Time slots -->
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">10:00</div>
+                        <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark)">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem">Lane 2 · Rezwan</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">2hrs · 4 players</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">11:00</div>
+                        <div style="flex:1;padding:6px 8px;background:var(--gold-light);border-radius:6px;border-left:3px solid var(--gold)">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem">League Match</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">Lanes 1-3 · 12 players</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">14:00</div>
+                        <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark)">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem">Lane 5 · Nusrat</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">1hr · 2 players</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">16:00</div>
+                        <div style="flex:1;padding:6px 8px;background:var(--coral-light);border-radius:6px;border-left:3px solid var(--coral)">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem">Birthday Party</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">Lanes 4-6 · 15 guests</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">18:00</div>
+                        <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark)">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem">Lane 1 · Zarif</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">2hrs · 6 players</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:stretch;gap:8px">
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);width:38px;text-align:right;padding-top:6px">20:00</div>
+                        <div style="flex:1;padding:6px 8px;border:2px dashed var(--fog);border-radius:6px">
+                            <div style="font-family:var(--font-sub);font-size:0.65rem;color:var(--fog)">Available</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--fog);text-align:center">
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">5 bookings · 2 events · 2 open slots</span>
+                </div>
+            </div>
+
+            <!-- CENTER: Member Directory + Events -->
+            <div style="padding:1.25rem;overflow:hidden">
+
+                <!-- Member Directory -->
+                <div style="margin-bottom:1.25rem">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <div class="component-label">Member Directory</div>
+                        <div style="display:flex;gap:6px">
+                            <input type="text" placeholder="Search members..." style="font-family:var(--font-body);font-size:0.7rem;padding:5px 10px;border:2px solid var(--navy);border-radius:20px;width:160px;background:var(--pin-white)">
+                            <button class="btn-lane primary" style="font-size:0.6rem;padding:5px 12px">+ New</button>
+                        </div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;overflow:hidden">
+                        <!-- Header row -->
+                        <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:6px 12px;background:var(--navy);gap:8px">
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)"></span>
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)">MEMBER</span>
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)">ROLE</span>
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)">LAST VISIT</span>
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)">STATUS</span>
+                        </div>
+                        <!-- Rows -->
+                        <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;border-bottom:1px solid var(--fog);gap:8px;align-items:center">
+                            <div class="ball-avatar ball-sm ball-coral"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">NR</span></div>
+                            <div><div style="font-family:var(--font-sub);font-size:0.7rem">Nusrat Rahman</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">nusrat@email.com</div></div>
+                            <span class="badge-role member" style="font-size:0.5rem;width:fit-content">Member</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">Today</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● Active</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;border-bottom:1px solid var(--fog);gap:8px;align-items:center">
+                            <div class="ball-avatar ball-sm ball-gold"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">RZ</span></div>
+                            <div><div style="font-family:var(--font-sub);font-size:0.7rem">Rezwan Kabir</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">rezwan@email.com</div></div>
+                            <span class="badge-role member" style="font-size:0.5rem;width:fit-content">Member</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">Yesterday</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● Active</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;border-bottom:1px solid var(--fog);gap:8px;align-items:center">
+                            <div class="ball-avatar ball-sm ball-sky"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">ZR</span></div>
+                            <div><div style="font-family:var(--font-sub);font-size:0.7rem">Zarif Ahmed</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">zarif@email.com</div></div>
+                            <span class="badge-role member" style="font-size:0.5rem;width:fit-content">Member</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">3 days ago</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog)">○ Inactive</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;gap:8px;align-items:center">
+                            <div class="ball-avatar ball-sm ball-navy"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
+                            <div><div style="font-family:var(--font-sub);font-size:0.7rem">Siam Khandaker</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">siam@email.com</div></div>
+                            <span class="badge-role manager" style="font-size:0.5rem;width:fit-content">Manager</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">Today</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events & Fixtures -->
+                <div>
+                    <div class="component-label" style="margin-bottom:8px">Upcoming Events & Fixtures</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;overflow:hidden">
+                            <div style="background:var(--coral);padding:6px 10px">
+                                <div style="font-family:var(--font-header);font-size:0.65rem;color:var(--pin-white)">SAT LEAGUE</div>
+                            </div>
+                            <div style="padding:10px">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Saturday League Night</div>
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate)">Every Sat · 7:00 PM</div>
+                                <div style="display:flex;gap:4px;margin-top:6px">
+                                    <div class="ball-avatar ball-sm ball-coral" style="width:20px;height:20px"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">+</span></div>
+                                    <div class="ball-avatar ball-sm ball-gold" style="width:20px;height:20px"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">+</span></div>
+                                    <div class="ball-avatar ball-sm ball-sky" style="width:20px;height:20px"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">+</span></div>
+                                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);align-self:center">8 teams</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--gold);border-radius:10px;overflow:hidden">
+                            <div style="background:var(--gold);padding:6px 10px">
+                                <div style="font-family:var(--font-header);font-size:0.65rem;color:var(--navy)">BIRTHDAY</div>
+                            </div>
+                            <div style="padding:10px">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Tasnim's Birthday Bash</div>
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate)">Sat Jul 26 · 4:00 PM</div>
+                                <div style="display:flex;gap:4px;margin-top:6px">
+                                    <div class="ball-avatar ball-sm ball-navy" style="width:20px;height:20px"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">+</span></div>
+                                    <div class="ball-avatar ball-sm ball-pin" style="width:20px;height:20px"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem;color:var(--navy);text-shadow:none">+</span></div>
+                                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);align-self:center">15 RSVPs</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--fog);border-radius:10px;overflow:hidden">
+                            <div style="background:var(--mist);padding:6px 10px">
+                                <div style="font-family:var(--font-header);font-size:0.65rem;color:var(--navy)">TOURNAMENT</div>
+                            </div>
+                            <div style="padding:10px">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Summer Showdown</div>
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate)">Aug 15 · All Day</div>
+                                <div style="display:flex;gap:4px;margin-top:6px">
+                                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog)">Registration open</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Quick Actions (compact shoe tags ~60%) -->
+            <div style="background:var(--sky-light);border-left:3px solid var(--navy);padding:0.75rem;display:flex;flex-direction:column;gap:6px;align-items:center">
+                <div class="component-label" style="margin-bottom:2px;width:100%">Quick Actions</div>
+                <a href="#" class="shoe-tag" style="width:70%"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%)"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem">&#127918;</div><h4 style="font-size:0.6rem">Book Lane</h4></div></a>
+                <a href="#" class="shoe-tag white" style="width:70%"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%)"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem">&#128100;</div><h4 style="font-size:0.6rem">New Member</h4></div></a>
+                <a href="#" class="shoe-tag coral" style="width:70%"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%)"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem">&#127881;</div><h4 style="font-size:0.6rem">Create Event</h4></div></a>
+                <div style="margin-top:auto;padding-top:8px;border-top:2px solid var(--fog);text-align:center">
+                    <div class="ball-avatar ball-sm ball-sky" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">MR</span></div>
+                    <div style="font-family:var(--font-sub);font-size:0.6rem;margin-top:4px">Maya R.</div>
+                    <span class="badge-role steward" style="font-size:0.45rem;padding:2px 6px">Steward</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 15. CARETAKER DASHBOARD — WORKSHOP -->
+<div class="section">
+    <div class="section-title">15. Caretaker Dashboard — Maintenance Bay</div>
+    <p class="section-desc">3-panel: task checklist (pins) + lane inspection grid + stock check logbook. Caretakers fix, maintain, and log — no day advance, no member management.</p>
+    <div class="mock-dash">
+
+        <!-- TOP BAR -->
+        <div class="mock-nav">
+            <div class="mn-logo"><div class="mn-ball"></div><span class="mn-title">The Tenth Frame</span></div>
+            <div style="display:flex;align-items:center;gap:1rem">
+                <div style="display:flex;gap:6px">
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--coral);color:var(--pin-white)">⚠ L3 JAMMED</span>
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--gold);color:var(--navy)">⚡ L6 LOW OIL</span>
+                </div>
+                <div style="width:1px;height:20px;background:var(--slate)"></div>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--fog)">SAT · DAY 14</span>
+            </div>
+            <span class="badge-role caretaker">Caretaker</span>
+        </div>
+
+        <!-- MAIN: 3-column -->
+        <div style="display:grid;grid-template-columns:180px 1fr 220px;min-height:420px">
+
+            <!-- LEFT: My Tasks (Pin Checklist) -->
+            <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column">
+                <div class="component-label" style="margin-bottom:8px">My Tasks Today</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                    <!-- Task items with pin indicators -->
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark)">
+                        <div class="pin standing" style="transform:scale(0.7);margin:-8px -4px"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--font-sub);font-size:0.6rem">Oil Lanes 1-4</div>
+                            <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Scheduled 8:00 AM</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--coral-light);border-radius:6px;border-left:3px solid var(--coral)">
+                        <div class="pin knocked" style="transform:scale(0.7);margin:-8px -4px"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--font-sub);font-size:0.6rem">Fix Lane 3 Jam</div>
+                            <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--coral-dark)">URGENT</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--pin-white);border-radius:6px;border:2px solid var(--fog)">
+                        <div class="pin standing" style="transform:scale(0.7);margin:-8px -4px"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--font-sub);font-size:0.6rem">Restock Shoes</div>
+                            <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Due 12:00 PM</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--pin-white);border-radius:6px;border:2px solid var(--fog)">
+                        <div class="pin standing" style="transform:scale(0.7);margin:-8px -4px"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--font-sub);font-size:0.6rem">Clean Bar Area</div>
+                            <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Due 2:00 PM</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--pin-white);border-radius:6px;border:2px solid var(--fog)">
+                        <div class="pin standing" style="transform:scale(0.7);margin:-8px -4px"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--font-sub);font-size:0.6rem">Check Pin Inventory</div>
+                            <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Due 5:00 PM</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--fog);text-align:center">
+                    <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">2 done · 1 urgent · 3 pending</div>
+                </div>
+            </div>
+
+            <!-- CENTER: Lane Inspection -->
+            <div style="padding:1.25rem;overflow:hidden">
+                <div class="component-label" style="margin-bottom:8px">Lane Inspection Dashboard</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                    <!-- Lane tiles -->
+                    <div style="background:var(--sky-light);border:2px solid var(--sky-dark);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 1</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:92%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● 92% Good</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 78% · Serviced 2d ago</div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--sky-dark);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 2</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:85%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● 85% Good</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 65% · Serviced 3d ago</div>
+                    </div>
+                    <div style="background:var(--coral-light);border:2px solid var(--coral);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 3</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:15%;height:100%;background:var(--coral);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--coral-dark)">✖ 15% JAMMED</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--coral-dark)">Pinsetter failure</div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--sky-dark);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 4</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:88%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● 88% Good</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 72% · Serviced 1d ago</div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--gold);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 5</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:60%;height:100%;background:var(--gold);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold)">▲ 60% Fair</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 30% · Needs oiling</div>
+                    </div>
+                    <div style="background:var(--gold-light);border:2px solid var(--gold);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 6</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:45%;height:100%;background:var(--gold);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold-dust)">▲ 45% LOW OIL</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 12% · Urgent</div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--sky-dark);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 7</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:95%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● 95% Excellent</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 90% · Serviced today</div>
+                    </div>
+                    <div style="background:var(--sky-light);border:2px solid var(--sky-dark);border-radius:8px;padding:10px;text-align:center">
+                        <div style="font-family:var(--font-header);font-size:0.7rem">Lane 8</div>
+                        <div style="height:4px;background:var(--fog);border-radius:2px;margin:6px 0;overflow:hidden"><div style="width:78%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                        <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark)">● 78% Good</div>
+                        <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--slate)">Oil: 55% · Serviced 4d ago</div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Logbook -->
+                <div style="margin-top:1.25rem">
+                    <div class="component-label" style="margin-bottom:6px">Maintenance Logbook</div>
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);line-height:1.8">
+                        <div><span style="color:var(--navy);font-weight:700">08:15</span> · Oiled Lanes 1-4. Applied 2 coats standard pattern.</div>
+                        <div><span style="color:var(--navy);font-weight:700">09:30</span> · Lane 3 pinsetter jam detected. Cleared debris. Still malfunctioning — escalated.</div>
+                        <div><span style="color:var(--navy);font-weight:700">10:00</span> · Replaced 6 worn pins on Lane 7 from spare inventory.</div>
+                        <div><span style="color:var(--fog)">Waiting for parts for Lane 3 pinsetter motor...</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Stock Check + My Profile -->
+            <div style="background:var(--sky-light);border-left:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column">
+                <div class="component-label" style="margin-bottom:8px">Stock Check</div>
+                <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+                    <!-- Shoes -->
+                    <div style="padding:8px;background:var(--mist);border-radius:8px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                            <span style="font-family:var(--font-sub);font-size:0.65rem">&#128098; Shoes</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">42 / 50</span>
+                        </div>
+                        <div style="height:6px;background:var(--fog);border-radius:3px;overflow:hidden;margin-bottom:4px"><div style="width:84%;height:100%;background:var(--sky-dark);border-radius:3px"></div></div>
+                        <div style="display:flex;gap:4px">
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--pin-white);cursor:pointer">- 5</button>
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--sky);cursor:pointer">+ 5</button>
+                        </div>
+                    </div>
+                    <!-- Oil -->
+                    <div style="padding:8px;background:var(--coral-light);border-radius:8px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                            <span style="font-family:var(--font-sub);font-size:0.65rem">&#128167; Lane Oil</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--coral-dark)">12% LOW</span>
+                        </div>
+                        <div style="height:6px;background:var(--fog);border-radius:3px;overflow:hidden;margin-bottom:4px"><div style="width:12%;height:100%;background:var(--coral);border-radius:3px"></div></div>
+                        <div style="display:flex;gap:4px">
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--coral);border-radius:4px;background:var(--pin-white);cursor:pointer">Order</button>
+                        </div>
+                    </div>
+                    <!-- Pins -->
+                    <div style="padding:8px;background:var(--mist);border-radius:8px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                            <span style="font-family:var(--font-sub);font-size:0.65rem">&#127936; Spare Pins</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">30 units</span>
+                        </div>
+                        <div style="height:6px;background:var(--fog);border-radius:3px;overflow:hidden;margin-bottom:4px"><div style="width:60%;height:100%;background:var(--lane-wood);border-radius:3px"></div></div>
+                        <div style="display:flex;gap:4px">
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--pin-white);cursor:pointer">- 10</button>
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--sky);cursor:pointer">+ 10</button>
+                        </div>
+                    </div>
+                    <!-- Cleaning -->
+                    <div style="padding:8px;background:var(--mist);border-radius:8px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                            <span style="font-family:var(--font-sub);font-size:0.65rem">&#129532; Cleaning Supplies</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem">Good</span>
+                        </div>
+                        <div style="height:6px;background:var(--fog);border-radius:3px;overflow:hidden;margin-bottom:4px"><div style="width:70%;height:100%;background:var(--sky-dark);border-radius:3px"></div></div>
+                        <div style="display:flex;gap:4px">
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--pin-white);cursor:pointer">- 1</button>
+                            <button style="flex:1;font-family:var(--font-mono);font-size:0.55rem;padding:3px;border:1px solid var(--navy);border-radius:4px;background:var(--sky);cursor:pointer">+ 1</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Crew Button -->
+                <a href="#" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:var(--navy);border-radius:8px;text-decoration:none;cursor:pointer;margin-top:8px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    <span style="font-family:var(--font-sub);font-size:0.65rem;color:var(--pin-white)">My Crew</span>
+                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--gold)">4 →</span>
+                </a>
+                <!-- Profile -->
+                <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--fog);text-align:center">
+                    <div class="ball-avatar ball-sm ball-coral" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">JM</span></div>
+                    <div style="font-family:var(--font-sub);font-size:0.6rem;margin-top:4px">Jake Morrison</div>
+                    <span class="badge-role caretaker" style="font-size:0.45rem;padding:2px 6px">Caretaker</span>
+                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:2px">Honest · Nerd</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 16. CUSTOMER DASHBOARD — LOUNGE -->
+<div class="section">
+    <div class="section-title">16. Customer Dashboard — Member Lounge</div>
+    <p class="section-desc">Hero booking + scorecard + events. Customers are here to bowl, book, and socialize — no backend access, no staff management.</p>
+    <div class="mock-dash">
+
+        <!-- TOP BAR -->
+        <div class="mock-nav">
+            <div class="mn-logo"><div class="mn-ball"></div><span class="mn-title">The Tenth Frame</span></div>
+            <div style="display:flex;align-items:center;gap:1.5rem">
+                <a href="#" style="font-family:var(--font-sub);font-size:0.7rem;color:var(--gold);text-decoration:none">Book a Lane</a>
+                <a href="#" style="font-family:var(--font-sub);font-size:0.7rem;color:var(--fog);text-decoration:none">Events</a>
+                <a href="#" style="font-family:var(--font-sub);font-size:0.7rem;color:var(--fog);text-decoration:none">My Scores</a>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="ball-avatar ball-sm ball-coral"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">NR</span></div>
+                <span class="badge-role member">Member</span>
+            </div>
+        </div>
+
+        <!-- MAIN: Single column, centered -->
+        <div style="padding:1.5rem 2rem;max-width:900px;margin:0 auto">
+
+            <!-- Hero: My Next Booking -->
+            <div style="margin-bottom:1.5rem">
+                <div class="component-label" style="margin-bottom:8px">My Next Booking</div>
+                <div class="lane-perspective" style="border-radius:12px">
+                    <div style="background:var(--sky-light);border-radius:10px;padding:1.25rem;display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;border:2px solid var(--navy)">
+                        <div>
+                            <div style="font-family:var(--font-header);font-size:1.1rem;color:var(--navy)">Lane 5 · Saturday Night</div>
+                            <div style="font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-top:4px">Jul 26, 2026 · 7:00 PM - 9:00 PM</div>
+                            <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+                                <div class="ball-avatar ball-sm ball-coral"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.45rem">NR</span></div>
+                                <div class="ball-avatar ball-sm ball-gold"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.45rem">RZ</span></div>
+                                <div class="ball-avatar ball-sm ball-sky"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.45rem">ZR</span></div>
+                                <div class="ball-avatar ball-sm ball-navy"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.45rem">TN</span></div>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">4 players</span>
+                            </div>
+                        </div>
+                        <div style="text-align:center">
+                            <div style="font-family:var(--font-display);font-size:2rem;color:var(--navy);line-height:1">2</div>
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate)">days away</div>
+                            <a href="#" class="btn-lane primary" style="font-size:0.6rem;padding:6px 16px;margin-top:8px;display:block">Manage</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two columns: Scorecard + Events -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+                <!-- My Scorecard -->
+                <div>
+                    <div class="component-label" style="margin-bottom:8px">My Scorecard</div>
+                    <div class="scorecard" style="width:100%">
+                        <div class="sc-frame"><div class="sc-num">1</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">20</div></div>
+                        <div class="sc-frame"><div class="sc-num">2</div><div class="sc-rolls"><span class="sc-roll">7</span><span class="sc-roll spare">/</span></div><div class="sc-total">37</div></div>
+                        <div class="sc-frame"><div class="sc-num">3</div><div class="sc-rolls"><span class="sc-roll">9</span><span class="sc-roll">-</span></div><div class="sc-total">46</div></div>
+                        <div class="sc-frame"><div class="sc-num">4</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">66</div></div>
+                        <div class="sc-frame"><div class="sc-num">5</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">86</div></div>
+                        <div class="sc-frame"><div class="sc-num">6</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">106</div></div>
+                        <div class="sc-frame"><div class="sc-num">7</div><div class="sc-rolls"><span class="sc-roll">8</span><span class="sc-roll spare">/</span></div><div class="sc-total">123</div></div>
+                        <div class="sc-frame"><div class="sc-num">8</div><div class="sc-rolls"><span class="sc-roll">9</span><span class="sc-roll">-</span></div><div class="sc-total">132</div></div>
+                        <div class="sc-frame"><div class="sc-num">9</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll"></span></div><div class="sc-total">152</div></div>
+                        <div class="sc-frame"><div class="sc-num">10</div><div class="sc-rolls"><span class="sc-roll strike">X</span><span class="sc-roll strike">X</span><span class="sc-roll strike">X</span></div><div class="sc-total">182</div></div>
+                    </div>
+                    <!-- Stats row -->
+                    <div style="display:flex;gap:8px;margin-top:10px">
+                        <div style="flex:1;text-align:center;padding:8px;background:var(--pin-white);border:2px solid var(--navy);border-radius:8px">
+                            <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--navy)">164</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">AVG</div>
+                        </div>
+                        <div style="flex:1;text-align:center;padding:8px;background:var(--pin-white);border:2px solid var(--navy);border-radius:8px">
+                            <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--coral)">212</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">BEST</div>
+                        </div>
+                        <div style="flex:1;text-align:center;padding:8px;background:var(--pin-white);border:2px solid var(--navy);border-radius:8px">
+                            <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--sky-dark)">47</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">GAMES</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events -->
+                <div>
+                    <div class="component-label" style="margin-bottom:8px">Upcoming Events</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center">
+                            <div style="min-width:48px;text-align:center;padding:6px 4px;background:var(--coral);border-radius:8px">
+                                <div style="font-family:var(--font-header);font-size:0.9rem;color:var(--pin-white);line-height:1">26</div>
+                                <div style="font-family:var(--font-mono);font-size:0.45rem;color:rgba(248,246,240,0.8)">JUL</div>
+                            </div>
+                            <div style="flex:1">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Saturday League Night</div>
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">7:00 PM · Lanes 1-3</div>
+                            </div>
+                            <a href="#" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px">RSVP</a>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--gold);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center">
+                            <div style="min-width:48px;text-align:center;padding:6px 4px;background:var(--gold);border-radius:8px">
+                                <div style="font-family:var(--font-header);font-size:0.9rem;color:var(--navy);line-height:1">01</div>
+                                <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--navy)">AUG</div>
+                            </div>
+                            <div style="flex:1">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Summer Social Mixer</div>
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">6:30 PM · All Lanes</div>
+                            </div>
+                            <a href="#" class="btn-lane secondary" style="font-size:0.55rem;padding:5px 12px">RSVP'd ✓</a>
+                        </div>
+                        <div style="background:var(--sky-light);border:2px solid var(--fog);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center">
+                            <div style="min-width:48px;text-align:center;padding:6px 4px;background:var(--mist);border-radius:8px">
+                                <div style="font-family:var(--font-header);font-size:0.9rem;color:var(--navy);line-height:1">15</div>
+                                <div style="font-family:var(--font-mono);font-size:0.45rem;color:var(--navy)">AUG</div>
+                            </div>
+                            <div style="flex:1">
+                                <div style="font-family:var(--font-sub);font-size:0.75rem">Summer Showdown Tournament</div>
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">All Day · Open Registration</div>
+                            </div>
+                            <a href="#" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px">Enter</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Club News -->
+            <div style="margin-top:1.5rem">
+                <div class="component-label" style="margin-bottom:6px">Club News</div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                    <div class="ball-return"><div class="mini-ball ball-gold"></div><span class="br-text">New high score alert! Rezwan bowled a 245 last night.</span></div>
+                    <div class="ball-return"><div class="mini-ball ball-sky"></div><span class="br-text">Lane 3 temporarily out of service for maintenance.</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div style="height:3rem"></div>
+
+<!-- 17. CREW DIRECTORY PAGE (accessed from caretaker "My Crew" button) -->
+<div class="section">
+    <div class="section-title">17. Crew Directory — Coworker List & DM</div>
+    <p class="section-desc">Full page: grid of coworker cards with details, traits, and a "Message" button. Clicking Message opens a 1-on-1 DM panel at the bottom.</p>
+    <div class="mock-dash">
+
+        <!-- TOP BAR -->
+        <div class="mock-nav">
+            <div class="mn-logo"><div class="mn-ball"></div><span class="mn-title">The Tenth Frame</span></div>
+            <div style="display:flex;align-items:center;gap:1rem">
+                <a href="#" style="font-family:var(--font-sub);font-size:0.7rem;color:var(--fog);text-decoration:none">← Back to Dashboard</a>
+            </div>
+            <span class="badge-role caretaker">Caretaker</span>
+        </div>
+
+        <!-- MAIN -->
+        <div style="padding:1.5rem 2rem;background:var(--sky)">
+
+            <!-- Page title -->
+            <div style="margin-bottom:1.25rem">
+                <div style="font-family:var(--font-header);font-size:1.1rem;text-transform:uppercase;letter-spacing:1px">My Crew</div>
+                <div style="font-family:var(--font-body);font-size:0.8rem;color:var(--slate)">4 caretakers on staff · 2 online now</div>
+            </div>
+
+            <!-- Coworker Cards Grid -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem">
+
+                <!-- Arif - Online, selected -->
+                <div style="background:var(--navy);border:3px solid var(--gold);border-radius:12px;padding:1.25rem;text-align:center;position:relative">
+                    <div style="position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:#4ade80"></div>
+                    <div class="ball-avatar ball-lg ball-sky" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">AP</span></div>
+                    <div style="font-family:var(--font-header);font-size:0.85rem;color:var(--pin-white);margin-top:10px">Arif Patel</div>
+                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog);margin-top:2px">Online · Shift: Morning</div>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:rgba(168,216,234,0.2);color:var(--sky)">Stoner</span>
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:rgba(168,216,234,0.2);color:var(--sky)">Friendly</span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--fog);margin-top:8px">Happiness: 72/100</div>
+                    <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:72%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                    <button style="margin-top:10px;width:100%;padding:7px;border:2px solid var(--gold);border-radius:20px;background:transparent;cursor:pointer;font-family:var(--font-sub);font-size:0.65rem;color:var(--gold)">💬 Message</button>
+                </div>
+
+                <!-- Dan - Online -->
+                <div style="background:var(--pin-white);border:2px solid var(--fog);border-radius:12px;padding:1.25rem;text-align:center;position:relative">
+                    <div style="position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:#4ade80"></div>
+                    <div class="ball-avatar ball-lg ball-gold" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">DL</span></div>
+                    <div style="font-family:var(--font-header);font-size:0.85rem;margin-top:10px">Dan Lee</div>
+                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:2px">Online · Shift: Evening</div>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Rude</span>
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Opportunistic</span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:8px">Happiness: 55/100</div>
+                    <div style="height:4px;background:var(--fog);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:55%;height:100%;background:var(--gold);border-radius:2px"></div></div>
+                    <button style="margin-top:10px;width:100%;padding:7px;border:2px solid var(--navy);border-radius:20px;background:var(--navy);cursor:pointer;font-family:var(--font-sub);font-size:0.65rem;color:var(--pin-white)">💬 Message</button>
+                </div>
+
+                <!-- Rafid - Offline -->
+                <div style="background:var(--pin-white);border:2px solid var(--fog);border-radius:12px;padding:1.25rem;text-align:center;position:relative;opacity:0.65">
+                    <div style="position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--fog)"></div>
+                    <div class="ball-avatar ball-lg ball-navy" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">RB</span></div>
+                    <div style="font-family:var(--font-header);font-size:0.85rem;margin-top:10px">Rafid Bashar</div>
+                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog);margin-top:2px">Offline · Shift: Night</div>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Honest</span>
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Nerd</span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:8px">Happiness: 81/100</div>
+                    <div style="height:4px;background:var(--fog);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:81%;height:100%;background:var(--sky-dark);border-radius:2px"></div></div>
+                    <button style="margin-top:10px;width:100%;padding:7px;border:2px solid var(--fog);border-radius:20px;background:transparent;cursor:pointer;font-family:var(--font-sub);font-size:0.65rem;color:var(--fog)">💬 Message</button>
+                </div>
+
+                <!-- Tasnim - Offline -->
+                <div style="background:var(--pin-white);border:2px solid var(--fog);border-radius:12px;padding:1.25rem;text-align:center;position:relative;opacity:0.65">
+                    <div style="position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--fog)"></div>
+                    <div class="ball-avatar ball-lg ball-coral" style="margin:0 auto"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">TN</span></div>
+                    <div style="font-family:var(--font-header);font-size:0.85rem;margin-top:10px">Tasnim Noor</div>
+                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--fog);margin-top:2px">Offline · Shift: Morning</div>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Creepy</span>
+                        <span style="font-family:var(--font-mono);font-size:0.45rem;padding:2px 6px;border-radius:10px;background:var(--mist);color:var(--navy)">Cliquey</span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:8px">Happiness: 38/100</div>
+                    <div style="height:4px;background:var(--fog);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:38%;height:100%;background:var(--coral);border-radius:2px"></div></div>
+                    <button style="margin-top:10px;width:100%;padding:7px;border:2px solid var(--fog);border-radius:20px;background:transparent;cursor:pointer;font-family:var(--font-sub);font-size:0.65rem;color:var(--fog)">💬 Message</button>
+                </div>
+
+            </div>
+
+            <!-- DM Panel (opens when you click Message on a coworker — showing Arif's DM open) -->
+            <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                    <div class="component-label" style="margin:0">Direct Message — Arif Patel</div>
+                    <div style="width:8px;height:8px;border-radius:50%;background:#4ade80"></div>
+                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate)">Online</span>
+                </div>
+                <div style="background:var(--navy);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:1fr auto;min-height:200px">
+                    <!-- Messages -->
+                    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+                        <div style="display:flex;gap:8px;align-items:flex-start">
+                            <div class="ball-avatar ball-sm ball-sky" style="width:24px;height:24px;flex-shrink:0"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">AP</span></div>
+                            <div>
+                                <div style="font-family:var(--font-sub);font-size:0.5rem;color:var(--sky);margin-bottom:2px">Arif Patel · 9:42 AM</div>
+                                <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;max-width:400px">
+                                    <div style="font-size:0.75rem;color:var(--pin-white)">yo did you finish oiling lanes 1-4?</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:flex-start;flex-direction:row-reverse">
+                            <div class="ball-avatar ball-sm ball-coral" style="width:24px;height:24px;flex-shrink:0"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">JM</span></div>
+                            <div>
+                                <div style="font-family:var(--font-sub);font-size:0.5rem;color:var(--coral);margin-bottom:2px;text-align:right">You · 9:45 AM</div>
+                                <div style="background:rgba(212,168,76,0.2);border:1px solid rgba(212,168,76,0.3);border-radius:8px;padding:8px 12px;max-width:400px">
+                                    <div style="font-size:0.75rem;color:var(--pin-white)">yeah done at 8:15. Lane 3 is the problem now, pinsetter jammed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:flex-start">
+                            <div class="ball-avatar ball-sm ball-sky" style="width:24px;height:24px;flex-shrink:0"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">AP</span></div>
+                            <div>
+                                <div style="font-family:var(--font-sub);font-size:0.5rem;color:var(--sky);margin-bottom:2px">Arif Patel · 9:47 AM</div>
+                                <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;max-width:400px">
+                                    <div style="font-size:0.75rem;color:var(--pin-white)">damn again? i can take a look after lunch if you want</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:flex-start;flex-direction:row-reverse">
+                            <div class="ball-avatar ball-sm ball-coral" style="width:24px;height:24px;flex-shrink:0"><div class="ball-holes"><span></span></div><span class="ball-initials" style="font-size:0.4rem">JM</span></div>
+                            <div>
+                                <div style="font-family:var(--font-sub);font-size:0.5rem;color:var(--coral);margin-bottom:2px;text-align:right">You · 9:48 AM</div>
+                                <div style="background:rgba(212,168,76,0.2);border:1px solid rgba(212,168,76,0.3);border-radius:8px;padding:8px 12px;max-width:400px">
+                                    <div style="font-size:0.75rem;color:var(--pin-white)">that'd be great, thanks man 👍</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Input -->
+                    <div style="padding:16px 14px;border-left:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;justify-content:flex-end;gap:8px">
+                        <input type="text" placeholder="Type a message..." style="font-family:var(--font-body);font-size:0.7rem;padding:8px 12px;border:none;border-radius:20px;background:rgba(255,255,255,0.1);color:var(--pin-white);outline:none;width:200px">
+                        <button style="padding:8px;border:none;border-radius:20px;background:var(--gold);cursor:pointer;font-family:var(--font-sub);font-size:0.65rem;color:var(--navy)">Send</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div style="height:3rem"></div>
+</body>
+</html>

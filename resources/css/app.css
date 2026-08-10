@@ -1,0 +1,71 @@
+@import './design-system.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        font-family: var(--font-body) !important;
+        color: var(--navy) !important;
+        line-height: 1.6 !important;
+        margin: 0;
+        padding: 0;
+
+        background-color: var(--sky) !important;
+
+        background-image:
+            /* Layer 2: Wood grain (vertical lines) */
+            repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 59px,
+                rgba(201, 168, 108, 0.12) 59px,
+                rgba(201, 168, 108, 0.12) 61px
+            ) !important,
+
+            /* Layer 3: Dot pattern (gold + white) */
+            radial-gradient(circle, rgba(212, 168, 76, 0.15) 2px, transparent 2px) !important,
+            radial-gradient(circle, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px) !important,
+
+            /* Layer 5: Faint lane lines (horizontal stripes) */
+            repeating-linear-gradient(
+                180deg,
+                rgba(26, 42, 58, 0.04) 0px,
+                rgba(26, 42, 58, 0.04) 2px,
+                transparent 2px,
+                transparent 20px
+            ) !important;
+
+        background-size:
+            100% 100%,
+            32px 32px,
+            32px 32px,
+            100% 120px !important;
+
+        background-position:
+            0 0,
+            0 0,
+            16px 16px,
+            0 0 !important;
+    }
+
+    /* Layer 4: SVG noise texture via pseudo-element */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E") !important;
+        background-repeat: repeat !important;
+        background-size: 200px 200px !important;
+    }
+
+    /* Content above noise layer */
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+}
