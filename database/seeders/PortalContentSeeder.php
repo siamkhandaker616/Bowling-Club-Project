@@ -13,6 +13,10 @@ class PortalContentSeeder extends Seeder
 {
     public function run(): void
     {
+        if (League::where('name', 'Premier Bowling League')->exists()) {
+            return;
+        }
+
         $lanes = Lane::pluck('id');
 
         $pbl = League::create(['name' => 'Premier Bowling League', 'season' => 'Summer 2026']);

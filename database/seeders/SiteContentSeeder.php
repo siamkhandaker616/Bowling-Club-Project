@@ -9,6 +9,10 @@ class SiteContentSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Announcement::where('title', 'Lane 7 Temporarily Closed for Oiling')->exists()) {
+            return;
+        }
+
         $announcements = [
             [
                 'title' => 'Lane 7 Temporarily Closed for Oiling',
