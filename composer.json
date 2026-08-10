@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "tenth-frame-bowling",
+    "name": "siamkhandaker/tenth-frame-bowling",
     "type": "project",
     "description": "The Tenth Frame Bowling — a private bowling club website and management simulation built with Laravel.",
     "keywords": ["bowling", "club-management", "simulation", "laravel"],
