@@ -6,7 +6,7 @@
         <title>{{ config('app.name', 'The Tenth Frame Bowling') }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     </head>
     <body style="min-height: 100vh;">
 
