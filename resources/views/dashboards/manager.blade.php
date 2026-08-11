@@ -17,7 +17,7 @@
             <a href="#" class="dash-sidebar-link active">&#127918; Overview</a>
             <a href="#" class="dash-sidebar-link">&#128101; Staff</a>
             <a href="#" class="dash-sidebar-link">&#128230; Inventory</a>
-            <a href="#" class="dash-sidebar-link">&#128197; Fixtures</a>
+            <a href="{{ route('public.fixtures') }}" class="dash-sidebar-link">&#128197; Fixtures</a>
             <a href="#" class="dash-sidebar-link">&#127903; Bookings</a>
             <a href="{{ route('site.announcements.index') }}" class="dash-sidebar-link">&#128227; Announcements</a>
             <a href="#" class="dash-sidebar-link">&#9878; Complaints</a>
