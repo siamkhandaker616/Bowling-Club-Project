@@ -80,7 +80,7 @@
                 The Tenth Frame Bowling Club
             </p>
             <p style="max-width: 520px; font-size: 1.05rem; color: var(--slate); line-height: 1.7; margin-bottom: 2.5rem; animation: fadeSlideUp 0.8s ease-out 0.3s both;">
-                Where every frame tells a story. Premium lanes, craft drinks, and a community that lives for the perfect strike.
+                Where every frame tells a story. Premium lanes, signature shakes, and a community that lives for the perfect strike.
             </p>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; animation: fadeSlideUp 0.8s ease-out 0.45s both;">
                 <a href="{{ Route::has('register') ? route('register') : '#' }}" class="btn">Join the Club</a>
@@ -125,7 +125,7 @@
 
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md);">
                     <div style="background: var(--navy); padding: 0.75rem 1.25rem;">
-                        <span style="font-family: var(--font-header); font-size: 0.8rem; color: var(--pin-white); text-transform: uppercase; letter-spacing: 1px;">The Bar</span>
+                        <span style="font-family: var(--font-header); font-size: 0.8rem; color: var(--pin-white); text-transform: uppercase; letter-spacing: 1px;">The Snack Bar</span>
                     </div>
                     <div style="padding: 1.25rem; text-align: center;">
                         <div id="pub-bar-status" style="margin-bottom: 1rem;"></div>
@@ -159,8 +159,8 @@
 
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
                     <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127866;</div>
-                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">The Bar</h3>
-                    <p style="color: var(--slate); font-size: 0.9rem;">Craft beers, signature cocktails, and game-day specials. Open daily from 10am.</p>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">The Snack Bar</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Fresh smoothies, specialty coffees, and game-day bites. Open daily from 10am.</p>
                 </div>
 
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">

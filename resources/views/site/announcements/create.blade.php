@@ -28,7 +28,7 @@
 
         @if($errors->any())
             <div style="background:#fde3e3;border:2px solid var(--coral);border-radius:8px;padding:1rem 1.5rem;margin-bottom:1.5rem;font-family:var(--font-sub);font-size:0.85rem;color:var(--coral-dark);">
-                Please fix the errors below.
+                &#9888; Gutter ball — something needs fixing before this announcement can roll. Check the fields below.
             </div>
         @endif
 
@@ -81,5 +81,6 @@
             </div>
         </form>
     </main>
+    <x-toast />
 </body>
 </html>

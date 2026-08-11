@@ -88,6 +88,9 @@
                         </form>
                     </div>
                 </div>
+                @if($role === 'admin')
+                    @include('sim.partials.settings-dropdown')
+                @endif
             </div>
 
             <!-- Hamburger -->

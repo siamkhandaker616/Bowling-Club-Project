@@ -34,7 +34,7 @@
 
         <div style="text-align:center;margin-bottom:2.5rem;">
             <h1 style="font-family:var(--font-display);font-size:2.2rem;text-transform:uppercase;color:var(--navy);margin-bottom:0.25rem;">Fixtures & Results</h1>
-            <p style="font-family:var(--font-sub);color:var(--slate);font-size:1rem;">Match schedules, scores, and league standings</p>
+            <p style="font-family:var(--font-sub);color:var(--slate);font-size:1rem;">Every frame, every score — the schedule, results, and standings straight off the lanes.</p>
             <div class="lane-stripe" style="margin:1.5rem auto 0;max-width:400px;"></div>
         </div>
 
@@ -130,7 +130,7 @@
                             </div>
                             <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:0.25rem;">
                                 <span style="width:8px;height:8px;border-radius:50%;background:var(--coral);animation:pub-pulse 1s ease-in-out infinite;"></span>
-                                <span style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--coral);">Live Now</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--coral);">Pins Falling</span>
                             </div>
                         @else
                             <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--slate);">{{ $fixture->date->format('M j, Y') }}</div>
@@ -162,8 +162,8 @@
             @empty
                 <div style="text-align:center;padding:4rem 2rem;background:var(--pin-white);border:2px solid var(--navy);border-radius:12px;">
                     <div style="font-size:3rem;margin-bottom:1rem;">🎳</div>
-                    <h3 style="font-family:var(--font-header);color:var(--navy);margin-bottom:0.5rem;">No Fixtures Yet</h3>
-                    <p style="font-family:var(--font-sub);color:var(--slate);">Fixtures will appear here once matches are scheduled.</p>
+                    <h3 style="font-family:var(--font-header);color:var(--navy);margin-bottom:0.5rem;">The Lanes Are Quiet</h3>
+                    <p style="font-family:var(--font-sub);color:var(--slate);">No matches on the board yet — check back once the leagues roll into town.</p>
                 </div>
             @endforelse
         </div>
@@ -171,7 +171,7 @@
         @if($fixtures->count() > 0)
         <div style="margin-top:2.5rem;">
             <div class="lane-stripe" style="margin-bottom:1.5rem;"></div>
-            <h2 style="font-family:var(--font-header);font-size:1.2rem;text-transform:uppercase;color:var(--navy);margin-bottom:1rem;">Team Standings</h2>
+            <h2 style="font-family:var(--font-header);font-size:1.2rem;text-transform:uppercase;color:var(--navy);margin-bottom:1rem;">The Scoreboard</h2>
             <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:1rem;">
                 @foreach($leagues as $league)
                     <div style="background:var(--pin-white);border:2px solid var(--navy);border-radius:10px;overflow:hidden;">
@@ -210,7 +210,7 @@
     <footer style="background:var(--navy);color:var(--fog);padding:3rem 2rem;text-align:center;margin-top:4rem;">
         <div class="ball-accent" style="width:28px;height:28px;margin:0 auto 1rem;"></div>
         <p style="font-family:var(--font-display);font-size:1.2rem;color:var(--pin-white);margin-bottom:0.5rem;">The Tenth Frame</p>
-        <p style="font-family:var(--font-sub);font-size:0.85rem;color:var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }}</p>
+        <p style="font-family:var(--font-sub);font-size:0.85rem;color:var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }} &bull; Strike fast, roll loud.</p>
     </footer>
 
     <script>

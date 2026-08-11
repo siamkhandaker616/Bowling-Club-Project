@@ -66,7 +66,8 @@
                 </div>
             @empty
                 <div style="padding:3rem;text-align:center;color:var(--slate);font-family:var(--font-sub);">
-                    No announcements yet.
+                    <div style="font-size:2rem;margin-bottom:0.5rem;">🎳</div>
+                    The board's empty. No announcements on the lane yet — hit "+ New Announcement" to get the first one rolling.
                 </div>
             @endforelse
         </div>
