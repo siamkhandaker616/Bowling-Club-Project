@@ -6,9 +6,7 @@
         <title>{{ config('app.name', 'The Tenth Frame Bowling') }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @endif
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body style="min-height: 100vh;">
 
@@ -25,7 +23,8 @@
                         @endif
                         <a href="{{ url('/dashboard') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" style="font-family: var(--font-sub); color: var(--navy); text-decoration: none;">Sign In</a>
+                        <a href="{{ route('login') }}" style="font-family: var(--font-sub); color: var(--navy); text-decoration: none; padding: 6px 14px; border-radius: 50px; transition: background 0.15s, color 0.15s;" onmouseover="this.style.background='var(--mist)'; this.style.color='var(--sky-dark)'" onmouseout="this.style.background=''; this.style.color='var(--navy)'">Sign In</a>
+                        <a href="{{ route('public.fixtures') }}" class="btn btn-gold" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Join the Club</a>
                         @endif
