@@ -15,6 +15,7 @@ use App\Http\Controllers\Sim\Steward\ScheduleController as StewardScheduleContro
 use App\Http\Controllers\Sim\Steward\VisitorController;
 use App\Http\Controllers\Sim\Caretaker\CrewController;
 use App\Http\Controllers\Sim\Caretaker\InventoryController as CaretakerInventoryController;
+use App\Http\Controllers\Sim\Caretaker\LaneController;
 use App\Http\Controllers\Sim\Caretaker\ShiftController;
 use App\Http\Controllers\Sim\Visitor\BookingController as VisitorBookingController;
 use App\Http\Controllers\Sim\Visitor\ComplaintController as VisitorComplaintController;
@@ -104,6 +105,11 @@ Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->
 
     Route::get('/crew', [CrewController::class, 'index'])->name('crew.index');
     Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');
+});
+
+// Lane maintenance — caretaker AND admin may run it (A_1's facility-map panel buttons call this).
+Route::middleware(['auth', 'verified', 'role:caretaker,admin'])->prefix('caretaker')->name('caretaker.')->group(function () {
+    Route::post('/lanes/{lane}/maintenance', [LaneController::class, 'maintain'])->name('lanes.maintain');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('visitor')->name('visitor.')->group(function () {

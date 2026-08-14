@@ -46,7 +46,7 @@
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">LANE</label>
                         <select name="lane_id" required style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             @foreach ($lanes as $lane)
-                                <option value="{{ $lane->id }}">Lane {{ $lane->lane_number }} ({{ $lane->status }})</option>
+                                <option value="{{ $lane->id }}" @selected($selectedLaneId === $lane->id)>Lane {{ $lane->lane_number }} ({{ $lane->status }})</option>
                             @endforeach
                         </select>
                     </div>

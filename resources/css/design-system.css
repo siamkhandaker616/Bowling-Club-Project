@@ -107,6 +107,14 @@ body > *{position:relative;z-index:1}
 .ball-rubber{background:radial-gradient(circle at 35% 35%,#6a6a6a,#3a3a3a 40%,#252525 80%,#1a1a1a)}
 .ball-pin{background:radial-gradient(circle at 35% 35%,#fff,#f8f6f0 40%,#e8e4d8 80%,#d0c8b0)}
 
+/* === COMPONENT: ACCENT PRIMITIVES === */
+
+.ball-accent{display:inline-block;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 30%,#f0d898,#d4a84c 38%,#8a6a20 78%,#5c4510);box-shadow:inset -4px -5px 12px rgba(0,0,0,0.35),inset 2px 3px 6px rgba(255,255,255,0.35),0 3px 8px rgba(26,42,58,0.25)}
+.ball-accent::before{content:'';position:absolute;top:20%;left:50%;transform:translateX(-50%);width:14px;height:8px;background:radial-gradient(circle,rgba(26,42,58,0.5) 2px,transparent 2px);background-size:6px 8px;background-position:0 0,6px 0,12px 0}
+.pin-accent{display:inline-block;position:relative;border-radius:46% 46% 40% 40%/32% 32% 58% 58%;box-shadow:inset -4px -5px 12px rgba(0,0,0,0.3),inset 2px 3px 6px rgba(255,255,255,0.12)}
+.pin-accent::after{content:'';position:absolute;left:12%;right:12%;top:36%;height:9%;background:var(--coral);opacity:0.8;border-radius:2px;box-shadow:0 15px 0 var(--coral)}
+.lane-stripe{height:10px;border-radius:6px;background:repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 5px),linear-gradient(180deg,var(--lane-wood-light),var(--lane-wood),var(--lane-wood-dark));border:2px solid var(--navy)}
+
 /* === COMPONENT: DIVIDERS === */
 
 .lane-divider{height:12px;border-radius:6px;margin:1.5rem 0;position:relative}

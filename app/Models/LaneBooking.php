@@ -35,7 +35,7 @@ class LaneBooking extends Model
 
     public function queueEntries(): HasMany
     {
-        return $this->hasMany(BookingQueue::class);
+        return $this->hasMany(BookingQueue::class, 'booking_id');
     }
 
     public function visitorReview(): HasOne

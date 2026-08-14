@@ -106,7 +106,6 @@
                     <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
                 @else
                     <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--slate);text-decoration:none;font-size:0.85rem;">Fixtures</a>
-                    <a href="{{ route('site.facility-map') }}" style="display:none;"></a>
                     <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;padding:6px 14px;border-radius:50px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='var(--mist)';this.style.color='var(--sky-dark)'" onmouseout="this.style.background='';this.style.color='var(--navy)'">Sign In</a>
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}" class="btn" style="padding:8px 20px;font-size:0.8rem;">Join the Club</a>

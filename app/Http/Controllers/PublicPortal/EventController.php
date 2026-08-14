@@ -51,6 +51,21 @@ class EventController extends Controller
                 return ['error' => 'This event has already rolled.'];
             }
 
+            $existing = Rsvp::where('event_id', $locked->id)
+                ->where('visitor_email', $data['visitor_email'])
+                ->where('status', '!=', 'cancelled')
+                ->get();
+
+            foreach ($existing as $row) {
+                $payment = $row->payment;
+                $inFlight = $row->status === 'confirmed'
+                    || ($row->status === 'pending' && $payment && in_array($payment->status, ['pending', 'processing'], true));
+
+                if ($inFlight) {
+                    return ['error' => "You're already on the list for this event."];
+                }
+            }
+
             if ($locked->isFull()) {
                 return ['error' => 'This event is at full capacity.'];
             }

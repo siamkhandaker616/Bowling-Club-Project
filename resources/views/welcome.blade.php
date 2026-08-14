@@ -166,7 +166,7 @@
                 </div>
 
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127866;</div>
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#129380;</div>
                     <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">The Snack Bar</h3>
                     <p style="color: var(--slate); font-size: 0.9rem;">Fresh smoothies, specialty coffees, and game-day bites. Open daily from 10am.</p>
                 </div>

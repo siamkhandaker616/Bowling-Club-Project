@@ -5,7 +5,49 @@ use App\Http\Controllers\PublicPortal\FixtureController;
 use App\Http\Controllers\PublicPortal\PaymentController;
 use App\Http\Controllers\PublicPortal\StatController;
 use App\Http\Controllers\PublicPortal\TouringController;
+use App\Http\Controllers\PublicSite\AnnouncementController;
+use App\Http\Controllers\PublicSite\FacilityMapController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| LAYER A — PUBLIC ROUTES (merged core)
+|--------------------------------------------------------------------------
+| Shared ownership: A_1 (Public Site Core) + A_2 (Public Data & Transactions).
+| Formerly `routes/public-1.php` (A_1) and `routes/public-2.php` (A_2);
+| merged by the coordinator 2026-08-14 into this single file.
+|
+| Name prefixes: A_1 = `site.*` (+ `home`), A_2 = `public.*` + `public.pay.*`.
+| Keep these prefixes and unique route URIs app-wide.
+| Non-public routes stay in their existing files (web.php, sim.php, game.php).
+| Loaded under the `web` middleware (see bootstrap/app.php).
+*/
+
+/*
+|--------------------------------------------------------------------------
+| LAYER A_1 — PUBLIC SITE CORE ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+Route::get('/api/lanes', function () {
+    $lanes = \App\Models\Lane::select('lane_number', 'status', 'oil_level')->orderBy('lane_number')->get();
+    return response()->json($lanes);
+})->name('site.lanes.api');
+
+Route::get('/facility-map', [FacilityMapController::class, 'index'])->name('site.facility-map');
+
+Route::prefix('admin')->name('site.announcements.')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('index');
+    Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('create');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('store');
+    Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit');
+    Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('update');
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -17,11 +59,10 @@ use Illuminate\Support\Facades\Route;
 | RSVP with Capacity (F5/F9), and the SSL Commerz payment flow.
 |
 | Rules:
-|   - Add ALL A_2 routes here, never in routes/web.php.
+|   - Add ALL public portal routes here, never in routes/web.php.
 |   - Do not reuse route names: home, login, register, logout, dashboard,
 |     profile.*, password.*, verification.*, google.*, manager.*,
 |     steward.*, caretaker.*, visitor.*, site.*, sim.*, game.*
-|   - This file is loaded under the `web` middleware (see bootstrap/app.php).
 */
 
 Route::get('/fixtures', [FixtureController::class, 'index'])->name('public.fixtures');

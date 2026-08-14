@@ -54,7 +54,7 @@ class PaymentController extends Controller
             return response()->json(['status' => 'VALID']);
         }
 
-        if (! $this->gateway->isConfigured()) {
+        if (! $this->gateway->isConfigured() || ! $payment->session_key) {
             return response()->json(['status' => 'FAILED']);
         }
 

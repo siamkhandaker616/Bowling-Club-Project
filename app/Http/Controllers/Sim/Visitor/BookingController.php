@@ -26,7 +26,12 @@ class BookingController extends Controller
         $slots = Clock::timeSlots();
         $date = Clock::date()->copy()->addDay();
 
-        return view('sim.visitor.bookings.create', compact('visitor', 'lanes', 'slots', 'date'));
+        $selectedLaneId = null;
+        if ($request->filled('lane')) {
+            $selectedLaneId = Lane::where('lane_number', $request->integer('lane'))->value('id');
+        }
+
+        return view('sim.visitor.bookings.create', compact('visitor', 'lanes', 'slots', 'date', 'selectedLaneId'));
     }
 
     public function store(Request $request)
