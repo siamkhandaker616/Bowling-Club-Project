@@ -9,6 +9,7 @@ use App\Models\LaneBooking;
 use App\Models\Visitor;
 use App\Services\Simulation\Clock;
 use App\Services\Simulation\VisitorSpawner;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -129,7 +130,10 @@ class BookingController extends Controller
         $booking->update(['status' => 'cancelled']);
         $booking->queueEntries()->delete();
 
-        session()->flash('success', 'Booking cancelled.');
+        $log = [];
+        app(VisitorSpawner::class)->promoteForSlot(Carbon::parse($booking->date), $booking->time_slot, $log);
+
+        session()->flash('success', 'Booking cancelled.' . ($log['queues_promoted'] ?? 0 > 0 ? ' The next visitor in the queue was promoted to your lane.' : ''));
 
         return redirect()->route('visitor.bookings.index');
     }

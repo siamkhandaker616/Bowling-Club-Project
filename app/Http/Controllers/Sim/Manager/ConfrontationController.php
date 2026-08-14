@@ -49,12 +49,16 @@ class ConfrontationController extends Controller
     public function respond(Request $request, Confrontation $confrontation)
     {
         $data = $request->validate([
-            'staff_response' => ['required', 'in:confessed,bs,innocent'],
+            'staff_response' => ['nullable', 'in:confessed,bs,innocent'],
         ]);
 
-        $this->service->respond($confrontation, $data['staff_response']);
-
-        session()->flash('success', 'Accused response recorded.');
+        if ($request->boolean('auto')) {
+            $this->service->autoRespond($confrontation);
+            session()->flash('success', 'Investigation complete — system evaluated the accused honesty score and DB evidence.');
+        } else {
+            $this->service->respond($confrontation, $data['staff_response']);
+            session()->flash('success', 'Accused response recorded.');
+        }
 
         return redirect()->route('manager.confrontations.index');
     }

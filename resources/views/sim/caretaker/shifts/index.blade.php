@@ -11,7 +11,7 @@
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label">Shift Context</div>
             <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-                @forelse ($shifts->where('status','in_progress') as $shift)
+                @forelse ($shifts->whereIn('status', ['in_progress', 'scheduled']) as $shift)
                     <div style="padding:8px;border-radius:8px;background:var(--pin-white);border:2px solid var(--navy);">
                         <div style="font-family:var(--font-sub);font-size:0.7rem;color:var(--navy);font-weight:700;">Active Shift</div>
                         <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);margin-top:4px;">{{ $shift->date }}</div>
@@ -52,7 +52,7 @@
                             @endif
                         </div>
                         <div style="display:flex;gap:8px;">
-                            @if (in_array($shift->status, ['assigned', 'in_progress']))
+                            @if (in_array($shift->status, ['assigned', 'in_progress', 'scheduled']))
                                 <form method="POST" action="{{ route('caretaker.shifts.complete', $shift) }}">
                                     @csrf
                                     <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Complete</button>
@@ -89,4 +89,8 @@
             </div>
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

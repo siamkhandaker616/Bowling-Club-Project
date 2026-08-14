@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicSite\AnnouncementController;
+use App\Http\Controllers\PublicSite\FacilityMapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,8 @@ Route::get('/api/lanes', function () {
     $lanes = \App\Models\Lane::select('lane_number', 'status', 'oil_level')->orderBy('lane_number')->get();
     return response()->json($lanes);
 })->name('site.lanes.api');
+
+Route::get('/facility-map', [FacilityMapController::class, 'index'])->name('site.facility-map');
 
 Route::prefix('admin')->name('site.announcements.')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('index');

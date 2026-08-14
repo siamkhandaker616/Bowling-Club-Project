@@ -21,10 +21,12 @@
                         @if(Auth::user()->role === 'admin')
                             <a href="{{ route('site.announcements.index') }}" style="font-family: var(--font-sub); color: var(--slate); text-decoration: none; font-size: 0.85rem;">Manage Announcements</a>
                         @endif
+                        <a href="{{ route('site.facility-map') }}" style="font-family: var(--font-sub); color: var(--slate); text-decoration: none; font-size: 0.85rem;">Facility Map</a>
                         <a href="{{ url('/dashboard') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}" style="font-family: var(--font-sub); color: var(--navy); text-decoration: none; padding: 6px 14px; border-radius: 50px; transition: background 0.15s, color 0.15s;" onmouseover="this.style.background='var(--mist)'; this.style.color='var(--sky-dark)'" onmouseout="this.style.background=''; this.style.color='var(--navy)'">Sign In</a>
                         <a href="{{ route('public.fixtures') }}" class="btn btn-gold" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
+                        <a href="{{ route('site.facility-map') }}" style="font-family: var(--font-sub); color: var(--slate); text-decoration: none; font-size: 0.85rem;">Facility Map</a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Join the Club</a>
                         @endif
@@ -145,6 +147,12 @@
             <h2 style="font-family: var(--font-header); text-align: center; text-transform: uppercase; font-size: 2rem; margin-bottom: 3rem;">What We Offer</h2>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                <a href="{{ route('site.facility-map') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#128506;</div>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem; color: var(--navy);">Find Your Way Around</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Interactive floor plan of the whole club. Hover any zone for its hours, click for the full rundown.</p>
+                </a>
+
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
                     <div class="ball-accent" style="width: 36px; height: 36px; margin-bottom: 1rem;"></div>
                     <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">12 Championship Lanes</h3>

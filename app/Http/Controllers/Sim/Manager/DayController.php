@@ -29,7 +29,22 @@ class DayController extends Controller
         session()->flash('day_report', $log);
 
         $count = count($log['accidents']);
-        session()->flash('success', "Day {$log['date_label']} processed. {$log['bookings_served']} bookings served, {$count} accidents, \${$log['revenue']} revenue.");
+        $quits = $log['quits'] ?? 0;
+        $snitches = count($log['snitches'] ?? []);
+
+        $flavor = [];
+        if ($count > 0) {
+            $flavor[] = "{$count} accident(s) on the floor";
+        }
+        if ($quits > 0) {
+            $flavor[] = "{$quits} staff walked out";
+        }
+        if ($snitches > 0) {
+            $flavor[] = "{$snitches} snitch report(s) filed";
+        }
+
+        session()->flash('success', "Day {$log['date_label']} wrapped. {$log['bookings_served']} lanes served, \${$log['revenue']} in revenue."
+            . ($flavor ? ' ' . implode(', ', $flavor) . '.' : ''));
 
         return redirect()->route('manager.dashboard');
     }

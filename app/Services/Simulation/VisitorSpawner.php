@@ -41,7 +41,7 @@ class VisitorSpawner
                 BookingQueue::create([
                     'booking_id' => $booking->id,
                     'visitor_id' => $visitor->id,
-                    'lane_id' => 1,
+                    'lane_id' => $this->queuedLaneId($date, $slot),
                     'date' => $date,
                     'time_slot' => $slot,
                     'position' => $booking->queue_position,
@@ -69,6 +69,27 @@ class VisitorSpawner
             ->first();
     }
 
+    public function promoteForSlot(Carbon $date, string $slot, array &$log): void
+    {
+        $entry = BookingQueue::with('booking')
+            ->whereDate('date', $date)
+            ->where('time_slot', $slot)
+            ->where('status', 'waiting')
+            ->orderBy('position')
+            ->first();
+
+        if (! $entry) {
+            return;
+        }
+
+        $lane = $this->pickFreeLane($date, $slot);
+        if (! $lane) {
+            return;
+        }
+
+        $this->promoteEntry($entry, $lane, $log);
+    }
+
     public function promoteQueues(Carbon $date, array &$log): void
     {
         $queues = BookingQueue::with('booking')
@@ -80,22 +101,41 @@ class VisitorSpawner
         foreach ($queues as $entry) {
             $lane = $this->pickFreeLane($date, $entry->time_slot);
             if (! $lane) {
-                break;
+                continue;
             }
 
-            $booking = $entry->booking;
-            if ($booking && $booking->status === 'pending') {
-                $booking->lane_id = $lane->id;
-                $booking->status = 'confirmed';
-                $booking->queue_position = null;
-                $booking->save();
-
-                $entry->status = 'notified';
-                $entry->lane_id = $lane->id;
-                $entry->save();
-
-                $log['queues_promoted'] = ($log['queues_promoted'] ?? 0) + 1;
-            }
+            $this->promoteEntry($entry, $lane, $log);
         }
+    }
+
+    private function promoteEntry(BookingQueue $entry, Lane $lane, array &$log): void
+    {
+        $booking = $entry->booking;
+        if ($booking && $booking->status === 'pending') {
+            $booking->lane_id = $lane->id;
+            $booking->status = 'confirmed';
+            $booking->queue_position = null;
+            $booking->save();
+
+            $entry->status = 'notified';
+            $entry->lane_id = $lane->id;
+            $entry->save();
+
+            $log['queues_promoted'] = ($log['queues_promoted'] ?? 0) + 1;
+        }
+    }
+
+    private function queuedLaneId(Carbon $date, string $slot): int
+    {
+        $busy = LaneBooking::whereDate('date', $date)
+            ->where('time_slot', $slot)
+            ->where('status', 'confirmed')
+            ->pluck('lane_id')
+            ->countBy()
+            ->all();
+
+        $lane = Lane::orderBy('id')->get(['id'])->sortBy(fn ($lane) => $busy[$lane->id] ?? 0)->first();
+
+        return $lane->id;
     }
 }

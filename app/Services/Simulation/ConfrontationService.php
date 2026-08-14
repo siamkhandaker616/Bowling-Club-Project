@@ -21,6 +21,33 @@ class ConfrontationService
         ]);
     }
 
+    public function autoRespond(Confrontation $confrontation): void
+    {
+        $accused = $confrontation->accused;
+
+        if ($confrontation->db_verified) {
+            $confessChance = 0.3 + ($accused->honesty_score / 100) * 0.5;
+
+            foreach ($accused->personalities->pluck('name')->all() as $name) {
+                $confessChance += match ($name) {
+                    'honest' => 0.15,
+                    'rude' => 0.1,
+                    'nerd' => 0.05,
+                    'cliquey' => -0.15,
+                    'opportunistic' => -0.2,
+                    'creepy' => -0.1,
+                    default => 0,
+                };
+            }
+
+            $response = mt_rand(1, 100) / 100 <= min(0.95, max(0.05, $confessChance)) ? 'confessed' : 'bs';
+        } else {
+            $response = 'innocent';
+        }
+
+        $this->respond($confrontation, $response);
+    }
+
     public function respond(Confrontation $confrontation, string $response): void
     {
         $accused = $confrontation->accused;

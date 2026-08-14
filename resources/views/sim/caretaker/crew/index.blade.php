@@ -41,6 +41,20 @@
             </div>
         </div>
         <div style="padding:1.25rem;overflow:hidden;">
+            <div class="dash-section-label">Break Room Chatter</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px;margin-bottom:1.25rem;">
+                <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;">
+                    <div style="font-family:var(--font-sub);font-size:0.72rem;color:var(--navy);font-weight:700;margin-bottom:8px;">{{ $me->user->name }} <span style="color:var(--slate);font-family:var(--font-mono);font-size:0.55rem;">(you)</span></div>
+                    @include('sim.partials.dialogue', ['bubbles' => $myBubbles])
+                </div>
+                @foreach($coworkerBubbles as $coworker)
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;">
+                        <div style="font-family:var(--font-sub);font-size:0.72rem;color:var(--navy);font-weight:700;margin-bottom:8px;">{{ $coworker['name'] }}</div>
+                        @include('sim.partials.dialogue', ['bubbles' => $coworker['bubbles']])
+                    </div>
+                @endforeach
+            </div>
+
             <div class="dash-section-label">My Confrontations</div>
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
                 @forelse ($confrontations as $confrontation)
@@ -87,6 +101,20 @@
                 <span class="dash-stat-num" style="color:var(--gold);">{{ $confrontations->count() }}</span>
                 <span class="dash-stat-label">Confrontations</span>
             </div>
+            <div style="margin-top:16px;padding-top:8px;border-top:2px solid var(--fog);">
+                <div class="dash-section-label">Gossip Corner</div>
+                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:4px;line-height:1.5;">
+                    Vent about management. It relieves stress… but someone might be listening.
+                </div>
+                <form method="POST" action="{{ route('caretaker.crew.vent') }}" style="margin-top:8px;">
+                    @csrf
+                    <button type="submit" class="btn-lane secondary" style="font-size:0.6rem;padding:6px 12px;width:100%;">Vent &amp; Trash-Talk</button>
+                </form>
+            </div>
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

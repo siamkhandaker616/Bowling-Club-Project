@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Sim\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accident;
 use App\Models\ClubConfig;
 use App\Models\Complaint;
 use App\Models\Visitor;
@@ -22,18 +23,28 @@ class ComplaintController extends Controller
     {
         $data = $request->validate([
             'resolution' => ['required', 'string', 'max:1000'],
-            'compensation_type' => ['nullable', 'in:free_game,refund,discount,apology'],
+            'compensation_type' => ['nullable', 'in:free_game,refund,discount,apology,priority_queue'],
         ]);
+
+        $matched = Accident::whereHas('affectedBooking', function ($q) use ($complaint) {
+            $q->where('visitor_id', $complaint->visitor_id);
+        })->where('resolved', false)->get();
+
+        $matched->each(function (Accident $accident) use ($complaint) {
+            $accident->resolved = true;
+            $accident->resolution = 'Linked to complaint #' . $complaint->id . ' and compensated.';
+            $accident->save();
+        });
 
         $complaint->update([
             'status' => 'resolved',
-            'resolution' => $data['resolution'],
+            'resolution' => $data['resolution'] . ($matched->isNotEmpty() ? ' (Matched ' . $matched->count() . ' accident(s) from the log.)' : ''),
             'compensation_type' => $data['compensation_type'],
             'resolved_by' => $request->user()->id,
             'resolved_at' => now(),
         ]);
 
-        session()->flash('success', 'Complaint #' . $complaint->id . ' resolved.');
+        session()->flash('success', 'Complaint #' . $complaint->id . ' resolved' . ($matched->isNotEmpty() ? ' — matched ' . $matched->count() . ' accident(s) in the log.' : '') . '.');
 
         return redirect()->route('manager.complaints.index');
     }

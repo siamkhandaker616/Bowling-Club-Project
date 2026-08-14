@@ -20,6 +20,7 @@ use App\Http\Controllers\Sim\Visitor\BookingController as VisitorBookingControll
 use App\Http\Controllers\Sim\Visitor\ComplaintController as VisitorComplaintController;
 use App\Http\Controllers\Sim\Visitor\QueueController;
 use App\Http\Controllers\Sim\Visitor\ReviewController as VisitorReviewController;
+use App\Http\Controllers\Sim\ReapplyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -102,6 +103,7 @@ Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->
     Route::post('/inventory/{inventory}/adjust', [CaretakerInventoryController::class, 'adjust'])->name('inventory.adjust');
 
     Route::get('/crew', [CrewController::class, 'index'])->name('crew.index');
+    Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('visitor')->name('visitor.')->group(function () {
@@ -118,4 +120,9 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('visitor')->nam
 
     Route::get('/complaints', [VisitorComplaintController::class, 'index'])->name('complaints.index');
     Route::post('/complaints', [VisitorComplaintController::class, 'store'])->name('complaints.store');
+});
+
+Route::middleware(['auth', 'verified'])->name('reapply.')->group(function () {
+    Route::get('/reapply', [ReapplyController::class, 'index'])->name('index');
+    Route::post('/reapply', [ReapplyController::class, 'store'])->name('store');
 });

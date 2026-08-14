@@ -5,6 +5,7 @@ namespace App\Services\Simulation;
 use App\Models\BookingQueue;
 use App\Models\ClubConfig;
 use App\Models\Complaint;
+use App\Models\Inventory;
 use App\Models\LaneBooking;
 use App\Models\Shift;
 use App\Models\Staff;
@@ -20,6 +21,7 @@ class DayCycle
         private AccidentEngine $accidents,
         private InventoryService $inventory,
         private VisitorSpawner $spawner,
+        private SocialEngine $social,
     ) {
     }
 
@@ -41,17 +43,24 @@ class DayCycle
             'happiness_changes' => collect(),
             'complaints_auto' => 0,
             'reputation_delta' => 0,
+            'quits' => 0,
+            'relationship_changes' => collect(),
+            'trash_talk' => [],
+            'snitches' => [],
+            'snitch_bonuses' => 0,
+            'turnaways' => 0,
         ];
 
+        $this->spawner->promoteQueues($today, $log);
         $this->serveToday($today, $log);
         $this->expireQueues($today, $log);
-        $this->spawner->promoteQueues($today, $log);
 
         $log['bookings_created'] = $this->spawner->runForDay($today->copy()->addDay(), $log);
 
         $this->accidents->rollForDay($today, $log);
 
         $this->happinessDrift($today, $log);
+        $this->social->dailyDrift($today, $log);
         $this->inventory->dailyDecay($log);
         $this->autoComplaints($today, $log);
 
@@ -70,7 +79,21 @@ class DayCycle
     {
         $bookings = LaneBooking::with('visitor')->whereDate('date', $date)->where('status', 'confirmed')->get();
 
-        foreach ($bookings as $booking) {
+        $impaired = $this->operationsImpaired();
+        $capacity = $impaired ? (int) floor($bookings->count() * 0.7) : $bookings->count();
+
+        foreach ($bookings as $index => $booking) {
+            if ($index >= $capacity) {
+                $booking->status = 'cancelled';
+                $booking->compensation_claimed = true;
+                $booking->compensation_type = 'free_game';
+                $booking->save();
+
+                $log['turnaways']++;
+                $log['complaints_auto']++;
+                continue;
+            }
+
             $booking->status = 'completed';
             $booking->save();
 
@@ -78,6 +101,14 @@ class DayCycle
             $log['revenue'] += $price;
             $log['bookings_served']++;
         }
+    }
+
+    private function operationsImpaired(): bool
+    {
+        $shoes = Inventory::where('name', 'Bowling Shoes')->first();
+        $pins = Inventory::where('name', 'Spare Pins')->first();
+
+        return ($shoes && $shoes->quantity <= 0) || ($pins && $pins->quantity <= 0);
     }
 
     private function expireQueues(Carbon $date, array &$log): void
@@ -135,7 +166,39 @@ class DayCycle
                     'reason' => implode(', ', $reasons) ?: 'daily drift',
                 ]);
             }
+
+            if ($member->happiness <= 19 && mt_rand(1, 100) / 100 <= 0.5) {
+                $this->quit($member, $date, $log);
+            }
         }
+    }
+
+    private function quit(Staff $member, Carbon $date, array &$log): void
+    {
+        $member->is_active = false;
+        $member->save();
+
+        if ($member->user) {
+            $member->user->is_active = false;
+            $member->user->save();
+        }
+
+        StaffEvent::create([
+            'staff_id' => $member->id,
+            'event_type' => 'quit',
+            'severity' => 'negative',
+            'description' => 'Quit the club — happiness dropped to ' . $member->happiness . '.',
+            'date' => $date,
+            'happiness_change' => 0,
+        ]);
+
+        $log['quits']++;
+        $log['happiness_changes']->push([
+            'staff_id' => $member->id,
+            'name' => $member->user->name ?? 'Staff',
+            'delta' => 0,
+            'reason' => 'QUIT the club (happiness ≤ 19)',
+        ]);
     }
 
     private function autoComplaints(Carbon $date, array &$log): void
@@ -192,6 +255,8 @@ class DayCycle
         $openComplaints = Complaint::where('status', 'open')->count();
         $delta -= $openComplaints;
 
+        $delta -= ($log['quits'] ?? 0) * 2;
+
         $avgHappiness = Staff::where('is_active', true)->avg('happiness');
         if ($avgHappiness !== null && $avgHappiness < 55) {
             $delta -= 1;
@@ -232,9 +297,28 @@ class DayCycle
 
     public function markShiftComplete(Shift $shift): void
     {
-        if ($shift->status !== 'completed') {
-            $shift->status = 'completed';
-            $shift->save();
+        if ($shift->status === 'completed') {
+            return;
         }
+
+        $staff = $shift->staff;
+
+        if ($staff) {
+            $staff->happiness = max(0, min(100, $staff->happiness + 5));
+            $staff->performance_score = max(0, min(100, $staff->performance_score + 2));
+            $staff->save();
+
+            StaffEvent::create([
+                'staff_id' => $staff->id,
+                'event_type' => 'worked',
+                'severity' => 'positive',
+                'description' => 'Completed shift: ' . ucfirst($shift->time_slot),
+                'date' => $shift->date,
+                'happiness_change' => 5,
+            ]);
+        }
+
+        $shift->status = 'completed';
+        $shift->save();
     }
 }

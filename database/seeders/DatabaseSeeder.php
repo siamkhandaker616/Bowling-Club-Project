@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SiteContentSeeder::class,
             PortalContentSeeder::class,
+            EventContentSeeder::class,
         ]);
     }
 

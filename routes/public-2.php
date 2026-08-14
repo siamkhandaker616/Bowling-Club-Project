@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\PublicPortal\EventController;
 use App\Http\Controllers\PublicPortal\FixtureController;
+use App\Http\Controllers\PublicPortal\PaymentController;
+use App\Http\Controllers\PublicPortal\StatController;
+use App\Http\Controllers\PublicPortal\TouringController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,3 +25,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/fixtures', [FixtureController::class, 'index'])->name('public.fixtures');
+
+Route::get('/stats', [StatController::class, 'index'])->name('public.stats');
+
+Route::get('/touring', [TouringController::class, 'create'])->name('public.touring');
+Route::post('/touring', [TouringController::class, 'store'])->name('public.touring.store');
+Route::get('/touring/welcome/{touringRequest}', [TouringController::class, 'welcome'])->name('public.touring.welcome');
+
+Route::get('/events', [EventController::class, 'index'])->name('public.events');
+Route::get('/events/{event}', [EventController::class, 'show'])->name('public.events.show');
+Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('public.events.rsvp');
+
+Route::get('/pay/{payment}/success', [PaymentController::class, 'success'])->name('public.pay.success');
+Route::get('/pay/{payment}/fail', [PaymentController::class, 'fail'])->name('public.pay.fail');
+Route::get('/pay/{payment}/cancel', [PaymentController::class, 'cancel'])->name('public.pay.cancel');
+Route::post('/pay/ipn', [PaymentController::class, 'ipn'])
+    ->name('public.pay.ipn')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);

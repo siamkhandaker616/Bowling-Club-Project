@@ -14,6 +14,7 @@ use App\Models\Staff;
 use App\Models\StaffEvent;
 use App\Models\TouringRequest;
 use App\Services\Simulation\Clock;
+use App\Services\Simulation\DialogueService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -55,8 +56,16 @@ class DashboardController extends Controller
 
         $recentEvents = StaffEvent::with('staff.user')->orderByDesc('created_at')->limit(8)->get();
 
+        $dialogue = app(DialogueService::class);
+        $chatter = $activeStaff->take(4)->map(fn (Staff $s) => [
+            'name' => $s->user->name ?? 'Staff',
+            'role' => $s->role,
+            'happiness' => $s->happiness,
+            'bubbles' => $dialogue->bubblesFor($s, $today),
+        ]);
+
         $dayReport = session('day_report');
 
-        return view('dashboards.manager', compact('user', 'stats', 'lanes', 'lowStock', 'recentEvents', 'dayReport'));
+        return view('dashboards.manager', compact('user', 'stats', 'lanes', 'lowStock', 'recentEvents', 'dayReport', 'chatter'));
     }
 }

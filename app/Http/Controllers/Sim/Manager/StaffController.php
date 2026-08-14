@@ -184,9 +184,9 @@ class StaffController extends Controller
         ]);
 
         $lift = match ($data['type']) {
+            'recognition' => 10,
             'cash' => 5,
             'time_off' => 3,
-            'recognition' => 2,
         };
 
         $staff->happiness = max(0, min(100, $staff->happiness + $lift));

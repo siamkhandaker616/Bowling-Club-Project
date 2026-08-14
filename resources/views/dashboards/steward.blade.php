@@ -10,6 +10,16 @@
         </div>
     </x-slot>
 
+    @if ($staff && ! $staff->is_active)
+        <div style="zoom:1.25;margin:0.75rem 0;padding:0.75rem 1rem;border:2px solid var(--coral-dark);background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div>
+                <div style="font-family:var(--font-sub);font-size:0.75rem;color:var(--navy);font-weight:700;">You are no longer on the roster.</div>
+                <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Your employment ended with the club. You can reapply with a new identity.</div>
+            </div>
+            <a href="{{ route('reapply.index') }}" class="btn-lane primary" style="font-size:0.6rem;padding:6px 12px;text-decoration:none;white-space:nowrap;">Reapply Now</a>
+        </div>
+    @endif
+
     <div style="zoom:1.25;display:grid;grid-template-columns:220px 1fr 180px;gap:0;min-height:calc(100vh - 200px);">
 
         <!-- LEFT: Today's Schedule -->
@@ -108,4 +118,8 @@
         </div>
 
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

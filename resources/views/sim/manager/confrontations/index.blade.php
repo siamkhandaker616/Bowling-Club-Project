@@ -109,7 +109,7 @@
                         @endif
 
                         @if (! $confrontation->staff_response)
-                            <form method="POST" action="{{ route('manager.confrontations.respond', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;">
+                            <form method="POST" action="{{ route('manager.confrontations.respond', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
                                 @csrf
                                 <select name="staff_response" required class="con-input">
                                     <option value="confessed">Confessed</option>
@@ -117,6 +117,9 @@
                                     <option value="bs">Calls BS</option>
                                 </select>
                                 <button type="submit" class="btn-lane secondary" style="font-size:0.55rem;padding:5px 12px;">Record Response</button>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">or</span>
+                                <button type="submit" name="auto" value="1" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Auto-Investigate</button>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">(honesty-weighted confession + DB evidence)</span>
                             </form>
                         @elseif (! $confrontation->manager_verdict)
                             <form method="POST" action="{{ route('manager.confrontations.verdict', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
@@ -141,4 +144,8 @@
 
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

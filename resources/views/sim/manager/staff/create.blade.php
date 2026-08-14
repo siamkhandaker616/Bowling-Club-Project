@@ -74,4 +74,8 @@
             </form>
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

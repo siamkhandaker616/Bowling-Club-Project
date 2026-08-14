@@ -170,6 +170,24 @@
                             <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">REPUTATION</div>
                         </div>
                     </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--coral);">{{ $dayReport['turnaways'] ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">TURNAWAYS</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--coral-dark);">{{ $dayReport['quits'] ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">QUITS</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--gold);">{{ $dayReport['queues_promoted'] ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">QUEUES PROMOTED</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['snitch_bonuses'] ?? 0) > 0 ? 'var(--sky-dark)' : 'var(--slate)' }};">{{ count($dayReport['snitches'] ?? []) }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">SNITCH REPORTS</div>
+                        </div>
+                    </div>
                 </div>
             @endif
 
@@ -189,6 +207,26 @@
                 </div>
             @endif
 
+            <!-- Break Room Chatter -->
+            <div style="margin-top:1.25rem;">
+                <div class="dash-section-label" style="margin-bottom:6px;">Break Room Chatter</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+                    @foreach($chatter as $chat)
+                        <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-family:var(--font-sub);font-size:0.72rem;color:var(--navy);font-weight:700;">{{ $chat['name'] }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:{{ $chat['happiness'] < 50 ? 'var(--coral)' : 'var(--sky-dark)' }};">{{ $chat['role'] }} · {{ $chat['happiness'] }}%</span>
+                            </div>
+                            @include('sim.partials.dialogue', ['bubbles' => $chat['bubbles']])
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

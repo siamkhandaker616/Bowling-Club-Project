@@ -70,6 +70,7 @@
                                     <option value="refund">Refund</option>
                                     <option value="discount">Discount</option>
                                     <option value="apology">Apology</option>
+                                    <option value="priority_queue">Priority Queue</option>
                                 </select>
                                 <div style="display:flex;gap:6px;">
                                     <button type="submit" class="btn-lane primary" style="flex:1;font-size:0.55rem;padding:5px 10px;">Resolve</button>
@@ -88,4 +89,8 @@
 
         </div>
     </div>
+
+    <x-toast />
+
+    @include('sim.partials.responsive')
 </x-app-layout>

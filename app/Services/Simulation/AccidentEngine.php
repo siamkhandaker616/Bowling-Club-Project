@@ -19,6 +19,25 @@ class AccidentEngine
         'walkway_incident' => 'Minor collision in the walkway',
     ];
 
+    public const ACCIDENT_TYPES_BY_ROLE = [
+        'caretaker' => [
+            'pinsetter_jam' => 'Pinsetter jam — lane stopped mid-frame',
+            'oil_spill' => 'Oil spill on the approach — slip hazard',
+            'cleaning_issue' => 'Lane or rental shoes not cleaned between games',
+            'discount_error' => 'Accidental discount applied to a non-entitled visitor',
+            'ball_damage' => 'Ball scuffed or dropped during carry',
+        ],
+        'steward' => [
+            'schedule_conflict' => 'Double-booked lane — schedule conflict',
+            'missed_escalation' => 'Complaint escalation missed — response delayed',
+            'walkway_incident' => 'Minor collision in the walkway',
+        ],
+        'club_manager' => [
+            'miscommunication' => 'Internal miscommunication disrupted staff shifts',
+            'supply_mishap' => 'Supply order mishandled — stock delayed',
+        ],
+    ];
+
     public const COSTS = [
         'minor' => 50,
         'moderate' => 150,
@@ -68,10 +87,10 @@ class AccidentEngine
             }
 
             if ($badDay) {
-                $chance += 0.15;
+                $chance = 1.0;
+            } else {
+                $chance = max(0.01, min(0.6, $chance));
             }
-
-            $chance = max(0.01, min(0.6, $chance));
 
             if (mt_rand(1, 100) / 100 > $chance) {
                 continue;
@@ -80,7 +99,8 @@ class AccidentEngine
             $roll = mt_rand(1, 100);
             $severity = $roll <= 60 ? 'minor' : ($roll <= 90 ? 'moderate' : 'major');
 
-            $type = array_rand(self::ACCIDENT_TYPES);
+            $pools = self::ACCIDENT_TYPES_BY_ROLE[$staff->role] ?? self::ACCIDENT_TYPES;
+            $type = array_rand($pools);
 
             $booking = LaneBooking::whereDate('date', $date)
                 ->whereIn('status', ['confirmed', 'completed'])
@@ -92,7 +112,7 @@ class AccidentEngine
                 'shift_id' => $shift->id,
                 'type' => $type,
                 'severity' => $severity,
-                'description' => self::ACCIDENT_TYPES[$type],
+                'description' => $pools[$type],
                 'resolved' => false,
                 'affected_booking_id' => $booking?->id,
             ]);
@@ -121,7 +141,7 @@ class AccidentEngine
                 'staff_name' => $staff->user->name ?? 'Staff',
                 'type' => $type,
                 'severity' => $severity,
-                'description' => self::ACCIDENT_TYPES[$type],
+                'description' => $pools[$type],
                 'cost' => self::COSTS[$severity],
                 'happiness_change' => $happinessHit,
             ]);

@@ -15,6 +15,8 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        $staff = $user->staff;
+
         $date = Clock::date();
 
         $shifts = Shift::with('staff.user')->whereDate('date', $date)->orderBy('time_slot')->get();
@@ -30,6 +32,6 @@ class DashboardController extends Controller
             'premium' => $visitors->where('tier', 'premium')->count(),
         ];
 
-        return view('dashboards.steward', compact('user', 'date', 'shifts', 'bookings', 'visitors', 'stats'));
+        return view('dashboards.steward', compact('user', 'staff', 'date', 'shifts', 'bookings', 'visitors', 'stats'));
     }
 }
