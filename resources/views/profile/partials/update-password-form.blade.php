@@ -1,8 +1,6 @@
-<section>
-    <header>
-        <h2 style="font-family:var(--font-sub);font-size:1.1rem;color:var(--navy);">
-            {{ __('Update Password') }}
-        </h2>
+<section class="card" style="max-width:640px;">
+    <header style="margin-bottom:1.2rem;">
+        <h3>{{ __('Update Password') }}</h3>
         <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);margin-top:0.25rem;">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>

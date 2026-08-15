@@ -2,35 +2,30 @@
 @section('title', 'Confirm Password')
 
 @section('content')
-<div class="auth-form-wrap">
+<section class="section" style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;">
+    <div class="wrap">
+        <h2 class="section-title"><span class="pin-dot"></span>Confirm Password<span class="pin-dot"></span></h2>
 
-    <div class="auth-logo-row">
-        <div class="auth-logo-ball"></div>
-        <span class="auth-logo-text">The Tenth Frame</span>
-    </div>
-    <div class="auth-logo-divider"></div>
-    <h2 class="auth-title">Confirm Password</h2>
+        <div class="access-panel" style="max-width:440px">
+            <div class="access-form">
+                <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);text-align:center;line-height:1.55;margin:0 0 1.2rem">
+                    This is a secure area. Please confirm your password before continuing.
+                </p>
 
-    <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);text-align:center;line-height:1.5;margin:1rem 0 0">
-        This is a secure area. Please confirm your password before continuing.
-    </p>
-
-    <form method="POST" action="{{ route('password.confirm') }}" novalidate id="confirmForm" style="margin-top:1rem">
-        @csrf
-
-        <div class="auth-field">
-            <label for="password">Password</label>
-            <div class="auth-pw-wrap">
-                <input id="password" type="password" name="password" required autocomplete="current-password" class="auth-input" placeholder="Enter your password" style="padding-right:42px">
-                <button type="button" onclick="togglePwVisibility('password', this)" class="auth-pw-toggle" aria-label="Toggle password visibility">
-                    <img src="/images/eye-closed.svg" alt="" width="20" height="20">
-                </button>
+                <form method="POST" action="{{ route('password.confirm') }}" novalidate id="confirmForm">
+                    @csrf
+                    <div class="field">
+                        <label class="label" for="password">Password <span class="req">*</span></label>
+                        <div class="pw-wrap">
+                            <input class="input" id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password" style="padding-right:64px">
+                            <button type="button" class="pw-eye" onclick="togglePwText('password', this)" aria-label="Toggle password visibility">SHOW</button>
+                        </div>
+                        <div class="auth-error" id="passwordError"></div>
+                    </div>
+                    <button type="submit" class="submit" style="margin-top:.6rem">Confirm &rarr;</button>
+                </form>
             </div>
-            <div class="auth-error" id="passwordError"></div>
         </div>
-
-        <button type="submit" class="auth-submit">Confirm</button>
-    </form>
-
-</div>
+    </div>
+</section>
 @endsection

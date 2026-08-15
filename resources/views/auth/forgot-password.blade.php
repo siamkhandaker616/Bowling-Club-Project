@@ -2,41 +2,35 @@
 @section('title', 'Forgot Password')
 
 @section('content')
-<div class="auth-form-wrap">
+<section class="section" style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;">
+    <div class="wrap">
+        <h2 class="section-title"><span class="pin-dot"></span>Reset your access PIN<span class="pin-dot"></span></h2>
 
-    <div class="auth-logo-row">
-        <div class="auth-logo-ball"></div>
-        <span class="auth-logo-text">The Tenth Frame</span>
-    </div>
-    <div class="auth-logo-divider"></div>
-    <h2 class="auth-title">Reset Password</h2>
+        @if (session('status'))
+            <div style="max-width:440px;margin:0 auto 1.2rem;padding:10px 14px;border:2px solid var(--ok);border-radius:8px;background:var(--sky-light);font-family:var(--font-sub);font-size:0.82rem;color:var(--ok);text-align:center">
+                {{ session('status') }}
+            </div>
+        @endif
 
-    <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);text-align:center;line-height:1.5;margin:1rem 0 0">
-        Forgot your password? Enter your email and we'll send you a reset link.
-    </p>
+        <div class="access-panel" style="max-width:440px">
+            <div class="access-form">
+                <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);text-align:center;line-height:1.55;margin:0 0 1.2rem">
+                    Forgot your PIN? Enter your email and we'll send you a reset link.
+                </p>
 
-    @if (session('status'))
-        <div style="padding:10px 14px;border:2px solid var(--sky-dark);border-radius:8px;background:var(--sky-light);font-family:var(--font-sub);font-size:0.82rem;color:var(--sky-dark);text-align:center;margin:1rem 0">
-            {{ session('status') }}
+                <form method="POST" action="{{ route('password.email') }}" novalidate id="forgotForm">
+                    @csrf
+                    <div class="field">
+                        <label class="label" for="email">Email <span class="req">*</span></label>
+                        <input class="input" id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="you@example.com">
+                        <div class="auth-error" id="emailError"></div>
+                    </div>
+                    <button type="submit" class="submit" style="margin-top:.6rem">Send Reset Link &rarr;</button>
+                </form>
+
+                <p style="font-family:var(--font-mono);font-size:.62rem;color:var(--slate);text-align:center;margin-top:1rem">Remember your password? <a href="{{ route('login') }}">Sign In</a></p>
+            </div>
         </div>
-    @endif
-
-    <form method="POST" action="{{ route('password.email') }}" novalidate id="forgotForm" style="margin-top:1rem">
-        @csrf
-
-        <div class="auth-field">
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="auth-input" placeholder="you@example.com">
-            <div class="auth-error" id="emailError"></div>
-        </div>
-
-        <button type="submit" class="auth-submit">Send Reset Link</button>
-    </form>
-
-    <div class="auth-switch">
-        Remember your password?
-        <a href="{{ route('login') }}">Sign In</a>
     </div>
-
-</div>
+</section>
 @endsection

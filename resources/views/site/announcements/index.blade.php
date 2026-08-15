@@ -18,11 +18,11 @@
             <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
         </a>
         <nav style="display:flex;align-items:center;gap:1.5rem;">
-            <a href="{{ url('/') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Home</a>
+            <a href="{{ url('/') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
             @auth
                 <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
             @else
-                <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Sign In</a>
+                <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
             @endauth
         </nav>
     </header>
@@ -66,7 +66,8 @@
                 </div>
             @empty
                 <div style="padding:3rem;text-align:center;color:var(--slate);font-family:var(--font-sub);">
-                    No announcements yet.
+                    <div style="font-size:2rem;margin-bottom:0.5rem;">🎳</div>
+                    The board's empty. No announcements on the lane yet — hit "+ New Announcement" to get the first one rolling.
                 </div>
             @endforelse
         </div>

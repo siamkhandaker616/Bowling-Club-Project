@@ -12,10 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (): void {
             Route::middleware('web')
-                ->group(base_path('routes/public-1.php'));
-
-            Route::middleware('web')
-                ->group(base_path('routes/public-2.php'));
+                ->group(base_path('routes/core.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/sim.php'));

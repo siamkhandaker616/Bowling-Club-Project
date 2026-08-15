@@ -1,4 +1,5 @@
 import './bootstrap';
+import './controls';
 
 import Alpine from 'alpinejs';
 
@@ -108,7 +109,7 @@ window.togglePwVisibility = function (inputId, btn) {
 
         form.addEventListener('submit', function (e) {
             submitted = true;
-            if (!validateFn()) { e.preventDefault(); e.stopPropagation(); }
+            if (!validateFn(form)) { e.preventDefault(); e.stopPropagation(); }
         });
 
         /* After first submit attempt, clear errors on input so user sees them vanish as they fix */
@@ -124,36 +125,38 @@ window.togglePwVisibility = function (inputId, btn) {
         }
     }
 
-    setupForm('loginForm', function () {
+    setupForm('loginForm', function (form) {
         var ok = true;
-        if (!validateEmail(document.getElementById('email'), 'emailError')) ok = false;
-        if (!validateRequired(document.getElementById('password'), 'passwordError', 'Password')) ok = false;
+        if (!validateEmail(form.querySelector('#email'), 'emailError')) ok = false;
+        if (!validateRequired(form.querySelector('#password'), 'passwordError', 'Password')) ok = false;
         return ok;
     });
 
-    setupForm('registerForm', function () {
+    setupForm('registerForm', function (form) {
         var ok = true;
-        if (!validateRequired(document.getElementById('name'), 'nameError', 'Name')) ok = false;
-        if (!validateEmail(document.getElementById('email'), 'emailError')) ok = false;
-        if (!validatePassword(document.getElementById('password'), 'passwordError')) ok = false;
-        if (!validateConfirm(document.getElementById('password'), document.getElementById('password_confirmation'), 'password_confirmationError')) ok = false;
+        if (!validateRequired(form.querySelector('#name'), 'nameError', 'Name')) ok = false;
+        if (!validateEmail(form.querySelector('#email'), 'emailError')) ok = false;
+        if (!validatePassword(form.querySelector('#password'), 'passwordError')) ok = false;
+        if (!validateConfirm(form.querySelector('#password'), form.querySelector('#password_confirmation'), 'password_confirmationError')) ok = false;
         return ok;
     });
 
-    setupForm('forgotForm', function () {
-        return validateEmail(document.getElementById('email'), 'emailError');
+    setupForm('forgotForm', function (form) {
+        var em = form.querySelector('#femail') || form.querySelector('#email');
+        var err = form.querySelector('#femailError') ? 'femailError' : 'emailError';
+        return validateEmail(em, err);
     });
 
-    setupForm('resetForm', function () {
+    setupForm('resetForm', function (form) {
         var ok = true;
-        if (!validateEmail(document.getElementById('email'), 'emailError')) ok = false;
-        if (!validatePassword(document.getElementById('password'), 'passwordError')) ok = false;
-        if (!validateConfirm(document.getElementById('password'), document.getElementById('password_confirmation'), 'password_confirmationError')) ok = false;
+        if (!validateEmail(form.querySelector('#email'), 'emailError')) ok = false;
+        if (!validatePassword(form.querySelector('#password'), 'passwordError')) ok = false;
+        if (!validateConfirm(form.querySelector('#password'), form.querySelector('#password_confirmation'), 'password_confirmationError')) ok = false;
         return ok;
     });
 
-    setupForm('confirmForm', function () {
-        return validateRequired(document.getElementById('password'), 'passwordError', 'Password');
+    setupForm('confirmForm', function (form) {
+        return validateRequired(form.querySelector('#password'), 'passwordError', 'Password');
     });
 
     /* Password strength live update (register page only) */
@@ -162,3 +165,11 @@ window.togglePwVisibility = function (inputId, btn) {
         pwInput.addEventListener('input', function () { updatePwStrength(pwInput.value); });
     }
 })();
+
+/* Global SHOW/HIDE password toggle (Oil Alley pw-eye buttons on auth pages) */
+window.togglePwText = function (id, btn) {
+    var i = document.getElementById(id);
+    if (!i) return;
+    if (i.type === 'password') { i.type = 'text'; btn.textContent = 'HIDE'; }
+    else { i.type = 'password'; btn.textContent = 'SHOW'; }
+};

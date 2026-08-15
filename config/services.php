@@ -47,4 +47,9 @@ return [
         'sandbox' => env('SSLCZ_SANDBOX', true),
     ],
 
+    'groq' => [
+        'enabled' => env('GROQ_ENABLED', false),
+        'api_key' => env('GROQ_API_KEY'),
+    ],
+
 ];

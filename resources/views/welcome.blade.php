@@ -19,12 +19,20 @@
                 @if (Route::has('login'))
                     @auth
                         @if(Auth::user()->role === 'admin')
-                            <a href="{{ route('site.announcements.index') }}" style="font-family: var(--font-sub); color: var(--slate); text-decoration: none; font-size: 0.85rem;">Manage Announcements</a>
+                            <a href="{{ route('site.announcements.index') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Manage Announcements</a>
+                        @endif
+                        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
+                        @if(Auth::user()->role === 'customer')
+                            @php $bagCount = (int) \App\Models\CartItem::where('session_id', session()->getId())->sum('quantity'); @endphp
+                            <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem; position: relative;">Bag
+                                @if($bagCount > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $bagCount }}</span>@endif
+                            </a>
                         @endif
                         <a href="{{ url('/dashboard') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" style="font-family: var(--font-sub); color: var(--navy); text-decoration: none; padding: 6px 14px; border-radius: 50px; transition: background 0.15s, color 0.15s;" onmouseover="this.style.background='var(--mist)'; this.style.color='var(--sky-dark)'" onmouseout="this.style.background=''; this.style.color='var(--navy)'">Sign In</a>
-                        <a href="{{ route('public.fixtures') }}" class="btn btn-gold" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
+                        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
+                        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
+                        <a href="{{ route('login') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Sign In</a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Join the Club</a>
                         @endif
@@ -80,7 +88,7 @@
                 The Tenth Frame Bowling Club
             </p>
             <p style="max-width: 520px; font-size: 1.05rem; color: var(--slate); line-height: 1.7; margin-bottom: 2.5rem; animation: fadeSlideUp 0.8s ease-out 0.3s both;">
-                Where every frame tells a story. Premium lanes, craft drinks, and a community that lives for the perfect strike.
+                Where every frame tells a story. Premium lanes, signature shakes, and a community that lives for the perfect strike.
             </p>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; animation: fadeSlideUp 0.8s ease-out 0.45s both;">
                 <a href="{{ Route::has('register') ? route('register') : '#' }}" class="btn">Join the Club</a>
@@ -125,7 +133,7 @@
 
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md);">
                     <div style="background: var(--navy); padding: 0.75rem 1.25rem;">
-                        <span style="font-family: var(--font-header); font-size: 0.8rem; color: var(--pin-white); text-transform: uppercase; letter-spacing: 1px;">The Bar</span>
+                        <span style="font-family: var(--font-header); font-size: 0.8rem; color: var(--pin-white); text-transform: uppercase; letter-spacing: 1px;">The Snack Bar</span>
                     </div>
                     <div style="padding: 1.25rem; text-align: center;">
                         <div id="pub-bar-status" style="margin-bottom: 1rem;"></div>
@@ -145,41 +153,49 @@
             <h2 style="font-family: var(--font-header); text-align: center; text-transform: uppercase; font-size: 2rem; margin-bottom: 3rem;">What We Offer</h2>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                <a href="{{ route('site.facility-map') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
                     <div class="ball-accent" style="width: 36px; height: 36px; margin-bottom: 1rem;"></div>
-                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">12 Championship Lanes</h3>
-                    <p style="color: var(--slate); font-size: 0.9rem;">Premium synthetic lanes, professionally oiled and maintained. Real-time availability tracking.</p>
-                </div>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem; color: var(--navy);">12 Championship Lanes</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Premium synthetic lanes, professionally oiled and maintained. See live availability on the interactive floor plan.</p>
+                </a>
 
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127923;</div>
-                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Social Events</h3>
-                    <p style="color: var(--slate); font-size: 0.9rem;">Leagues, tournaments, and social nights. RSVP and reserve your spot before they fill up.</p>
-                </div>
+                <a href="{{ route('site.snackbar') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#129380;</div>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">The Snack Bar</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Fresh smoothies, specialty coffees, and game-day bites. Live status and daily hours.</p>
+                </a>
 
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127866;</div>
-                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">The Bar</h3>
-                    <p style="color: var(--slate); font-size: 0.9rem;">Craft beers, signature cocktails, and game-day specials. Open daily from 10am.</p>
-                </div>
-
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                <a href="{{ route('public.proshop.index') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
                     <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127923;</div>
                     <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Pro Shop</h3>
                     <p style="color: var(--slate); font-size: 0.9rem;">Custom ball drilling, premium equipment, and expert advice from our pro shop staff.</p>
-                </div>
+                </a>
 
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                <a href="{{ route('public.touring') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
                     <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127942;</div>
                     <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Touring Teams</h3>
                     <p style="color: var(--slate); font-size: 0.9rem;">Visiting from out of town? Book lanes, download welcome packs, and find nearby amenities.</p>
-                </div>
+                </a>
 
-                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                <a href="{{ route('public.events') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127923;</div>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Social Events</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Leagues, tournaments, and social nights. RSVP and reserve your spot before they fill up.</p>
+                </a>
+
+                @if(Route::has('game.index'))
+                <a href="{{ route('game.index') }}" class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem; transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; color: inherit; display: block;" onmouseover="this.style.transform='translate(-3px,-3px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127918;</div>
+                    <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Virtual Bowling</h3>
+                    <p style="color: var(--slate); font-size: 0.9rem;">Can't make it in? Bowl from your browser. Top-down arcade bowling, high scores on the leaderboard.</p>
+                </a>
+                @else
+                <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); box-shadow: var(--shadow-md); padding: 2rem;">
                     <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#127918;</div>
                     <h3 style="font-family: var(--font-sub); margin-bottom: 0.5rem;">Virtual Bowling</h3>
                     <p style="color: var(--slate); font-size: 0.9rem;">Can't make it in? Bowl from your browser. Top-down arcade bowling, high scores on the leaderboard.</p>
                 </div>
+                @endif
             </div>
         </section>
 
@@ -208,17 +224,22 @@
             function updateBar() {
                 var now = new Date();
                 var secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                var isOpen = secNow >= openSec && secNow < closeSec;
+                var open24 = openSec === closeSec;
+                var isOpen = open24 || (openSec < closeSec ? (secNow >= openSec && secNow < closeSec) : (secNow >= openSec || secNow < closeSec));
                 var statusEl = document.getElementById('pub-bar-status');
                 var countdownEl = document.getElementById('pub-bar-countdown');
 
                 if (isOpen) {
-                    var secsLeft = closeSec - secNow;
-                    var h = Math.floor(secsLeft / 3600);
-                    var m = Math.floor((secsLeft % 3600) / 60);
-                    var s = secsLeft % 60;
                     statusEl.innerHTML = '<div style="font-family:var(--font-header);font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);padding:8px 20px;background:var(--gold-light);border:2px solid var(--gold);border-radius:50px;display:inline-block;">Open Now</div>';
-                    countdownEl.innerHTML = pad(h) + ' : ' + pad(m) + ' : ' + pad(s) + ' <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;">until close</span>';
+                    if (open24) {
+                        countdownEl.innerHTML = '<span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;">Open 24 hours</span>';
+                    } else {
+                        var secsLeft = (closeSec <= secNow) ? (closeSec + 86400 - secNow) : (closeSec - secNow);
+                        var h = Math.floor(secsLeft / 3600);
+                        var m = Math.floor((secsLeft % 3600) / 60);
+                        var s = secsLeft % 60;
+                        countdownEl.innerHTML = pad(h) + ' : ' + pad(m) + ' : ' + pad(s) + ' <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;">until close</span>';
+                    }
                 } else {
                     var secsUntil;
                     if (secNow < openSec) {
@@ -263,6 +284,11 @@
                         });
                         var now = new Date();
                         document.getElementById('pub-lane-updated').textContent = 'Updated ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+                    })
+                    .catch(function() {
+                        var grid = document.getElementById('pub-lane-grid');
+                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-family:var(--font-mono);font-size:0.62rem;color:var(--coral-dark);">Lane data unavailable &#8212; retrying&#8230;</div>';
+                        document.getElementById('pub-lane-updated').textContent = 'Updated \u2014 unavailable';
                     });
             }
 

@@ -17,25 +17,22 @@
             $message = $flash;
         }
     }
-
-    $border = match ($type) {
-        'success' => '#4caf7d',
-        'error' => 'var(--coral)',
-        default => 'var(--fog)',
-    };
 @endphp
 
 @if ($message)
-    <div id="x-toast" role="status" style="position:fixed;top:5rem;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 24px;border-radius:8px;font-family:var(--font-sub);font-size:0.85rem;color:var(--pin-white);background:var(--navy);border:2px solid {{ $border }};box-shadow:var(--shadow-md);opacity:0;transition:opacity 0.3s;">
-        {{ $message }}
+    <div id="x-toast" role="status" class="toast {{ $type === 'error' ? 'err' : '' }}" style="position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;">
+        <span class="t-ball"></span>
+        <span>{{ $message }}</span>
     </div>
     <script>
     (function() {
         var t = document.getElementById('x-toast');
-        t.style.opacity = '1';
+        requestAnimationFrame(function() {
+            t.classList.add('show');
+        });
         setTimeout(function() {
-            t.style.opacity = '0';
-            setTimeout(function() { t.remove(); }, 300);
+            t.classList.remove('show');
+            setTimeout(function() { t.remove(); }, 400);
         }, 3000);
     })();
     </script>
