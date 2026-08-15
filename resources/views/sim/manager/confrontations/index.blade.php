@@ -18,26 +18,9 @@
         .con-input{font-family:var(--font-body);font-size:0.7rem;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);}
     </style>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
-        <div class="dash-sidebar">
-            <div class="dash-section-label" style="margin-bottom:4px;">Modules</div>
-            <a href="{{ route('manager.dashboard') }}" class="dash-sidebar-link">Overview</a>
-            <a href="{{ route('manager.staff.index') }}" class="dash-sidebar-link">Staff</a>
-            <a href="{{ route('manager.inventory.index') }}" class="dash-sidebar-link">Inventory</a>
-            <a href="{{ route('manager.bookings.index') }}" class="dash-sidebar-link">Bookings</a>
-            <a href="{{ route('manager.bans.index') }}" class="dash-sidebar-link">Bans</a>
-            <a href="{{ route('manager.complaints.index') }}" class="dash-sidebar-link">Complaints</a>
-            <a href="{{ route('manager.confrontations.index') }}" class="dash-sidebar-link active">Confrontations</a>
-            <a href="{{ route('manager.reviews.index') }}" class="dash-sidebar-link">Reviews</a>
-            <a href="{{ route('manager.touring.index') }}" class="dash-sidebar-link">Touring</a>
-            <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog);text-align:center;">
-                @php $u = auth()->user(); @endphp
-                <div class="ball-avatar ball-sm ball-navy" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ strtoupper(substr($u->name,0,1)) }}{{ strtoupper(substr(str_replace(' ','',$u->name),-1)) }}</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px;">{{ ucfirst($u->name) }}</div>
-                <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px;">Manager</span>
-            </div>
-        </div>
+        @include('sim.partials.module-dock')
 
         <div style="padding:1.25rem;overflow:hidden;">
 
@@ -45,19 +28,19 @@
                 <div class="dash-section-label">Log a Confrontation</div>
                 <form method="POST" action="{{ route('manager.confrontations.store') }}" class="con-form">
                     @csrf
-                    <select name="reporter_staff_id" required class="con-input">
+                    <select name="reporter_staff_id" required class="con-input fold-select">
                         <option value="" disabled selected>Reporter…</option>
                         @foreach ($activeStaff as $s)
                             <option value="{{ $s->id }}">{{ $s->user->name }}</option>
                         @endforeach
                     </select>
-                    <select name="accused_staff_id" required class="con-input">
+                    <select name="accused_staff_id" required class="con-input fold-select">
                         <option value="" disabled selected>Accused…</option>
                         @foreach ($activeStaff as $s)
                             <option value="{{ $s->id }}">{{ $s->user->name }}</option>
                         @endforeach
                     </select>
-                    <select name="incident_type" required class="con-input">
+                    <select name="incident_type" required class="con-input fold-select">
                         <option value="theft">Theft</option>
                         <option value="sabotage">Sabotage</option>
                         <option value="harassment">Harassment</option>
@@ -66,8 +49,8 @@
                     </select>
                     <div style="display:flex;gap:8px;">
                         <input name="incident_description" type="text" placeholder="What happened…" style="flex:1;" class="con-input">
-                        <label style="display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:0.55rem;cursor:pointer;">
-                            <input type="checkbox" name="db_verified" value="1"> DB Verified
+                        <label class="pin-check" style="font-family:var(--font-mono);font-size:0.55rem;color:var(--navy);cursor:pointer;">
+                            <input type="checkbox" name="db_verified" value="1"><span class="pin-box"></span> DB Verified
                         </label>
                         <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Log</button>
                     </div>
@@ -111,7 +94,7 @@
                         @if (! $confrontation->staff_response)
                             <form method="POST" action="{{ route('manager.confrontations.respond', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
                                 @csrf
-                                <select name="staff_response" required class="con-input">
+                                <select name="staff_response" required class="con-input fold-select">
                                     <option value="confessed">Confessed</option>
                                     <option value="innocent">Pleads Innocent</option>
                                     <option value="bs">Calls BS</option>
@@ -124,12 +107,12 @@
                         @elseif (! $confrontation->manager_verdict)
                             <form method="POST" action="{{ route('manager.confrontations.verdict', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
                                 @csrf
-                                <select name="verdict" required class="con-input">
+                                <select name="verdict" required class="con-input fold-select">
                                     <option value="upheld">Upheld</option>
                                     <option value="dismissed">Dismissed</option>
                                     <option value="penalized">Penalized</option>
                                 </select>
-                                <input name="penalty_amount" type="number" step="0.01" min="0" placeholder="Penalty $" style="width:120px;" class="con-input">
+                                <input name="penalty_amount" type="number" step="0.01" min="0" placeholder="Penalty $" style="width:120px;" class="con-input" data-stepper="edit">
                                 <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Apply Verdict</button>
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Accused responded: {{ $confrontation->staff_response }}</span>
                             </form>
@@ -147,5 +130,6 @@
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

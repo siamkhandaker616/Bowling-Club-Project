@@ -15,3 +15,13 @@ use Illuminate\Support\Facades\Route;
 |   - Do not reuse Breeze route names (see routes/public.php header).
 |   - This file is loaded under the `web` middleware (see bootstrap/app.php).
 */
+
+Route::get('/game', [App\Http\Controllers\Game\GameController::class, 'index'])
+    ->name('game.index');
+
+Route::post('/game/scores', [App\Http\Controllers\Game\ScoreController::class, 'store'])
+    ->name('game.scores.store')
+    ->middleware('throttle:60,1');
+
+Route::get('/game/leaderboard', [App\Http\Controllers\Game\ScoreController::class, 'index'])
+    ->name('game.leaderboard');

@@ -7,23 +7,14 @@
         </div>
     </x-slot>
 
-    <style>
-        .sim-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
-        .sim-nav a{padding:6px 14px;border-radius:50px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.65rem;text-transform:uppercase;text-decoration:none;color:var(--navy);background:var(--pin-white);}
-        .sim-nav a.active{background:var(--navy);color:var(--pin-white);}
-    </style>
 
-    <div style="zoom:1.25;padding:0 1rem;max-width:900px;margin:0 auto;">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
-        <div class="sim-nav">
-            <a href="{{ route('visitor.dashboard') }}">Dashboard</a>
-            <a href="{{ route('visitor.bookings.create') }}" class="active">Book a Lane</a>
-            <a href="{{ route('visitor.bookings.index') }}">My Bookings</a>
-            <a href="{{ route('visitor.queues.index') }}">Queue</a>
-            <a href="{{ route('visitor.reviews.index') }}">Reviews</a>
-            <a href="{{ route('visitor.complaints.index') }}">Complaints</a>
-            <a href="/game">Play Bowling</a>
-        </div>
+        @include('sim.partials.module-dock')
+
+        <div style="padding:0 1rem;max-width:900px;margin:0 auto;">
+
+        
 
         @if (! $visitor)
             <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
@@ -40,19 +31,36 @@
                     @csrf
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">DATE</label>
-                        <input type="date" name="date" value="{{ $date->toDateString() }}" required style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                        <div class="lc" data-year="{{ $date->year }}">
+                            <div class="lc-head">
+                                <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
+                                <div class="lc-mo"></div>
+                                <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                            </div>
+                            <div class="lc-frame"><div class="lc-grid"></div></div>
+                            <div class="lc-read"><span class="lc-key">Date</span><span class="lc-picked" data-kept="1">{{ $date->format('F j, Y') }}</span></div>
+                            <input type="hidden" name="date" class="lc-input" value="{{ $date->toDateString() }}">
+                            <input type="hidden" class="lc-m" value="{{ $date->month - 1 }}">
+                        </div>
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">LANE</label>
-                        <select name="lane_id" required style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                            @foreach ($lanes as $lane)
-                                <option value="{{ $lane->id }}" @selected($selectedLaneId === $lane->id)>Lane {{ $lane->lane_number }} ({{ $lane->status }})</option>
-                            @endforeach
-                        </select>
+                        <div class="br-wrap">
+                            <div class="br-trigger" role="button" tabindex="0">
+                                <span class="br-ball"></span>
+                                <span class="br-val">@if($selectedLaneId) Lane {{ $lanes->firstWhere('id', $selectedLaneId)?->lane_number }} @else Select a lane @endif</span>
+                            </div>
+                            <div class="br-lane-strip">
+                                @foreach ($lanes as $lane)
+                                    <div class="br-lane{{ $selectedLaneId === $lane->id ? ' on' : '' }}" data-v="{{ $lane->id }}">Lane {{ $lane->lane_number }}<small>{{ $lane->status }}</small></div>
+                                @endforeach
+                            </div>
+                            <input type="hidden" name="lane_id" value="{{ $selectedLaneId ?? '' }}">
+                        </div>
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">TIME SLOT</label>
-                        <select name="time_slot" required style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                        <select name="time_slot" required class="fold-select" style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             @foreach ($slots as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
@@ -67,8 +75,10 @@
         @endif
 
     </div>
+    </div>
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

@@ -98,7 +98,9 @@ class DayCycle
             $booking->save();
 
             $price = ($booking->visitor->tier ?? 'regular') === 'premium' ? 25.0 : 15.0;
-            $log['revenue'] += $price;
+            if (! $booking->compensation_claimed) {
+                $log['revenue'] += $price;
+            }
             $log['bookings_served']++;
         }
     }

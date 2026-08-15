@@ -47,7 +47,7 @@ class FixtureController extends Controller
             ->orderBy('time')
             ->first();
 
-        $leagues = League::withCount('teams')->get();
+        $leagues = League::with('teams')->withCount('teams')->get();
         $teams = Team::with('league')->orderBy('name')->get();
 
         return view('portal.fixtures', compact('fixtures', 'nextMatch', 'leagues', 'teams'));

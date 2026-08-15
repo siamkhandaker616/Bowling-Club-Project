@@ -18,16 +18,16 @@
             <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
         </a>
         <nav style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-            <a href="/" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Home</a>
-            <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Fixtures</a>
-            <a href="{{ route('public.stats') }}" style="font-family:var(--font-sub);color:var(--gold);text-decoration:none;font-weight:600;">Stats</a>
-            <a href="{{ route('public.events') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Events</a>
-            <a href="{{ route('public.touring') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Touring</a>
+            <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
+            <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+            <a href="{{ route('public.stats') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
+            <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
+            <a href="{{ route('public.touring') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
             @if (Route::has('login'))
                 @auth
                     <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
                 @else
-                    <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Sign In</a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
                 @endauth
             @endif
         </nav>

@@ -3,32 +3,38 @@
 namespace App\Http\Controllers\PublicPortal;
 
 use App\Http\Controllers\Controller;
-use App\Mail\RsvpConfirmation;
-use App\Models\Club;
-use App\Models\Event;
+use App\Models\CartItem;
 use App\Models\Payment;
+use App\Models\ProductOrder;
 use App\Models\Rsvp;
-use App\Services\Payments\SslCommerzGateway;
+use App\Services\Payments\PaymentSettler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    public function __construct(private SslCommerzGateway $gateway)
+    public function __construct(private PaymentSettler $settler)
     {
     }
 
-    public function success(Payment $payment): View
+    public function success(Request $request, Payment $payment): View
     {
+        if (! $payment->isSuccessful() && $payment->status === 'processing') {
+            $this->settler->settleIfPossible($payment);
+        }
+
+        if ($payment->isSuccessful() && $payment->payable instanceof ProductOrder) {
+            CartItem::where('session_id', $request->session()->getId())->delete();
+        }
+
         return view('portal.payments.result', ['payment' => $payment, 'status' => 'success']);
     }
 
     public function fail(Payment $payment): View
     {
         $payment->update(['status' => 'failed']);
+        $this->voidRsvp($payment);
 
         return view('portal.payments.result', ['payment' => $payment, 'status' => 'fail']);
     }
@@ -36,6 +42,7 @@ class PaymentController extends Controller
     public function cancel(Payment $payment): View
     {
         $payment->update(['status' => 'cancelled']);
+        $this->voidRsvp($payment);
 
         return view('portal.payments.result', ['payment' => $payment, 'status' => 'cancel']);
     }
@@ -54,46 +61,19 @@ class PaymentController extends Controller
             return response()->json(['status' => 'VALID']);
         }
 
-        if (! $this->gateway->isConfigured() || ! $payment->session_key) {
-            return response()->json(['status' => 'FAILED']);
-        }
-
-        $validation = $this->gateway->validate($payment->session_key, $tranId);
-
-        if (($validation['status'] ?? '') === 'VALID') {
-            $this->completePayment($payment, $tranId, $validation);
-
+        if ($this->settler->settleIfPossible($payment)) {
             return response()->json(['status' => 'VALID']);
         }
 
         return response()->json(['status' => 'FAILED']);
     }
 
-    private function completePayment(Payment $payment, string $tranId, array $response): void
+    private function voidRsvp(Payment $payment): void
     {
-        DB::transaction(function () use ($payment, $tranId, $response) {
-            $rsvp = $payment->payable;
+        $payable = $payment->payable;
 
-            $event = Event::whereKey($rsvp?->event_id)->lockForUpdate()->first();
-            $event?->increment('current_rsvps');
-
-            $rsvp?->update(['status' => 'confirmed']);
-            $payment->markSuccessful($tranId, $response);
-        });
-
-        $rsvp = $payment->payable;
-
-        if ($rsvp) {
-            $this->notifySecretary($rsvp);
-        }
-    }
-
-    private function notifySecretary(Rsvp $rsvp): void
-    {
-        $club = Club::first();
-
-        if ($club && $club->email) {
-            Mail::to($club->email)->send(new RsvpConfirmation($rsvp));
+        if ($payable instanceof Rsvp && ! $payable->isConfirmed()) {
+            $payable->update(['status' => 'cancelled']);
         }
     }
 }

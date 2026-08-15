@@ -7,7 +7,11 @@
         </div>
     </x-slot>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:180px 1fr 220px;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
+
+        @include('sim.partials.module-dock')
+
+        <div style="display:grid;grid-template-columns:180px 1fr 220px;gap:0;">
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label">Stock Alerts</div>
             <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
@@ -29,25 +33,44 @@
         </div>
         <div style="padding:1.25rem;overflow:hidden;">
             <div class="dash-section-label">All Stock</div>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
                 @forelse ($items as $item)
-                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-                        <div style="flex:1;display:flex;gap:10px;align-items:center;">
-                            <span class="badge-role" style="background:var(--mist);color:var(--slate);border:1px solid var(--fog);font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $item->category }}</span>
-                            <span style="font-family:var(--font-sub);font-size:0.75rem;">{{ $item->name }}</span>
-                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">reorder @ {{ $item->reorder_level }}</span>
+                    @php
+                        $pct = $item->max_quantity > 0 ? (int) round(min(100, $item->quantity / $item->max_quantity * 100)) : 0;
+                        $full = $item->quantity >= $item->max_quantity;
+                    @endphp
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:14px;">
+                        <div style="flex:1;min-width:0;display:flex;gap:10px;align-items:center;">
                             @if ($item->isLowStock())
                                 <span class="pin knocked" style="color:var(--coral-dark);font-size:0.75rem;" title="Low stock">&#9679;</span>
                             @else
-                                <span class="pin standing" style="color:var(--sky-dark);font-size:0.75rem;" title="OK">&#9679;</span>
+                                <span class="pin standing" style="color:var(--ok);font-size:0.75rem;" title="OK">&#9679;</span>
                             @endif
+                            <div style="min-width:0;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span class="badge-role" style="background:var(--mist);color:var(--slate);border:1px solid var(--fog);font-family:var(--font-mono);font-size:0.52rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $item->category }}</span>
+                                    <span style="font-family:var(--font-sub);font-size:0.75rem;">{{ $item->name }}</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                                    <div style="width:140px;height:10px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);overflow:hidden;">
+                                        <div style="height:100%;width:{{ $pct }}%;background:{{ $item->isLowStock() ? 'var(--coral)' : 'var(--ok)' }};transition:width .3s ease;"></div>
+                                    </div>
+                                    <span style="font-family:var(--font-mono);font-size:0.62rem;font-weight:700;color:{{ $item->isLowStock() ? 'var(--coral-dark)' : 'var(--navy)' }};">{{ $item->quantity }} / {{ $item->max_quantity }}</span>
+                                </div>
+                                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">reorder @ {{ $item->reorder_threshold }}</span>
+                            </div>
                         </div>
-                        <div class="dash-stat-num" style="color:{{ $item->isLowStock() ? 'var(--coral-dark)' : 'var(--navy)' }};">{{ $item->quantity }}</div>
-                        <form method="POST" action="{{ route('caretaker.inventory.adjust', $item) }}" style="display:flex;gap:6px;">
-                            @csrf
-                            <input name="change" type="number" step="1" placeholder="&#916;" style="width:70px;font-family:var(--font-body);font-size:0.7rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);" title="Negative = usage, positive = restock">
-                            <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Adjust</button>
-                        </form>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <form method="POST" action="{{ route('caretaker.inventory.adjust', $item) }}" style="display:flex;align-items:center;gap:6px;">
+                                @csrf
+                                <input name="change" type="number" step="1" value="0" min="-9999" max="9999" data-stepper="edit" style="width:64px;font-family:var(--font-mono);font-size:0.7rem;padding:4px 6px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);text-align:center;">
+                                <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;" title="Positive = restock, negative = usage">Adjust</button>
+                            </form>
+                            <form method="POST" action="{{ route('caretaker.inventory.restock', $item) }}">
+                                @csrf
+                                <button type="submit" class="btn-lane solid" style="font-size:0.55rem;padding:4px 10px;" title="Fill to max capacity (costs money)" @if ($full) disabled @endif>Restock</button>
+                            </form>
+                        </div>
                     </div>
                 @empty
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
@@ -72,10 +95,18 @@
                 <span class="dash-stat-num" style="color:var(--coral-dark);">{{ $lowStock->count() }}</span>
                 <span class="dash-stat-label">Low Stock</span>
             </div>
+            <div class="dash-section-label" style="margin-top:16px;">How it works</div>
+            <p style="font-family:var(--font-body);font-size:0.6rem;color:var(--slate);margin:6px 0 0;line-height:1.5;">Use <span style="font-family:var(--font-mono);font-weight:700;">&#8722;</span>/<span style="font-family:var(--font-mono);font-weight:700;">&#43;</span> to nudge the count, or type a delta and hit Adjust. <span style="font-family:var(--font-mono);font-weight:700;">Restock</span> tops the shelf to max and charges the club.</p>
         </div>
+    </div>
     </div>
 
     <x-toast />
 
     @include('sim.partials.responsive')
+    @include('sim.partials.fold-controls')
+
+    <style>
+        .btn-lane[disabled]{opacity:.45;cursor:not-allowed}
+    </style>
 </x-app-layout>

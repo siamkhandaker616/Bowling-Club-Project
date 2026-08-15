@@ -29,7 +29,6 @@
         .pub-fz:hover .pub-fz-body,.pub-fz:focus-visible .pub-fz-body,.pub-fz.is-hovered .pub-fz-body{fill:var(--gold-light);stroke:var(--gold-dust);stroke-width:3;}
         .pub-fz.is-active .pub-fz-body{fill:var(--gold-light);stroke:var(--gold-dust);stroke-width:3.5;filter:drop-shadow(0 2px 6px rgba(212,168,76,.5));}
         .pub-fz:focus-visible{outline:3px solid var(--coral);outline-offset:3px;}
-        .pub-stage.dimmed .pub-fz:not(.is-active){opacity:.5;}
         .pub-fz-label{font-family:var(--font-header);text-transform:uppercase;letter-spacing:1px;fill:var(--navy);pointer-events:none;}
         .pub-fz-emoji{pointer-events:none;}
         .pub-facility-deco{pointer-events:none;}
@@ -38,29 +37,26 @@
         .pub-facility-pulse{animation:pubFacilityPulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center;}
         @keyframes pubFacilityPulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.8);opacity:0}}
 
-        .pub-facility-tooltip{position:absolute;pointer-events:none;background:var(--navy);color:var(--pin-white);border-radius:8px;padding:.55rem .8rem;box-shadow:var(--shadow-md);z-index:20;opacity:0;transition:opacity .12s;transform:translate(16px,-50%);max-width:230px;white-space:nowrap;}
-        .pub-facility-tooltip.is-visible{opacity:1;}
-        .pub-facility-tooltip-name{font-family:var(--font-sub);font-size:.85rem;color:var(--gold-light);margin-bottom:.15rem;}
-        .pub-facility-tooltip-sub{font-family:var(--font-mono);font-size:.68rem;color:var(--fog);display:flex;align-items:center;gap:6px;}
+        .pub-facility-hovercard{position:absolute;top:0;left:0;z-index:30;width:min(300px,calc(100% - 24px));background:var(--pin-white);border:3px solid var(--navy);border-radius:12px;box-shadow:var(--shadow-lg);padding:1rem 1.1rem;opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .13s ease,transform .13s ease,visibility .13s;pointer-events:none;}
+        .pub-facility-hovercard.is-visible{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
+        .pub-hc-head{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.6rem;}
+        .pub-hc-emoji{font-size:1.7rem;line-height:1;flex:none;}
+        .pub-hc-name{font-family:var(--font-header);font-size:.95rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);line-height:1.25;margin-bottom:.3rem;}
+        .pub-hc-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+        .pub-hc-badge{font-family:var(--font-header);font-size:.6rem;text-transform:uppercase;letter-spacing:1px;padding:.18rem .55rem;border-radius:50px;}
+        .pub-hc-badge.open{background:var(--gold);color:var(--navy);}
+        .pub-hc-badge.closed{background:var(--slate);color:var(--pin-white);}
+        .pub-hc-badge.occupied{background:var(--coral-light);color:var(--coral);}
+        .pub-hc-badge.maintenance{background:var(--mist);color:var(--slate);}
+        .pub-hc-badge.reserved{background:var(--gold-light);color:var(--gold-dust);}
+        .pub-hc-hours{font-family:var(--font-mono);font-size:.68rem;color:var(--slate);}
+        .pub-hc-desc{font-family:var(--font-body);font-size:.86rem;color:var(--navy);line-height:1.55;margin:0 0 .75rem;}
+        .pub-hc-facilities{margin-bottom:.6rem;}
+        .pub-hc-oil{margin-bottom:.4rem;}
+        .pub-hc-oil h3,.pub-hc-facilities h3{font-family:var(--font-sub);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate);margin:0 0 .55rem;}
         .pub-facility-status{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none;}
         .pub-facility-status.open{background:var(--gold);}
         .pub-facility-status.closed{background:var(--slate);}
-
-        .pub-facility-panel{position:absolute;top:0;right:0;bottom:0;width:min(340px,100%);background:var(--pin-white);border-left:3px solid var(--navy);box-shadow:var(--shadow-lg);transform:translateX(103%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column;overflow:auto;}
-        .pub-facility-panel.is-open{transform:translateX(0);}
-        .pub-facility-panel-head{background:var(--navy);color:var(--pin-white);padding:1rem 1.25rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border-bottom:3px solid var(--gold);}
-        .pub-facility-panel-emoji{font-size:1.6rem;display:block;margin-bottom:.3rem;}
-        .pub-facility-panel-title{font-family:var(--font-header);font-size:1rem;text-transform:uppercase;letter-spacing:1px;margin:0;line-height:1.2;}
-        .pub-facility-panel-close{background:none;border:none;color:var(--fog);font-size:1.1rem;cursor:pointer;padding:.25rem;line-height:1;border-radius:4px;transition:color .15s,background .15s;}
-        .pub-facility-panel-close:hover{color:var(--pin-white);background:rgba(255,255,255,.12);}
-        .pub-facility-panel-body{padding:1.25rem;}
-        .pub-facility-panel-meta{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;}
-        .pub-facility-panel-status{font-family:var(--font-header);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:.25rem .7rem;border-radius:50px;}
-        .pub-facility-panel-status.open{background:var(--gold);color:var(--navy);}
-        .pub-facility-panel-status.closed{background:var(--slate);color:var(--pin-white);}
-        .pub-facility-panel-hours{font-family:var(--font-mono);font-size:.75rem;color:var(--slate);}
-        .pub-facility-panel-desc{font-family:var(--font-body);font-size:.9rem;color:var(--navy);line-height:1.6;margin:0 0 1.25rem;}
-        .pub-facility-panel-body h3{font-family:var(--font-sub);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate);margin:0 0 .6rem;}
         .pub-facility-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.55rem;}
         .pub-facility-list li{font-family:var(--font-body);font-size:.88rem;color:var(--navy);position:relative;padding-left:1.4rem;}
         .pub-facility-list li::before{content:'';position:absolute;left:0;top:50%;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--navy);transform:translateY(-50%);}
@@ -80,11 +76,45 @@
         .pub-facility-swatch-washrooms{background:var(--mist);}
         .pub-facility-swatch-parking{background:var(--fog);}
 
+        .pub-lz{cursor:pointer;outline:none;pointer-events:auto;}
+        .pub-lz .pub-lane-row{transition:fill .2s,stroke .2s;}
+        .pub-lz:hover .pub-lane-row,.pub-lz:focus-visible .pub-lane-row,.pub-lz.is-hovered .pub-lane-row{fill:var(--gold-light);stroke:var(--gold-dust);stroke-width:2.5;}
+        .pub-lz.is-active .pub-lane-row{fill:var(--gold-light);stroke:var(--gold-dust);stroke-width:3;}
+        .pub-lz:focus-visible{outline:3px solid var(--coral);outline-offset:3px;}
+        .pub-pinbox-open{fill:var(--pin-white);}
+        .pub-pinbox-occupied{fill:var(--coral-light);}
+        .pub-pinbox-maintenance{fill:var(--mist);}
+        .pub-pinbox-reserved{fill:var(--gold-light);}
+        .pub-fz[data-key="lanes"]:hover .pub-fz-body,.pub-fz[data-key="lanes"]:focus-visible .pub-fz-body,.pub-fz[data-key="lanes"].is-hovered .pub-fz-body{fill:url(#pub-pattern-lanes);stroke:var(--navy);stroke-width:2.5;}
+
+        .pub-lane-board{margin-top:2rem;}
+        .pub-lane-board-title{font-family:var(--font-header);text-transform:uppercase;letter-spacing:1px;font-size:.9rem;color:var(--navy);text-align:center;margin:0 0 .25rem;}
+        .pub-lane-board-sub{font-family:var(--font-mono);font-size:.65rem;color:var(--slate);text-align:center;margin-bottom:.9rem;}
+        .pub-lane-strip{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;}
+        .pub-lane-strip-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem .7rem;background:var(--pin-white);border:2px solid var(--navy);border-radius:8px;cursor:pointer;font-family:var(--font-mono);font-size:.68rem;color:var(--navy);transition:transform .15s,box-shadow .15s,background .15s;}
+        .pub-lane-strip-chip:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+        .pub-lane-strip-chip.is-active{background:var(--gold-light);}
+        .pub-lane-dot-open{background:var(--sky);border:1.5px solid var(--sky-dark);}
+        .pub-lane-dot-occupied{background:var(--coral-light);border:1.5px solid var(--coral);}
+        .pub-lane-dot-maintenance{background:var(--mist);border:1.5px solid var(--slate);}
+        .pub-lane-dot-reserved{background:var(--gold-light);border:1.5px solid var(--gold-dust);}
+
+        .pub-oil-track{height:10px;border-radius:50px;background:var(--mist);border:2px solid var(--navy);overflow:hidden;margin-bottom:.4rem;}
+        .pub-oil-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width .3s;}
+        .pub-lane-sub{font-family:var(--font-mono);font-size:.7rem;color:var(--slate);margin-bottom:1.1rem;}
+        .pub-lane-actions{display:flex;flex-direction:column;gap:.6rem;border-top:2px dashed var(--fog);padding-top:1rem;margin-top:.4rem;}
+        .pub-zone-action{display:block;text-align:center;background:var(--navy);color:var(--pin-white);font-family:var(--font-header);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:.7rem;border-radius:8px;text-decoration:none;transition:background .15s,transform .15s;}
+        .pub-zone-action:hover{background:var(--sky-dark);transform:translateY(-1px);}
+        .pub-zone-action.secondary{background:var(--pin-white);color:var(--navy);border:2px solid var(--navy);}
+        .pub-zone-action.secondary:hover{background:var(--gold-light);}
+        .pub-lane-actions form{display:flex;gap:.5rem;}
+        .pub-lane-actions form button{flex:1;cursor:pointer;font-family:var(--font-header);font-size:.62rem;text-transform:uppercase;letter-spacing:.5px;padding:.6rem .4rem;border-radius:6px;border:2px solid var(--navy);background:var(--pin-white);color:var(--navy);transition:background .15s;}
+        .pub-lane-actions form button:hover{background:var(--gold-light);}
+        .pub-lane-actions form button.maint-toggle{background:var(--mist);}
+
         @media(max-width:760px){
-            .pub-facility-tooltip{display:none;}
-            .pub-facility-panel{top:auto;right:0;bottom:0;left:0;width:100%;max-height:62vh;border-left:none;border-top:3px solid var(--navy);transform:translateY(103%);}
-            .pub-facility-panel.is-open{transform:translateY(0);}
             .pub-facility-hero h1{font-size:1.6rem;}
+            .pub-facility-hovercard{width:calc(100% - 20px);}
         }
     </style>
 </head>
@@ -96,17 +126,23 @@
             <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
         </a>
         <nav style="display:flex;align-items:center;gap:1.25rem;">
-            <a href="/" style="font-family:var(--font-sub);color:var(--slate);text-decoration:none;font-size:0.85rem;">Home</a>
-            <a href="{{ route('site.facility-map') }}" style="font-family:var(--font-sub);color:var(--sky-dark);text-decoration:none;font-size:0.85rem;border-bottom:2px solid var(--coral);">Facility Map</a>
+            <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
+            <a href="{{ route('site.facility-map') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Facility Map</a>
             @if (Route::has('login'))
                 @auth
                     @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('site.announcements.index') }}" style="font-family:var(--font-sub);color:var(--slate);text-decoration:none;font-size:0.85rem;">Manage Announcements</a>
+                        <a href="{{ route('site.announcements.index') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Manage Announcements</a>
+                    @endif
+                    @if(Auth::user()->role === 'customer')
+                        @php $bagCount = (int) \App\Models\CartItem::where('session_id', session()->getId())->sum('quantity'); @endphp
+                        <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;position:relative;">Bag
+                            @if($bagCount > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $bagCount }}</span>@endif
+                        </a>
                     @endif
                     <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
                 @else
-                    <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--slate);text-decoration:none;font-size:0.85rem;">Fixtures</a>
-                    <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;padding:6px 14px;border-radius:50px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='var(--mist)';this.style.color='var(--sky-dark)'" onmouseout="this.style.background='';this.style.color='var(--navy)'">Sign In</a>
+                    <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}" class="btn" style="padding:8px 20px;font-size:0.8rem;">Join the Club</a>
                     @endif
@@ -120,7 +156,7 @@
         <h1>Find Your Way Around</h1>
         <p>Every lane leads somewhere. Hover a zone for a quick look, click it for the full tour &mdash; and know exactly where to go before your ball's even out of the rack.</p>
         <span class="pub-facility-count" id="pub-facility-count">Checking the lights...</span>
-        <div class="pub-facility-hint">Hover for a peek &middot; Click for the full rundown &middot; Your keyboard works too</div>
+        <div class="pub-facility-hint">Hover any zone or lane for its rundown &middot; Click to pin it open &middot; Your keyboard works too</div>
     </section>
 
     <div class="pub-facility-stage-wrap">
@@ -188,22 +224,28 @@
                 <g class="pub-fz" data-key="lanes" tabindex="0" role="button" aria-label="Championship Lanes, open today">
                     <rect class="pub-fz-body" x="90" y="118" width="470" height="520" rx="12" fill="url(#pub-pattern-lanes)"/>
                     <g class="pub-facility-deco">
-                        @for($i = 0; $i < 12; $i++)
-                            @php $ly = 138 + $i * 40; @endphp
-                            <g transform="translate(100, {{ $ly }})">
-                                <rect x="0" y="0" width="6" height="26" fill="var(--rubber)"/>
-                                <rect x="6" y="0" width="428" height="26" fill="url(#pub-lane-wood)" stroke="rgba(26,42,58,0.35)" stroke-width="1"/>
-                                <rect x="434" y="0" width="6" height="26" fill="var(--rubber)"/>
-                                <polygon points="108,10 114,16 108,22" fill="rgba(26,42,58,0.4)"/>
-                                <polygon points="120,10 114,16 120,22" fill="rgba(26,42,58,0.4)"/>
-                                <polygon points="228,10 234,16 228,22" fill="rgba(26,42,58,0.4)"/>
-                                <polygon points="240,10 234,16 240,22" fill="rgba(26,42,58,0.4)"/>
-                                <rect x="398" y="0" width="36" height="26" fill="var(--pin-white)" stroke="var(--navy)" stroke-width="1.5"/>
-                                @foreach($pins as $pin)
-                                    <circle cx="{{ $pin[0] }}" cy="{{ $pin[1] }}" r="2.3" fill="var(--pin-white)" stroke="var(--navy)" stroke-width="1"/>
-                                @endforeach
+                        @foreach($lanes as $i => $lane)
+                            @php
+                                $ly = 138 + $i * 40;
+                                $ln = $lane->lane_number;
+                                $st = $lane->status;
+                            @endphp
+                            <g class="pub-lz" data-lane="{{ $ln }}" data-status="{{ $st }}" tabindex="0" role="button" aria-label="Lane {{ $ln }}, {{ $st }}">
+                                <g transform="translate(100, {{ $ly }})">
+                                    <rect x="0" y="0" width="6" height="26" fill="var(--rubber)"/>
+                                    <rect class="pub-lane-row" x="6" y="0" width="428" height="26" fill="url(#pub-lane-wood)" stroke="rgba(26,42,58,0.35)" stroke-width="1"/>
+                                    <rect x="434" y="0" width="6" height="26" fill="var(--rubber)"/>
+                                    <polygon points="108,10 114,16 108,22" fill="rgba(26,42,58,0.4)"/>
+                                    <polygon points="120,10 114,16 120,22" fill="rgba(26,42,58,0.4)"/>
+                                    <polygon points="228,10 234,16 228,22" fill="rgba(26,42,58,0.4)"/>
+                                    <polygon points="240,10 234,16 240,22" fill="rgba(26,42,58,0.4)"/>
+                                    <rect class="pub-pinbox pub-pinbox-{{ $st }}" x="398" y="0" width="36" height="26" stroke="var(--navy)" stroke-width="1.5"/>
+                                    @foreach($pins as $pin)
+                                        <circle cx="{{ $pin[0] }}" cy="{{ $pin[1] }}" r="2.3" fill="var(--pin-white)" stroke="var(--navy)" stroke-width="1"/>
+                                    @endforeach
+                                </g>
                             </g>
-                        @endfor
+                        @endforeach
                     </g>
                     <text class="pub-fz-label pub-facility-deco" x="100" y="132" font-size="15">Championship Lanes</text>
                     <text class="pub-facility-deco" x="540" y="138" text-anchor="end" font-size="20">&#127944;</text>
@@ -276,32 +318,46 @@
                 </g>
             </svg>
 
-            <div class="pub-facility-tooltip" id="pub-facility-tooltip">
-                <div class="pub-facility-tooltip-name" id="pub-facility-tooltip-name"></div>
-                <div class="pub-facility-tooltip-sub" id="pub-facility-tooltip-sub"></div>
-            </div>
-
-            <div class="pub-facility-panel" id="pub-facility-panel" aria-live="polite">
-                <div class="pub-facility-panel-head">
+            <div class="pub-facility-hovercard" id="pub-facility-hovercard" role="tooltip" aria-live="polite">
+                <div class="pub-hc-head">
+                    <span class="pub-hc-emoji" id="pub-hc-emoji"></span>
                     <div>
-                        <span class="pub-facility-panel-emoji" id="pub-facility-panel-emoji"></span>
-                        <h2 class="pub-facility-panel-title" id="pub-facility-panel-title"></h2>
+                        <div class="pub-hc-name" id="pub-hc-name"></div>
+                        <div class="pub-hc-meta">
+                            <span class="pub-facility-status" id="pub-hc-dot"></span>
+                            <span class="pub-hc-badge" id="pub-hc-status"></span>
+                            <span class="pub-hc-hours" id="pub-hc-hours"></span>
+                        </div>
                     </div>
-                    <button class="pub-facility-panel-close" id="pub-facility-panel-close" aria-label="Close panel">&times;</button>
                 </div>
-                <div class="pub-facility-panel-body">
-                    <div class="pub-facility-panel-meta">
-                        <span class="pub-facility-panel-status" id="pub-facility-panel-status"></span>
-                        <span class="pub-facility-panel-hours" id="pub-facility-panel-hours"></span>
-                    </div>
-                    <p class="pub-facility-panel-desc" id="pub-facility-panel-desc"></p>
+                <p class="pub-hc-desc" id="pub-hc-desc"></p>
+                <div class="pub-hc-facilities" id="pub-hc-facilities">
                     <h3>What's in here</h3>
-                    <ul class="pub-facility-list" id="pub-facility-list"></ul>
+                    <ul class="pub-facility-list" id="pub-hc-list"></ul>
                 </div>
+                <div class="pub-hc-oil" id="pub-hc-oil">
+                    <h3>Oil level</h3>
+                    <div class="pub-oil-track"><div class="pub-oil-fill" id="pub-hc-oil-fill" style="width:0%;"></div></div>
+                    <div class="pub-lane-sub" id="pub-hc-lane-sub"></div>
+                </div>
+                <div class="pub-lane-actions" id="pub-hc-actions"></div>
             </div>
         </div>
 
         <div class="pub-facility-legend" id="pub-facility-legend" role="list"></div>
+
+        <div class="pub-lane-board">
+            <h2 class="pub-lane-board-title">Lane Board</h2>
+            <p class="pub-lane-board-sub">Hover a lane for its rundown &middot; Pick a free one to book</p>
+            <div class="pub-lane-strip" id="pub-lane-strip" role="list" aria-label="Lane availability board">
+                @foreach($lanes as $lane)
+                    <button type="button" class="pub-lane-strip-chip" data-lane="{{ $lane->lane_number }}" role="listitem" title="Lane {{ $lane->lane_number }} - {{ ucfirst($lane->status) }}">
+                        <span class="pub-facility-status pub-lane-dot-{{ $lane->status }}"></span>
+                        Lane {{ str_pad($lane->lane_number, 2, '0', STR_PAD_LEFT) }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
     </div>
 
     <footer style="background:var(--navy);color:var(--fog);padding:3rem 2rem;text-align:center;">
@@ -310,10 +366,36 @@
         <p style="font-family:var(--font-sub);font-size:0.85rem;color:var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }}</p>
     </footer>
 
+    @php
+        $userRole = auth()->check() ? auth()->user()->role : null;
+        $gameUrl = \Illuminate\Support\Facades\Route::has('game.index') ? route('game.index') : null;
+        $maintainUrl = \Illuminate\Support\Facades\Route::has('caretaker.lanes.maintain')
+            ? route('caretaker.lanes.maintain', ['lane' => '__ID__'])
+            : null;
+        $bookUrl = auth()->check() && $userRole === 'customer' ? route('visitor.bookings.create') : null;
+        $loginUrl = route('login');
+        $complaintsUrl = auth()->check() && $userRole === 'customer' ? route('visitor.complaints.index') : null;
+        $proshopUrl = \Illuminate\Support\Facades\Route::has('public.proshop.index') ? route('public.proshop.index') : null;
+        $snackbarUrl = \Illuminate\Support\Facades\Route::has('site.snackbar') ? route('site.snackbar') : null;
+    @endphp
+
+    <x-toast />
+
     <script>
     (function () {
         var ZONES = @json($zones);
         if (!ZONES || !ZONES.length) return;
+
+        var LANES = @json($lanes ?: []);
+        var ROLE = @json($userRole);
+        var GAME_URL = @json($gameUrl);
+        var MAINTAIN_URL = @json($maintainUrl);
+        var BOOK_URL = @json($bookUrl);
+        var LOGIN_URL = @json($loginUrl);
+        var COMPLAINTS_URL = @json($complaintsUrl);
+        var PROSHOP_URL = @json($proshopUrl);
+        var SNACKBAR_URL = @json($snackbarUrl);
+        var CSRF = @json(csrf_token());
 
         var EMOJI = {'lanes':'\u{1F3B3}','snack-bar':'\u{1F964}','arcade':'\u{1F579}','lounge':'\u{1F6CB}','restaurant':'\u{1F37D}','pro-shop':'\u{1F3EA}','washrooms':'\u{1F6BD}','parking':'\u{1F697}'};
 
@@ -323,20 +405,41 @@
             byKey[z.map_key] = z;
         });
 
+        var laneByNum = {};
+        LANES.forEach(function (l) { laneByNum[l.lane_number] = l; });
+
+        var STATUS_LABEL = {open:'OPEN', occupied:'BUSY', maintenance:'MAINT', reserved:'RES'};
+        var STATUS_NOTE = {
+            open:'This lane is open and ready to roll.',
+            occupied:'This lane is currently in play - it should free up after the current frame.',
+            maintenance:'This lane is under maintenance and off the board right now.',
+            reserved:'This lane is reserved for an upcoming booking.'
+        };
+
         var stage = document.getElementById('pub-facility-stage');
         var svgMap = document.getElementById('pub-facility-map');
-        var tooltip = document.getElementById('pub-facility-tooltip');
-        var ttName = document.getElementById('pub-facility-tooltip-name');
-        var ttSub = document.getElementById('pub-facility-tooltip-sub');
-        var panel = document.getElementById('pub-facility-panel');
-        var pEmoji = document.getElementById('pub-facility-panel-emoji');
-        var pTitle = document.getElementById('pub-facility-panel-title');
-        var pStatus = document.getElementById('pub-facility-panel-status');
-        var pHours = document.getElementById('pub-facility-panel-hours');
-        var pDesc = document.getElementById('pub-facility-panel-desc');
-        var pList = document.getElementById('pub-facility-list');
+        var card = document.getElementById('pub-facility-hovercard');
+        var hcEmoji = document.getElementById('pub-hc-emoji');
+        var hcName = document.getElementById('pub-hc-name');
+        var hcDot = document.getElementById('pub-hc-dot');
+        var hcStatus = document.getElementById('pub-hc-status');
+        var hcHours = document.getElementById('pub-hc-hours');
+        var hcDesc = document.getElementById('pub-hc-desc');
+        var hcFacilities = document.getElementById('pub-hc-facilities');
+        var hcList = document.getElementById('pub-hc-list');
+        var hcOil = document.getElementById('pub-hc-oil');
+        var hcOilFill = document.getElementById('pub-hc-oil-fill');
+        var hcLaneSub = document.getElementById('pub-hc-lane-sub');
+        var hcActions = document.getElementById('pub-hc-actions');
         var legend = document.getElementById('pub-facility-legend');
         var countEl = document.getElementById('pub-facility-count');
+
+        var hideTimer = null;
+        var pinned = false;
+        var pinKind = null;
+        var pinKey = null;
+
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
 
         function timeToSec(t) {
             if (!t) return 0;
@@ -366,10 +469,16 @@
             return window.matchMedia('(max-width: 760px)').matches;
         }
 
+        function openLanesCount() {
+            var c = 0;
+            LANES.forEach(function (l) { if (l.status === 'open') c++; });
+            return c;
+        }
+
         function updateCount() {
             if (!countEl) return;
             var open = ZONES.filter(isOpen).length;
-            countEl.textContent = open + ' of ' + ZONES.length + ' zones open right now';
+            countEl.textContent = open + ' of ' + ZONES.length + ' zones open \u00b7 ' + openLanesCount() + ' of ' + LANES.length + ' lanes free';
         }
 
         function zoneEl(key) {
@@ -381,58 +490,229 @@
             if (el) el.classList.toggle('is-hovered', on);
         }
 
-        function showTooltip(el) {
-            var z = byKey[el.getAttribute('data-key')];
-            if (!z || isSmallScreen()) return;
-            ttName.textContent = z.name;
-            ttSub.innerHTML = '<span class="pub-facility-status ' + (isOpen(z) ? 'open' : 'closed') + '"></span> ' + (isOpen(z) ? 'Open' : 'Closed') + ' \u00b7 ' + hours(z);
-            tooltip.classList.add('is-visible');
+        function laneEl(n) {
+            return document.querySelector('.pub-lz[data-lane="' + n + '"]');
         }
 
-        function hideTooltip() {
-            tooltip.classList.remove('is-visible');
+        function setLaneHover(n, on) {
+            var el = laneEl(n);
+            if (el) el.classList.toggle('is-hovered', on);
         }
 
-        function moveTooltip(e) {
-            var r = stage.getBoundingClientRect();
-            var x = e.clientX - r.left;
-            var y = e.clientY - r.top;
-            tooltip.style.left = Math.min(x, r.width - 240) + 'px';
-            tooltip.style.top = y + 'px';
+        function setHover(kind, key, on) {
+            if (kind === 'zone') setZoneHover(key, on); else setLaneHover(key, on);
         }
 
-        function openZone(key) {
-            var z = byKey[key];
-            if (!z) return;
-            pEmoji.textContent = z.emoji;
-            pTitle.textContent = z.name;
+        function clearActive() {
+            document.querySelectorAll('.pub-fz.is-active').forEach(function (e) { e.classList.remove('is-active'); });
+            document.querySelectorAll('.pub-facility-chip.is-active').forEach(function (c) { c.classList.remove('is-active'); });
+            document.querySelectorAll('.pub-lz.is-active').forEach(function (e) { e.classList.remove('is-active'); });
+            document.querySelectorAll('.pub-lane-strip-chip.is-active').forEach(function (c) { c.classList.remove('is-active'); });
+        }
+
+        function actionHtml(l) {
+            var n = l.lane_number;
+            var h = '';
+            if (ROLE === 'customer') {
+                if (BOOK_URL) h += '<a class="pub-zone-action" href="' + BOOK_URL + '?lane=' + n + '">Book Lane ' + pad(n) + ' \u2192</a>';
+                if (COMPLAINTS_URL) h += '<a class="pub-zone-action secondary" href="' + COMPLAINTS_URL + '">Report a problem with this lane</a>';
+            } else if (ROLE === 'caretaker' || ROLE === 'admin') {
+                if (MAINTAIN_URL) {
+                    var url = MAINTAIN_URL.replace('__ID__', l.id);
+                    h += '<form method="POST" action="' + url + '">'
+                        + '<input type="hidden" name="_token" value="' + CSRF + '">'
+                        + '<button type="submit" name="action" value="oiled">Oiled</button>'
+                        + '<button type="submit" name="action" value="cleaned">Cleaned</button>'
+                        + '<button type="submit" name="action" value="toggle_maint" class="maint-toggle">Toggle Maint</button>'
+                        + '</form>';
+                }
+                if (COMPLAINTS_URL) h += '<a class="pub-zone-action secondary" href="' + COMPLAINTS_URL + '">Report a problem with this lane</a>';
+            } else if (!ROLE) {
+                h += '<a class="pub-zone-action" href="' + LOGIN_URL + '">Sign in to book this lane \u2192</a>';
+            }
+            return h;
+        }
+
+        function zoneCard(z) {
             var open = isOpen(z);
-            pStatus.textContent = open ? 'OPEN' : 'CLOSED';
-            pStatus.className = 'pub-facility-panel-status ' + (open ? 'open' : 'closed');
-            pHours.textContent = hours(z);
-            pDesc.textContent = z.description || '';
-            pList.innerHTML = '';
+            hcEmoji.textContent = z.emoji;
+            hcName.textContent = z.name;
+            hcDot.className = 'pub-facility-status ' + (open ? 'open' : 'closed');
+            hcStatus.textContent = open ? 'OPEN' : 'CLOSED';
+            hcStatus.className = 'pub-hc-badge ' + (open ? 'open' : 'closed');
+            hcHours.textContent = hours(z);
+            hcDesc.textContent = z.description || '';
+            hcList.innerHTML = '';
             (z.facilities || []).forEach(function (f) {
                 var li = document.createElement('li');
                 li.textContent = f;
-                pList.appendChild(li);
+                hcList.appendChild(li);
             });
-            panel.classList.add('is-open');
-            stage.classList.add('dimmed');
-            document.querySelectorAll('.pub-fz.is-active').forEach(function (e) { e.classList.remove('is-active'); });
-            var el = zoneEl(key);
-            if (el) el.classList.add('is-active');
-            document.querySelectorAll('.pub-facility-chip.is-active').forEach(function (c) { c.classList.remove('is-active'); });
-            var chip = document.querySelector('.pub-facility-chip[data-key="' + key + '"]');
-            if (chip) chip.classList.add('is-active');
-            hideTooltip();
+            hcFacilities.style.display = (z.facilities && z.facilities.length) ? '' : 'none';
+            hcOil.style.display = 'none';
+            hcActions.innerHTML = '';
+            if (z.map_key === 'arcade' && GAME_URL) {
+                var a = document.createElement('a');
+                a.className = 'pub-zone-action';
+                a.href = GAME_URL;
+                a.textContent = 'Launch Virtual Bowling \u2192';
+                hcActions.appendChild(a);
+            }
+            if (z.map_key === 'pro-shop' && PROSHOP_URL) {
+                var a = document.createElement('a');
+                a.className = 'pub-zone-action';
+                a.href = PROSHOP_URL;
+                a.textContent = 'Visit the Pro Shop \u2192';
+                hcActions.appendChild(a);
+            }
+            if (z.map_key === 'snack-bar' && SNACKBAR_URL) {
+                var a = document.createElement('a');
+                a.className = 'pub-zone-action';
+                a.href = SNACKBAR_URL;
+                a.textContent = 'See the Snack Bar menu \u2192';
+                hcActions.appendChild(a);
+            }
+            hcActions.style.display = hcActions.children.length ? '' : 'none';
         }
 
-        function closePanel() {
-            panel.classList.remove('is-open');
-            stage.classList.remove('dimmed');
-            document.querySelectorAll('.pub-fz.is-active').forEach(function (e) { e.classList.remove('is-active'); });
-            document.querySelectorAll('.pub-facility-chip.is-active').forEach(function (c) { c.classList.remove('is-active'); });
+        function laneCard(l) {
+            var n = l.lane_number;
+            hcEmoji.textContent = '\u{1F3B3}';
+            hcName.textContent = 'Lane ' + pad(n);
+            hcDot.className = 'pub-facility-status pub-lane-dot-' + l.status;
+            hcStatus.textContent = STATUS_LABEL[l.status] || l.status;
+            hcStatus.className = 'pub-hc-badge ' + l.status;
+            var zl = byKey['lanes'];
+            hcHours.textContent = zl ? hours(zl) : '';
+            hcDesc.textContent = STATUS_NOTE[l.status] || '';
+            hcFacilities.style.display = 'none';
+            hcOil.style.display = '';
+            hcOilFill.style.width = Math.max(0, Math.min(100, l.oil_level)) + '%';
+            var lm = l.last_maintained_at ? new Date(l.last_maintained_at).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : '';
+            hcLaneSub.textContent = l.oil_level + '% oil' + (lm ? ' \u00b7 last serviced ' + lm : ' \u00b7 never serviced');
+            hcActions.innerHTML = actionHtml(l);
+            hcActions.style.display = hcActions.children.length ? '' : 'none';
+        }
+
+        function anchorEl() {
+            return pinKind === 'zone' ? zoneEl(pinKey) : laneEl(pinKey);
+        }
+
+        function placeCard(e) {
+            var r = stage.getBoundingClientRect();
+            var x = e.clientX - r.left;
+            var y = e.clientY - r.top;
+            var w = card.offsetWidth, h = card.offsetHeight;
+            var left = x + 18;
+            if (left + w > r.width - 8) left = x - w - 18;
+            left = Math.max(8, Math.min(left, r.width - w - 8));
+            var top = y + 14;
+            if (top + h > r.height - 8) top = r.height - h - 8;
+            top = Math.max(8, top);
+            card.style.left = left + 'px';
+            card.style.top = top + 'px';
+        }
+
+        function placeCardNear(el) {
+            if (!el) return;
+            var r = stage.getBoundingClientRect();
+            var er = el.getBoundingClientRect();
+            var w = card.offsetWidth, h = card.offsetHeight;
+            var left = (er.left - r.left) + er.width / 2 - w / 2;
+            left = Math.max(8, Math.min(left, r.width - w - 8));
+            var top = (er.bottom - r.top) + 10;
+            if (top + h > r.height - 8) top = (er.top - r.top) - h - 10;
+            top = Math.max(8, top);
+            card.style.left = left + 'px';
+            card.style.top = top + 'px';
+        }
+
+        function showCard(kind, key, e) {
+            if (kind === 'zone') {
+                var z = byKey[key];
+                if (!z) return;
+                zoneCard(z);
+            } else {
+                var l = laneByNum[key];
+                if (!l) return;
+                laneCard(l);
+            }
+            pinKind = kind;
+            pinKey = key;
+            card.classList.add('is-visible');
+            if (e) placeCard(e); else placeCardNear(anchorEl());
+        }
+
+        function hideCard() {
+            clearTimeout(hideTimer);
+            if (pinned) return;
+            card.classList.remove('is-visible');
+        }
+
+        function scheduleHide() {
+            if (pinned) return;
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(hideCard, 120);
+        }
+
+        function setActive(kind, key, on) {
+            if (kind === 'zone') {
+                var el = zoneEl(key), chip = document.querySelector('.pub-facility-chip[data-key="' + key + '"]');
+                if (el) el.classList.toggle('is-active', on);
+                if (chip) chip.classList.toggle('is-active', on);
+            } else {
+                var le = laneEl(key), c = document.querySelector('.pub-lane-strip-chip[data-lane="' + key + '"]');
+                if (le) le.classList.toggle('is-active', on);
+                if (c) c.classList.toggle('is-active', on);
+            }
+        }
+
+        function pinCard(kind, key) {
+            if (pinned && pinKind === kind && pinKey === key) { unpinCard(); return; }
+            clearActive();
+            pinned = true;
+            showCard(kind, key, null);
+            setActive(kind, key, true);
+        }
+
+        function unpinCard() {
+            pinned = false;
+            hideCard();
+            clearActive();
+        }
+
+        function bindHover(el, kind, key) {
+            el.addEventListener('mouseenter', function (e) {
+                setHover(kind, key, true);
+                if (pinned || isSmallScreen()) return;
+                clearTimeout(hideTimer);
+                showCard(kind, key, e);
+            });
+            el.addEventListener('mousemove', function (e) {
+                if (!pinned && !isSmallScreen() && card.classList.contains('is-visible')) placeCard(e);
+            });
+            el.addEventListener('mouseleave', function (e) {
+                setHover(kind, key, false);
+                if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+                scheduleHide();
+            });
+            el.addEventListener('focus', function () {
+                if (pinned || isSmallScreen()) return;
+                clearTimeout(hideTimer);
+                showCard(kind, key, null);
+            });
+            el.addEventListener('blur', function () { scheduleHide(); });
+            el.addEventListener('click', function (e) {
+                e.stopPropagation();
+                pinCard(kind, key);
+            });
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    pinCard(kind, key);
+                }
+            });
         }
 
         function buildLegend() {
@@ -447,35 +727,32 @@
                     '<span>' + z.name + '</span>' +
                     '<span class="pub-facility-chip-hours">' + hours(z) + '</span>' +
                     '<span class="pub-facility-status ' + (isOpen(z) ? 'open' : 'closed') + '" title="' + (isOpen(z) ? 'Open now' : 'Closed now') + '"></span>';
-                chip.addEventListener('click', function () { openZone(z.map_key); });
-                chip.addEventListener('mouseenter', function () { setZoneHover(z.map_key, true); });
-                chip.addEventListener('mouseleave', function () { setZoneHover(z.map_key, false); });
+                bindHover(chip, 'zone', z.map_key);
                 legend.appendChild(chip);
             });
         }
 
+        document.querySelectorAll('.pub-lane-strip-chip').forEach(function (chip) {
+            bindHover(chip, 'lane', +chip.getAttribute('data-lane'));
+        });
+
+        document.querySelectorAll('.pub-lz').forEach(function (el) {
+            bindHover(el, 'lane', +el.getAttribute('data-lane'));
+        });
+
         document.querySelectorAll('.pub-fz').forEach(function (el) {
-            el.addEventListener('mouseenter', function () { showTooltip(el); });
-            el.addEventListener('mousemove', moveTooltip);
-            el.addEventListener('mouseleave', hideTooltip);
-            el.addEventListener('focus', function () { showTooltip(el); });
-            el.addEventListener('blur', hideTooltip);
-            el.addEventListener('click', function () { openZone(el.getAttribute('data-key')); });
-            el.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    openZone(el.getAttribute('data-key'));
-                }
-            });
+            bindHover(el, 'zone', el.getAttribute('data-key'));
         });
 
         svgMap.addEventListener('click', function (e) {
-            if (!e.target.closest('.pub-fz')) closePanel();
+            if (!e.target.closest('.pub-fz') && !e.target.closest('.pub-lz') && !card.contains(e.target)) unpinCard();
         });
 
-        document.getElementById('pub-facility-panel-close').addEventListener('click', closePanel);
+        card.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+        card.addEventListener('mouseleave', function () { scheduleHide(); });
+
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closePanel();
+            if (e.key === 'Escape') unpinCard();
         });
 
         buildLegend();

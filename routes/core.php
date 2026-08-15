@@ -3,10 +3,12 @@
 use App\Http\Controllers\PublicPortal\EventController;
 use App\Http\Controllers\PublicPortal\FixtureController;
 use App\Http\Controllers\PublicPortal\PaymentController;
+use App\Http\Controllers\PublicPortal\ProShopController;
 use App\Http\Controllers\PublicPortal\StatController;
 use App\Http\Controllers\PublicPortal\TouringController;
 use App\Http\Controllers\PublicSite\AnnouncementController;
 use App\Http\Controllers\PublicSite\FacilityMapController;
+use App\Http\Controllers\PublicSite\SnackbarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,11 +36,13 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/api/lanes', function () {
-    $lanes = \App\Models\Lane::select('lane_number', 'status', 'oil_level')->orderBy('lane_number')->get();
+    $lanes = \App\Models\Lane::select('id', 'lane_number', 'status', 'oil_level', 'last_maintained_at')->orderBy('lane_number')->get();
     return response()->json($lanes);
 })->name('site.lanes.api');
 
 Route::get('/facility-map', [FacilityMapController::class, 'index'])->name('site.facility-map');
+
+Route::get('/snackbar', [SnackbarController::class, 'index'])->name('site.snackbar');
 
 Route::prefix('admin')->name('site.announcements.')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('index');
@@ -83,3 +87,10 @@ Route::get('/pay/{payment}/cancel', [PaymentController::class, 'cancel'])->name(
 Route::post('/pay/ipn', [PaymentController::class, 'ipn'])
     ->name('public.pay.ipn')
     ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+
+Route::get('/pro-shop', [ProShopController::class, 'index'])->name('public.proshop.index');
+Route::get('/pro-shop/cart', [ProShopController::class, 'cart'])->name('public.proshop.cart');
+Route::post('/pro-shop/cart/add', [ProShopController::class, 'add'])->name('public.proshop.cart.add');
+Route::post('/pro-shop/cart/update', [ProShopController::class, 'update'])->name('public.proshop.cart.update');
+Route::post('/pro-shop/cart/remove', [ProShopController::class, 'remove'])->name('public.proshop.cart.remove');
+Route::post('/pro-shop/checkout', [ProShopController::class, 'checkout'])->name('public.proshop.checkout');

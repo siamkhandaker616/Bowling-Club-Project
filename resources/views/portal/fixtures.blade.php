@@ -18,13 +18,13 @@
             <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
         </a>
         <nav style="display:flex;align-items:center;gap:1.5rem;">
-            <a href="/" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Home</a>
-            <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--gold);text-decoration:none;font-weight:600;">Fixtures</a>
+            <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
+            <a href="{{ route('public.fixtures') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
             @if (Route::has('login'))
                 @auth
                     <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
                 @else
-                    <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Sign In</a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
                 @endauth
             @endif
         </nav>
@@ -62,40 +62,72 @@
         @endif
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+            @php $activeStatus = request('status', 'all'); @endphp
             <div id="pub-filter-tabs" style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="pub-tab active" data-filter="all" onclick="pubFilterFixtures('all', this)">All Fixtures</button>
-                <button class="pub-tab" data-filter="upcoming" onclick="pubFilterFixtures('upcoming', this)">Upcoming</button>
-                <button class="pub-tab" data-filter="live" onclick="pubFilterFixtures('live', this)">Live</button>
-                <button class="pub-tab" data-filter="completed" onclick="pubFilterFixtures('completed', this)">Completed</button>
+                <button class="pub-tab {{ $activeStatus === 'all' ? 'active' : '' }}" data-filter="all" onclick="pubFilterFixtures('all', this)">All Fixtures</button>
+                <button class="pub-tab {{ $activeStatus === 'upcoming' ? 'active' : '' }}" data-filter="upcoming" onclick="pubFilterFixtures('upcoming', this)">Upcoming</button>
+                <button class="pub-tab {{ $activeStatus === 'live' ? 'active' : '' }}" data-filter="live" onclick="pubFilterFixtures('live', this)">Live</button>
+                <button class="pub-tab {{ $activeStatus === 'completed' ? 'active' : '' }}" data-filter="completed" onclick="pubFilterFixtures('completed', this)">Completed</button>
             </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <select id="pub-league-filter" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
-                    <option value="">All Leagues</option>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                @php
+                    $fromRaw = request('date_from');
+                    $toRaw = request('date_to');
+                    try { $fromDate = $fromRaw ? \Carbon\Carbon::parse($fromRaw) : now(); } catch (\Throwable $e) { $fromRaw = null; $fromDate = now(); }
+                    try { $toDate = $toRaw ? \Carbon\Carbon::parse($toRaw) : now(); } catch (\Throwable $e) { $toRaw = null; $toDate = now(); }
+                @endphp
+                <select id="pub-league-filter" class="fold-select" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
+                    <option value="" {{ request('league_id') === null ? 'selected' : '' }}>All Leagues</option>
                     @foreach($leagues as $league)
-                        <option value="{{ $league->id }}">{{ $league->name }}</option>
+                        <option value="{{ $league->id }}" {{ (string) request('league_id') === (string) $league->id ? 'selected' : '' }}>{{ $league->name }}</option>
                     @endforeach
                 </select>
-                <select id="pub-team-filter" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
-                    <option value="">All Teams</option>
+                <select id="pub-team-filter" class="fold-select" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
+                    <option value="" {{ request('team_id') === null ? 'selected' : '' }}>All Teams</option>
                     @foreach($teams as $team)
-                        <option value="{{ $team->id }}">{{ $team->name }}</option>
+                        <option value="{{ $team->id }}" {{ (string) request('team_id') === (string) $team->id ? 'selected' : '' }}>{{ $team->name }}</option>
                     @endforeach
                 </select>
+                <div class="lc" id="pub-date-from-lc" data-year="{{ $fromDate->year }}" title="From date" style="border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);">
+                    <div class="lc-head">
+                        <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
+                        <div class="lc-mo"></div>
+                        <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                    </div>
+                    <div class="lc-frame"><div class="lc-grid"></div></div>
+                    <div class="lc-read"><span class="lc-key">From</span><span class="lc-picked" data-kept="1">{{ $fromRaw ? $fromDate->format('M j, Y') : 'Any' }}</span></div>
+                    <input type="hidden" id="pub-date-from" class="lc-input" value="{{ $fromRaw }}">
+                    <input type="hidden" class="lc-m" value="{{ $fromDate->month - 1 }}">
+                </div>
+                <div class="lc" id="pub-date-to-lc" data-year="{{ $toDate->year }}" title="To date" style="border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);">
+                    <div class="lc-head">
+                        <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
+                        <div class="lc-mo"></div>
+                        <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                    </div>
+                    <div class="lc-frame"><div class="lc-grid"></div></div>
+                    <div class="lc-read"><span class="lc-key">To</span><span class="lc-picked" data-kept="1">{{ $toRaw ? $toDate->format('M j, Y') : 'Any' }}</span></div>
+                    <input type="hidden" id="pub-date-to" class="lc-input" value="{{ $toRaw }}">
+                    <input type="hidden" class="lc-m" value="{{ $toDate->month - 1 }}">
+                </div>
+                <button onclick="pubResetFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">Reset</button>
             </div>
         </div>
 
         <div id="pub-fixtures-list" style="display:flex;flex-direction:column;gap:1rem;">
             @forelse($fixtures as $fixture)
                 @php
-                    $homeWin = $fixture->status === 'completed' && $fixture->home_score > $fixture->away_score;
-                    $awayWin = $fixture->status === 'completed' && $fixture->away_score > $fixture->home_score;
-                    $draw = $fixture->status === 'completed' && $fixture->home_score === $fixture->away_score;
+                    $hasScores = $fixture->home_score !== null && $fixture->away_score !== null;
+                    $homeWin = $fixture->status === 'completed' && $hasScores && $fixture->home_score > $fixture->away_score;
+                    $awayWin = $fixture->status === 'completed' && $hasScores && $fixture->away_score > $fixture->home_score;
+                    $draw = $fixture->status === 'completed' && $hasScores && (int) $fixture->home_score === (int) $fixture->away_score;
                 @endphp
                 <div class="pub-fixture-card pub-fixture-reveal"
                      data-status="{{ $fixture->status }}"
                      data-league="{{ $fixture->league_id }}"
                      data-home="{{ $fixture->home_team_id }}"
                      data-away="{{ $fixture->away_team_id }}"
+                     data-date="{{ $fixture->date->format('Y-m-d') }}"
                      style="background:var(--pin-white);border:2px solid var(--navy);border-radius:10px;padding:1.25rem 1.5rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;transition:transform 0.15s,box-shadow 0.15s;"
                      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-lg)'"
                      onmouseout="this.style.transform='';this.style.boxShadow=''">
@@ -105,7 +137,7 @@
                             {{ $fixture->homeTeam->name }}
                         </div>
                         <div style="font-family:var(--font-sub);font-size:0.7rem;color:var(--slate);">{{ $fixture->homeTeam->league->name }}</div>
-                        @if($fixture->status === 'completed')
+                        @if($fixture->status === 'completed' && $hasScores)
                             <div style="margin-top:0.35rem;">
                                 @if($homeWin)
                                     <span style="font-family:var(--font-mono);font-size:0.65rem;padding:2px 10px;background:var(--gold-light);color:var(--navy);border-radius:50px;border:1.5px solid var(--gold);">W</span>
@@ -115,13 +147,17 @@
                                     <span style="font-family:var(--font-mono);font-size:0.65rem;padding:2px 10px;background:var(--coral-light);color:var(--navy);border-radius:50px;border:1.5px solid var(--coral);">L</span>
                                 @endif
                             </div>
+                        @elseif($fixture->status === 'completed')
+                            <div style="margin-top:0.35rem;">
+                                <span style="font-family:var(--font-mono);font-size:0.65rem;padding:2px 10px;background:var(--mist);color:var(--slate);border-radius:50px;border:1.5px solid var(--slate);">&mdash;</span>
+                            </div>
                         @endif
                     </div>
 
                     <div style="text-align:center;min-width:120px;">
                         @if($fixture->status === 'completed')
                             <div style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--navy);line-height:1;">
-                                {{ $fixture->home_score }}&mdash;{{ $fixture->away_score }}
+                                {{ $fixture->home_score ?? '—' }}&mdash;{{ $fixture->away_score ?? '—' }}
                             </div>
                             <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate);margin-top:0.25rem;">Final</div>
                         @elseif($fixture->status === 'live')
@@ -251,6 +287,8 @@
         window.pubApplyFilters = function() {
             var leagueId = document.getElementById('pub-league-filter').value;
             var teamId = document.getElementById('pub-team-filter').value;
+            var dateFrom = document.getElementById('pub-date-from').value;
+            var dateTo = document.getElementById('pub-date-to').value;
             var cards = document.querySelectorAll('.pub-fixture-card');
 
             cards.forEach(function(card, i) {
@@ -259,10 +297,13 @@
                 var cardLeague = card.dataset.league;
                 var cardHome = card.dataset.home;
                 var cardAway = card.dataset.away;
+                var cardDate = card.dataset.date;
 
                 if (currentTab !== 'all' && cardStatus !== currentTab) show = false;
                 if (leagueId && cardLeague !== leagueId) show = false;
                 if (teamId && cardHome !== teamId && cardAway !== teamId) show = false;
+                if (dateFrom && cardDate < dateFrom) show = false;
+                if (dateTo && cardDate > dateTo) show = false;
 
                 card.style.display = show ? '' : 'none';
                 if (show) {
@@ -276,6 +317,26 @@
                 }
             });
         };
+
+        window.pubResetFilters = function() {
+            currentTab = 'all';
+            document.querySelectorAll('.pub-tab').forEach(function(t) { t.classList.remove('active'); });
+            var allTab = document.querySelector('.pub-tab[data-filter="all"]');
+            if (allTab) allTab.classList.add('active');
+            document.getElementById('pub-league-filter').value = '';
+            document.getElementById('pub-team-filter').value = '';
+            document.getElementById('pub-date-from').value = '';
+            document.getElementById('pub-date-to').value = '';
+            var fromLbl = document.querySelector('#pub-date-from-lc .lc-picked');
+            if (fromLbl) fromLbl.textContent = 'Any';
+            var toLbl = document.querySelector('#pub-date-to-lc .lc-picked');
+            if (toLbl) toLbl.textContent = 'Any';
+            pubApplyFilters();
+        };
+
+        document.querySelectorAll('.lc-grid').forEach(function(grid) {
+            grid.addEventListener('click', function() { pubApplyFilters(); });
+        });
 
         var reveals = document.querySelectorAll('.pub-fixture-reveal');
         if (reveals.length && 'IntersectionObserver' in window) {
@@ -326,5 +387,6 @@
     }
     </style>
 
+    @include('sim.partials.fold-controls')
 </body>
 </html>

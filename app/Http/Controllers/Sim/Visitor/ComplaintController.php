@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Sim\Visitor;
 use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use App\Models\Visitor;
+use App\Services\Simulation\VisitorRegistry;
 use Illuminate\Http\Request;
 
 class ComplaintController extends Controller
 {
     public function index(Request $request)
     {
-        $visitor = Visitor::where('user_id', $request->user()->id)->first();
+        $visitor = app(VisitorRegistry::class)->forUser($request->user());
 
         $complaints = $visitor
             ? Complaint::with('staff.user')->where('visitor_id', $visitor->id)->orderByDesc('created_at')->get()
@@ -22,7 +23,7 @@ class ComplaintController extends Controller
 
     public function store(Request $request)
     {
-        $visitor = Visitor::where('user_id', $request->user()->id)->first();
+        $visitor = app(VisitorRegistry::class)->forUser($request->user());
 
         if (! $visitor) {
             abort(403, 'No visitor profile linked to this account.');

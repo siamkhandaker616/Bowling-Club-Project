@@ -11,7 +11,7 @@
     </x-slot>
 
     @if ($staff && ! $staff->is_active)
-        <div style="zoom:1.25;margin:0.75rem 0;padding:0.75rem 1rem;border:2px solid var(--coral-dark);background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <div style="margin:0.75rem 0;padding:0.75rem 1rem;border:2px solid var(--coral-dark);background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
             <div>
                 <div style="font-family:var(--font-sub);font-size:0.75rem;color:var(--navy);font-weight:700;">You are no longer on the roster.</div>
                 <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Your employment ended with the club. You can reapply with a new identity.</div>
@@ -20,9 +20,12 @@
         </div>
     @endif
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:220px 1fr 180px;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
+
+        @include('sim.partials.steward-sidebar')
 
         <!-- LEFT: Today's Schedule -->
+        <div style="display:grid;grid-template-columns:220px 1fr 180px;gap:0;">
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label" style="margin-bottom:8px;">Today's Schedule</div>
             <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
@@ -116,10 +119,10 @@
                 <span class="badge-role steward" style="font-size:0.45rem;padding:2px 6px;">Steward</span>
             </div>
         </div>
+        </div>
 
     </div>
 
     <x-toast />
-
     @include('sim.partials.responsive')
 </x-app-layout>

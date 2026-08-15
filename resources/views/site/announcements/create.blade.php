@@ -53,25 +53,37 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
                 <div>
                     <label style="display:block;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-bottom:6px;">Priority</label>
-                    <select name="priority" required
+                    <select name="priority" required class="fold-select"
                         style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;box-sizing:border-box;">
                         <option value="normal" {{ old('priority') === 'normal' ? 'selected' : '' }}>Normal</option>
                         <option value="urgent" {{ old('priority') === 'urgent' ? 'selected' : '' }}>Urgent</option>
                     </select>
                 </div>
-                <div>
+                <div style="grid-column:1 / -1;">
                     <label style="display:block;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-bottom:6px;">Published At</label>
-                    <input type="datetime-local" name="published_at" value="{{ old('published_at', date('Y-m-d\TH:i')) }}"
-                        style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;box-sizing:border-box;">
+                    @php
+                        $pubVal = old('published_at', date('Y-m-d\TH:i'));
+                        $pubDate = \Carbon\Carbon::parse($pubVal);
+                    @endphp
+                    <div class="lc" id="published-at-lc" data-year="{{ $pubDate->year }}">
+                        <div class="lc-head">
+                            <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
+                            <div class="lc-mo"></div>
+                            <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                        </div>
+                        <div class="lc-frame"><div class="lc-grid"></div></div>
+                        <div class="lc-read"><span class="lc-key">Publish</span><span class="lc-picked" data-kept="1">{{ $pubDate->format('M j, Y g:i A') }}</span></div>
+                        <input type="hidden" name="published_at" class="lc-input" value="{{ $pubVal }}">
+                        <input type="hidden" class="lc-m" value="{{ $pubDate->month - 1 }}">
+                    </div>
                 </div>
             </div>
 
             <div style="margin-bottom:2rem;">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);">
-                    <input type="hidden" name="is_active" value="0">
-                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}
-                        style="width:18px;height:18px;accent-color:var(--navy);">
-                    Active (visible on ticker)
+                <input type="hidden" name="is_active" value="0">
+                <label class="pin-check" style="cursor:pointer;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);">
+                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}>
+                    <span class="pin-box"></span> Active (visible on ticker)
                 </label>
             </div>
 
@@ -82,5 +94,29 @@
         </form>
     </main>
     <x-toast />
+
+    @include('sim.partials.fold-controls')
+
+    <script>
+        (function () {
+            var lc = document.getElementById('published-at-lc');
+            if (!lc) return;
+            var hid = lc.querySelector('.lc-input');
+            var m = (hid.value || '').match(/T(\d{2}:\d{2})/);
+            var timePart = m ? m[1] : '';
+            var picked = lc.querySelector('.lc-picked');
+            lc.addEventListener('click', function (e) {
+                if (!e.target.classList.contains('lc-day')) return;
+                var v = hid.value;
+                if (v && timePart && v.indexOf('T') === -1) hid.value = v + 'T' + timePart;
+                if (picked) {
+                    var t = timePart ? timePart.split(':') : null;
+                    var hr = t ? +t[0] % 12 : 12, ap = t ? (+t[0] >= 12 ? 'PM' : 'AM') : '';
+                    var cur = picked.textContent;
+                    if (t && cur.indexOf(',') === -1) picked.textContent = cur + ', ' + (hr === 0 ? 12 : hr) + ':' + t[1] + ' ' + ap;
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
 use App\Models\FacilityZone;
+use App\Models\Lane;
 
 class FacilityMapController extends Controller
 {
@@ -21,6 +22,10 @@ class FacilityMapController extends Controller
                 'facilities' => $zone->facilities,
             ]);
 
-        return view('site.facility-map', compact('zones'));
+        $lanes = Lane::select('id', 'lane_number', 'status', 'oil_level', 'last_maintained_at')
+            ->orderBy('lane_number')
+            ->get();
+
+        return view('site.facility-map', compact('zones', 'lanes'));
     }
 }

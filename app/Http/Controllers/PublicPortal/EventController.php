@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PublicPortal;
 
 use App\Http\Controllers\Controller;
 use App\Mail\RsvpConfirmation;
+use App\Mail\RsvpReceipt;
 use App\Models\Club;
 use App\Models\Event;
 use App\Models\Rsvp;
@@ -66,7 +67,12 @@ class EventController extends Controller
                 }
             }
 
-            if ($locked->isFull()) {
+            $held = Rsvp::where('event_id', $locked->id)
+                ->where('status', 'pending')
+                ->whereHas('payment', fn ($q) => $q->whereIn('status', ['pending', 'processing']))
+                ->count();
+
+            if ($locked->current_rsvps + $held >= (int) $locked->max_capacity) {
                 return ['error' => 'This event is at full capacity.'];
             }
 
@@ -91,7 +97,6 @@ class EventController extends Controller
                 ]);
             } else {
                 $locked->increment('current_rsvps');
-                $this->notifySecretary($rsvp);
             }
 
             return ['rsvp' => $rsvp, 'paid' => $paid];
@@ -105,6 +110,9 @@ class EventController extends Controller
         $paid = $result['paid'];
 
         if (! $paid) {
+            $this->notifySecretary($rsvp);
+            Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
+
             return $this->rsvpResponse($request, $rsvp, null, "You're on the list! See you on the lanes.");
         }
 
@@ -118,6 +126,7 @@ class EventController extends Controller
             });
             $payment->markSuccessful($payment->transaction_id);
             $this->notifySecretary($rsvp);
+            Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
 
             return $this->rsvpResponse($request, $rsvp, $payment, 'Payment received — you\'re confirmed!');
         }
@@ -145,6 +154,10 @@ class EventController extends Controller
                 'status' => 'failed',
                 'error_message' => 'The payment gateway could not be reached. Please try again later.',
             ]);
+
+            if (! $rsvp->isConfirmed()) {
+                $rsvp->update(['status' => 'cancelled']);
+            }
 
             return $this->rsvpError($request, $event, 'The payment gateway could not be reached. Please try again later.');
         }

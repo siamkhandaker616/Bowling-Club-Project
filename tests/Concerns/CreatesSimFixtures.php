@@ -4,6 +4,7 @@ namespace Tests\Concerns;
 
 use App\Models\BookingQueue;
 use App\Models\ClubConfig;
+use App\Models\Inventory;
 use App\Models\Lane;
 use App\Models\LaneBooking;
 use App\Models\Personality;
@@ -86,6 +87,18 @@ trait CreatesSimFixtures
             'tier' => 'regular',
             'reputation_score' => 50,
             'is_banned' => false,
+        ], $attrs));
+    }
+
+    protected function makeInventory(array $attrs = []): Inventory
+    {
+        return Inventory::create(array_merge([
+            'name' => 'Item ' . uniqid(),
+            'category' => 'supplies',
+            'quantity' => 4,
+            'max_quantity' => 20,
+            'reorder_threshold' => 5,
+            'cost_per_unit' => 3,
         ], $attrs));
     }
 

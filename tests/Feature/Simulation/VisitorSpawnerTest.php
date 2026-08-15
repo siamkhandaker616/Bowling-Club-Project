@@ -146,4 +146,35 @@ class VisitorSpawnerTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $created);
         $this->assertLessThanOrEqual(2, $created);
     }
+
+    public function test_run_for_day_queues_visitors_when_every_lane_is_booked(): void
+    {
+        $this->clubConfig();
+
+        $laneIds = [];
+        foreach (range(1, 4) as $i) {
+            $laneIds[] = $this->makeLane()->id;
+        }
+
+        foreach (['morning', 'afternoon', 'evening'] as $slot) {
+            foreach ($laneIds as $laneId) {
+                $this->makeBooking(['lane_id' => $laneId, 'date' => Carbon::today()->addDay(), 'time_slot' => $slot, 'status' => 'confirmed']);
+            }
+        }
+
+        foreach (range(1, 8) as $i) {
+            $this->makeVisitor();
+        }
+
+        $log = $this->simLog();
+        $created = app(VisitorSpawner::class)->runForDay(Carbon::today()->addDay(), $log);
+
+        $this->assertGreaterThanOrEqual(0, $created);
+        $this->assertSame(0, LaneBooking::whereDate('date', Carbon::today()->addDay())->whereNull('lane_id')->count());
+
+        foreach (LaneBooking::whereDate('date', Carbon::today()->addDay())->where('status', 'pending')->get() as $booking) {
+            $this->assertNotNull($booking->lane_id);
+            $this->assertTrue(BookingQueue::where('booking_id', $booking->id)->where('status', 'waiting')->exists());
+        }
+    }
 }

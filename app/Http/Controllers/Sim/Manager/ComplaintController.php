@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Sim\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accident;
+use App\Models\BookingQueue;
 use App\Models\ClubConfig;
 use App\Models\Complaint;
+use App\Models\LaneBooking;
 use App\Models\Visitor;
 use App\Models\VisitorReview;
+use App\Services\Simulation\Clock;
 use Illuminate\Http\Request;
 
 class ComplaintController extends Controller
@@ -44,9 +47,75 @@ class ComplaintController extends Controller
             'resolved_at' => now(),
         ]);
 
+        $this->applyCompensation($complaint, $data['compensation_type'] ?? null);
+
         session()->flash('success', 'Complaint #' . $complaint->id . ' resolved' . ($matched->isNotEmpty() ? ' — matched ' . $matched->count() . ' accident(s) in the log.' : '') . '.');
 
         return redirect()->route('manager.complaints.index');
+    }
+
+    private function applyCompensation(Complaint $complaint, ?string $type): void
+    {
+        if ($type === 'free_game') {
+            $booking = LaneBooking::where('visitor_id', $complaint->visitor_id)
+                ->whereIn('status', ['confirmed', 'pending'])
+                ->where('date', '>=', Clock::date()->toDateString())
+                ->orderBy('date')
+                ->orderBy('id')
+                ->first();
+
+            if ($booking) {
+                $booking->compensation_claimed = true;
+                $booking->compensation_type = 'free_game';
+                $booking->save();
+            }
+
+            return;
+        }
+
+        if ($type === 'priority_queue') {
+            $booking = LaneBooking::where('visitor_id', $complaint->visitor_id)
+                ->where('status', 'pending')
+                ->where('date', '>=', Clock::date()->toDateString())
+                ->orderBy('date')
+                ->orderBy('id')
+                ->first();
+
+            if (! $booking) {
+                return;
+            }
+
+            $entry = BookingQueue::where('booking_id', $booking->id)->first();
+
+            if (! $entry) {
+                BookingQueue::create([
+                    'booking_id' => $booking->id,
+                    'visitor_id' => $booking->visitor_id,
+                    'lane_id' => $booking->lane_id,
+                    'date' => $booking->date,
+                    'time_slot' => $booking->time_slot,
+                    'position' => 0,
+                    'status' => 'waiting',
+                ]);
+
+                $booking->queue_position = 0;
+                $booking->save();
+
+                return;
+            }
+
+            BookingQueue::whereDate('date', $entry->date)
+                ->where('time_slot', $entry->time_slot)
+                ->where('status', 'waiting')
+                ->where('id', '!=', $entry->id)
+                ->increment('position');
+
+            $entry->position = 0;
+            $entry->save();
+
+            $booking->queue_position = 0;
+            $booking->save();
+        }
     }
 
     public function dismiss(Request $request, Complaint $complaint)

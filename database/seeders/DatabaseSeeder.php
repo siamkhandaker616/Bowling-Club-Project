@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
             SiteContentSeeder::class,
             PortalContentSeeder::class,
             EventContentSeeder::class,
+            ProShopSeeder::class,
+            SnackbarSeeder::class,
+            BowlingScoreSeeder::class,
         ]);
     }
 
@@ -84,27 +87,32 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($accounts as $data) {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'role' => $data['role'],
-                'email_verified_at' => now(),
-                'is_npc' => false,
-            ]);
+            $user = User::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => Hash::make($data['password']),
+                    'role' => $data['role'],
+                    'email_verified_at' => now(),
+                    'is_npc' => false,
+                    'is_active' => true,
+                ]
+            );
 
             if (in_array($data['role'], ['admin', 'steward', 'caretaker'])) {
-                Staff::create([
-                    'user_id' => $user->id,
-                    'role' => $data['role'] === 'admin' ? 'club_manager' : $data['role'],
-                    'base_salary' => $data['role'] === 'admin' ? 5000 : ($data['role'] === 'steward' ? 3500 : 2500),
-                    'current_salary' => $data['role'] === 'admin' ? 5000 : ($data['role'] === 'steward' ? 3500 : 2500),
-                    'happiness' => 85,
-                    'performance_score' => 75,
-                    'honesty_score' => 80,
-                    'hire_date' => Carbon::now()->subMonths(6),
-                    'is_active' => true,
-                ]);
+                Staff::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'role' => $data['role'] === 'admin' ? 'club_manager' : $data['role'],
+                        'base_salary' => $data['role'] === 'admin' ? 5000 : ($data['role'] === 'steward' ? 3500 : 2500),
+                        'current_salary' => $data['role'] === 'admin' ? 5000 : ($data['role'] === 'steward' ? 3500 : 2500),
+                        'happiness' => 85,
+                        'performance_score' => 75,
+                        'honesty_score' => 80,
+                        'hire_date' => Carbon::now()->subMonths(6),
+                        'is_active' => true,
+                    ]
+                );
             }
         }
     }

@@ -19,7 +19,9 @@ class BookingPrefillTest extends TestCase
         $this->actingAs($user)
             ->get(route('visitor.bookings.create', ['lane' => $lane->lane_number]))
             ->assertOk()
-            ->assertSee('value="' . $lane->id . '" selected', false);
+            ->assertSee('name="lane_id" value="' . $lane->id . '"', false)
+            ->assertSee('data-v="' . $lane->id . '"', false)
+            ->assertSee('br-lane on', false);
     }
 
     public function test_unknown_lane_query_param_is_ignored(): void
@@ -31,7 +33,7 @@ class BookingPrefillTest extends TestCase
         $this->actingAs($user)
             ->get(route('visitor.bookings.create', ['lane' => 999]))
             ->assertOk()
-            ->assertDontSee('value="1" selected', false);
+            ->assertSee('name="lane_id" value=""', false);
     }
 
     public function test_no_lane_query_param_loads_plain_form(): void
@@ -43,6 +45,7 @@ class BookingPrefillTest extends TestCase
         $this->actingAs($user)
             ->get(route('visitor.bookings.create'))
             ->assertOk()
-            ->assertDontSee('value="' . $lane->id . '" selected', false);
+            ->assertSee('name="lane_id" value=""', false)
+            ->assertDontSee('br-lane on', false);
     }
 }

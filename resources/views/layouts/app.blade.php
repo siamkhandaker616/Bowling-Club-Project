@@ -12,19 +12,19 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body style="min-height: 100vh;">
+    <body style="min-height: 100vh; background: var(--sky);">
         <div style="min-height: 100vh;">
             @include('layouts.navigation')
 
             @isset($header)
                 <header style="background: var(--pin-white); border-bottom: 3px solid var(--navy); box-shadow: var(--shadow-sm);">
-                    <div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem;">
+                    <div class="wrap" style="padding-top: 1.2rem; padding-bottom: 1.2rem;">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
-            <main style="max-width: {{ isset($fullWidth) ? 'none' : '1200px' }}; margin: 0 auto; padding: {{ isset($fullWidth) ? '0' : '2rem' }};">
+            <main style="{{ isset($fullWidth) ? 'padding:0;' : 'max-width:1200px;margin:0 auto;padding:2rem;' }}">
                 {{ $slot }}
             </main>
         </div>

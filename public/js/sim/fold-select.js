@@ -1,0 +1,368 @@
+(function () {
+    'use strict';
+
+    /* Oil Alley fold-select — adapted from Assignment 3 custom-select.js.
+     * Non-lane <select class="fold-select"> get the paper-fold dropdown while the
+     * native select stays in the DOM (hidden) so the form payload is untouched.
+     * The trigger keeps the current styled shape of the native select.
+     */
+
+    function el(sel, root) { return (root || document).querySelector(sel); }
+    function els(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+    function copyGeometry(from, to) {
+        ['width', 'maxWidth', 'minWidth', 'margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom'].forEach(function (p) {
+            if (from.style[p]) to.style[p] = from.style[p];
+        });
+    }
+
+    function createCustomSelect(selectEl) {
+        if (selectEl._foldSelect) return;
+        selectEl._foldSelect = true;
+
+        var wrap = document.createElement('div');
+        wrap.className = 'custom-select-wrap';
+        copyGeometry(selectEl, wrap);
+
+        var trigger = document.createElement('div');
+        trigger.className = 'custom-select-trigger';
+        trigger.tabIndex = 0;
+
+        var inner = document.createElement('div');
+        inner.className = 'custom-select-trigger-inner';
+
+        var textSpan = document.createElement('span');
+        textSpan.className = 'label';
+        inner.appendChild(textSpan);
+
+        var arrow = document.createElement('span');
+        arrow.className = 'arrow';
+        inner.appendChild(arrow);
+
+        var dropdown = document.createElement('div');
+        dropdown.className = 'custom-select-dropdown';
+
+        var opts = selectEl.options;
+        var optEls = [];
+        var animating = false;
+        var foldTimeouts = [];
+        var isOpen = false;
+
+        function animateRotate(el, fromDeg, toDeg, duration, onDone) {
+            var startTime = performance.now();
+            function step(now) {
+                var elapsed = now - startTime;
+                var t = Math.min(elapsed / duration, 1);
+                var eased = 1 - Math.pow(1 - t, 3);
+                el.style.transform = 'rotateX(' + (fromDeg + (toDeg - fromDeg) * eased) + 'deg)';
+                if (t < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.style.transform = 'rotateX(' + toDeg + 'deg)';
+                    if (onDone) onDone();
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function buildOptions() {
+            dropdown.innerHTML = '';
+            optEls = [];
+            for (var i = 0; i < opts.length; i++) {
+                (function (idx) {
+                    var panel = document.createElement('div');
+                    panel.className = 'fold-panel';
+
+                    var paper = document.createElement('div');
+                    paper.className = 'fold-paper';
+                    paper.style.transform = 'rotateX(92deg)';
+
+                    var div = document.createElement('div');
+                    div.className = 'custom-select-option';
+                    div.dataset.value = opts[idx].value;
+
+                    var l = document.createElement('span');
+                    l.textContent = opts[idx].text;
+                    div.appendChild(l);
+
+                    div.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        selectOption(idx);
+                        closeDropdown();
+                        trigger.focus();
+                    });
+
+                    paper.appendChild(div);
+                    panel.appendChild(paper);
+                    dropdown.appendChild(panel);
+                    optEls.push(div);
+                })(i);
+            }
+        }
+
+        buildOptions();
+
+        selectEl.parentNode.insertBefore(wrap, selectEl);
+        if (selectEl.id) wrap.setAttribute('data-for', selectEl.id);
+        wrap.appendChild(selectEl);
+        wrap.appendChild(trigger);
+        trigger.appendChild(inner);
+        wrap.appendChild(dropdown);
+
+        selectEl.style.position = 'absolute';
+        selectEl.style.opacity = '0';
+        selectEl.style.pointerEvents = 'none';
+        selectEl.style.width = '1px';
+        selectEl.style.height = '1px';
+        selectEl.style.overflow = 'hidden';
+        selectEl.tabIndex = -1;
+
+        var selectedIdx = selectEl.selectedIndex;
+        if (selectedIdx < 0) selectedIdx = 0;
+        textSpan.textContent = opts[selectedIdx] ? opts[selectedIdx].text : '';
+        if (optEls[selectedIdx]) optEls[selectedIdx].classList.add('selected');
+
+        function selectOption(idx) {
+            if (idx < 0 || idx >= opts.length) return;
+            optEls.forEach(function (el, j) {
+                el.classList.toggle('selected', j === idx);
+            });
+            selectedIdx = idx;
+            textSpan.textContent = opts[idx].text;
+            selectEl.selectedIndex = idx;
+            selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function syncFromNative() {
+            var idx = selectEl.selectedIndex;
+            if (idx < 0) idx = 0;
+            selectedIdx = idx;
+            textSpan.textContent = opts[idx] ? opts[idx].text : '';
+            optEls.forEach(function (el, j) {
+                el.classList.toggle('selected', j === idx);
+            });
+        }
+
+        function measurePanelHeights() {
+            var panels = dropdown.querySelectorAll('.fold-panel');
+            var heights = [];
+            dropdown.style.overflow = 'visible';
+            panels.forEach(function (p) {
+                var paper = p.querySelector('.fold-paper');
+                paper.style.position = 'relative';
+                paper.style.transform = 'none';
+                p.style.height = 'auto';
+                p.style.overflow = 'visible';
+                heights.push(p.scrollHeight);
+                p.style.height = '';
+                p.style.overflow = '';
+                paper.style.position = '';
+                paper.style.transform = '';
+            });
+            dropdown.style.overflow = '';
+            return heights;
+        }
+
+        function openDropdown() {
+            if (isOpen || animating) return;
+            animating = true;
+            syncFromNative();
+
+            trigger.classList.add('open');
+            dropdown.classList.add('open');
+            dropdown.style.clipPath = 'inset(0 0 100% 0)';
+
+            var panels = dropdown.querySelectorAll('.fold-panel');
+
+            panels.forEach(function (p) {
+                p.style.height = '0';
+                p.style.overflow = 'hidden';
+                var paper = p.querySelector('.fold-paper');
+                paper.style.transform = 'rotateX(92deg)';
+                paper.style.position = '';
+            });
+
+            var heights = measurePanelHeights();
+
+            panels.forEach(function (p, i) {
+                p.style.height = heights[i] + 'px';
+                p.style.overflow = 'hidden';
+                var paper = p.querySelector('.fold-paper');
+                paper.style.position = 'absolute';
+                paper.style.transform = 'rotateX(92deg)';
+            });
+
+            var revealStart = performance.now();
+
+            function revealStep(now) {
+                if (!animating) return;
+                var elapsed = now - revealStart;
+                var t = Math.min(elapsed / 170, 1);
+                var eased = 1 - Math.pow(1 - t, 3);
+                dropdown.style.clipPath = 'inset(0 0 ' + (100 * (1 - eased)) + '% 0)';
+                if (t < 1) {
+                    requestAnimationFrame(revealStep);
+                } else {
+                    dropdown.style.clipPath = 'none';
+                    dropdown.style.overflowY = 'auto';
+
+                    var completed = 0;
+                    var total = panels.length;
+
+                    Array.prototype.forEach.call(panels, function (p, i) {
+                        var paper = p.querySelector('.fold-paper');
+                        var delay = 80 + i * 110;
+                        var t2 = setTimeout(function () {
+                            p.classList.add('folding');
+                            animateRotate(paper, 92, 0, 340, function () {
+                                paper.classList.add('unfolded');
+                                p.classList.remove('folding');
+                                completed++;
+                                if (completed === total) {
+                                    isOpen = true;
+                                    animating = false;
+                                    setTimeout(function () { dropdown.classList.add('borders-visible'); }, 80);
+                                    if (optEls[selectedIdx]) {
+                                        optEls[selectedIdx].scrollIntoView({ block: 'nearest' });
+                                    }
+                                }
+                            });
+                        }, delay);
+                        foldTimeouts.push(t2);
+                    });
+                }
+            }
+            requestAnimationFrame(revealStep);
+        }
+
+        function abortOpen() {
+            dropdown.classList.remove('borders-visible');
+            foldTimeouts.forEach(function (t) { clearTimeout(t); });
+            foldTimeouts = [];
+            var panels = dropdown.querySelectorAll('.fold-panel');
+            panels.forEach(function (p) {
+                var paper = p.querySelector('.fold-paper');
+                paper.classList.remove('unfolded');
+                paper.style.transform = 'rotateX(92deg)';
+                paper.style.position = 'absolute';
+                p.classList.remove('folding');
+            });
+            dropdown.style.overflow = 'hidden';
+            dropdown.style.clipPath = 'inset(0 0 100% 0)';
+            trigger.classList.remove('open');
+            dropdown.classList.remove('open');
+            dropdown.style.overflowY = '';
+            isOpen = false;
+            animating = false;
+        }
+
+        function closeDropdown() {
+            if (!isOpen && !animating) return;
+            if (animating) { if (!isOpen) abortOpen(); return; }
+            dropdown.classList.remove('borders-visible');
+
+            animating = true;
+
+            foldTimeouts.forEach(function (t) { clearTimeout(t); });
+            foldTimeouts = [];
+
+            var panels = dropdown.querySelectorAll('.fold-panel');
+            var panelArr = Array.prototype.slice.call(panels);
+            var total = panelArr.length;
+            var completed = 0;
+
+            panelArr.reverse().forEach(function (p, ri) {
+                var paper = p.querySelector('.fold-paper');
+                var delay = ri * 85;
+                var t = setTimeout(function () {
+                    p.classList.add('folding');
+                    paper.classList.remove('unfolded');
+                    animateRotate(paper, 0, 92, 270, function () {
+                        p.classList.remove('folding');
+                        completed++;
+                        if (completed === total) {
+                            dropdown.style.overflow = 'hidden';
+                            var foldStart = performance.now();
+
+                            function foldStep(now) {
+                                if (!animating) return;
+                                var elapsed = now - foldStart;
+                                var t2 = Math.min(elapsed / 150, 1);
+                                var eased = 1 - Math.pow(1 - t2, 3);
+                                dropdown.style.clipPath = 'inset(0 0 ' + (100 * eased) + '% 0)';
+                                if (t2 < 1) {
+                                    requestAnimationFrame(foldStep);
+                                } else {
+                                    dropdown.style.clipPath = 'inset(0 0 100% 0)';
+                                    trigger.classList.remove('open');
+                                    dropdown.classList.remove('open');
+                                    dropdown.style.overflowY = '';
+                                    isOpen = false;
+                                    animating = false;
+                                }
+                            }
+                            requestAnimationFrame(foldStep);
+                        }
+                    });
+                }, delay);
+                foldTimeouts.push(t);
+            });
+        }
+
+        function toggleDropdown() {
+            if (isOpen) closeDropdown();
+            else openDropdown();
+        }
+
+        dropdown._close = closeDropdown;
+
+        trigger.addEventListener('click', toggleDropdown);
+
+        trigger.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleDropdown();
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+                trigger.focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!isOpen) { openDropdown(); return; }
+                var next = Math.min(selectedIdx + 1, opts.length - 1);
+                selectOption(next);
+                if (optEls[next]) optEls[next].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!isOpen) { openDropdown(); return; }
+                var prev = Math.max(selectedIdx - 1, 0);
+                selectOption(prev);
+                if (optEls[prev]) optEls[prev].scrollIntoView({ block: 'nearest' });
+            }
+        });
+    }
+
+    function init(root) {
+        root = root || document;
+        els('select.fold-select', root).forEach(createCustomSelect);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { init(document); });
+    } else {
+        init(document);
+    }
+
+    document.addEventListener('click', function (e) {
+        var wraps = document.querySelectorAll('.custom-select-wrap');
+        for (var w = 0; w < wraps.length; w++) {
+            var trig = wraps[w].querySelector('.custom-select-trigger');
+            if (trig && trig.classList.contains('open') && !wraps[w].contains(e.target)) {
+                var dd = wraps[w].querySelector('.custom-select-dropdown');
+                if (dd && dd._close) dd._close();
+            }
+        }
+    });
+
+    window.initFoldSelects = init;
+})();

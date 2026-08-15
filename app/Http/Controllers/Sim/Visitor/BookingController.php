@@ -8,6 +8,7 @@ use App\Models\Lane;
 use App\Models\LaneBooking;
 use App\Models\Visitor;
 use App\Services\Simulation\Clock;
+use App\Services\Simulation\VisitorRegistry;
 use App\Services\Simulation\VisitorSpawner;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -145,6 +146,6 @@ class BookingController extends Controller
 
     private function visitor($user): ?Visitor
     {
-        return Visitor::where('user_id', $user->id)->first();
+        return app(VisitorRegistry::class)->forUser($user);
     }
 }

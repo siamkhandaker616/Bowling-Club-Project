@@ -33,7 +33,7 @@
         $cards = $hubs[$role] ?? [];
     @endphp
 
-    <div style="zoom:1.25;padding:1.25rem;">
+    <div style="padding:1.25rem;">
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
             @forelse ($cards as $card)
                 <a href="{{ route($card['route']) }}" style="text-decoration:none;">

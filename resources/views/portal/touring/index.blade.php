@@ -18,11 +18,11 @@
             <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
         </a>
         <nav style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-            <a href="/" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Home</a>
-            <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Fixtures</a>
-            <a href="{{ route('public.stats') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Stats</a>
-            <a href="{{ route('public.events') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Events</a>
-            <a href="{{ route('public.touring') }}" style="font-family:var(--font-sub);color:var(--gold);text-decoration:none;font-weight:600;">Touring</a>
+            <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
+            <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+            <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
+            <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
+            <a href="{{ route('public.touring') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
             @if (Route::has('login'))
                 @auth
                     <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
@@ -68,16 +68,33 @@
                         @error('home_club')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
                     </div>
 
+                    <div>
+                        <label for="contact_email" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Team Contact Email *</label>
+                        <input id="contact_email" name="contact_email" type="email" value="{{ old('contact_email') }}" required maxlength="190" placeholder="e.g. captain@thunderrollers.com"
+                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
+                        @error('contact_email')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    </div>
+
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div>
-                            <label for="arrival_date" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Arrival Date *</label>
-                            <input id="arrival_date" name="arrival_date" type="date" value="{{ old('arrival_date') }}" required
-                                   style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;background:var(--cloud);color:var(--navy);outline:none;">
-                            @error('arrival_date')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    <div>
+                        <label for="arrival_date" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Arrival Date *</label>
+                        @php($touringDate = old('arrival_date') ? \Carbon\Carbon::parse(old('arrival_date')) : now())
+                        <div class="lc" data-year="{{ $touringDate->year }}">
+                            <div class="lc-head">
+                                <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
+                                <div class="lc-mo"></div>
+                                <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                            </div>
+                            <div class="lc-frame"><div class="lc-grid"></div></div>
+                            <div class="lc-read"><span class="lc-key">Date</span><span class="lc-picked" data-kept="1">{{ $touringDate->format('F j, Y') }}</span></div>
+                            <input type="hidden" name="arrival_date" class="lc-input" value="{{ $touringDate->toDateString() }}">
+                            <input type="hidden" class="lc-m" value="{{ $touringDate->month - 1 }}">
                         </div>
+                        @error('arrival_date')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    </div>
                         <div>
                             <label for="player_count" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Player Count *</label>
-                            <input id="player_count" name="player_count" type="number" min="1" max="24" value="{{ old('player_count', 5) }}" required
+                            <input id="player_count" name="player_count" type="number" min="1" max="24" value="{{ old('player_count', 5) }}" required data-stepper="edit"
                                    style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;background:var(--cloud);color:var(--navy);outline:none;">
                             @error('player_count')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
                         </div>
@@ -146,5 +163,6 @@
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
 </body>
 </html>

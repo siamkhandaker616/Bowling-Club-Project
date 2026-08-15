@@ -7,7 +7,7 @@
         </div>
     </x-slot>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
         <div class="dash-sidebar">
             <div class="dash-section-label" style="margin-bottom:4px;">You were let go</div>
             <div style="font-family:var(--font-body);font-size:0.7rem;line-height:1.5;color:var(--slate);padding:0 0.25rem;">
@@ -36,7 +36,7 @@
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">New Role</label>
-                        <select name="role" required class="con-input" style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                        <select name="role" required class="con-input fold-select" style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             <option value="caretaker" @selected(old('role') === 'caretaker')>Caretaker</option>
                             <option value="steward" @selected(old('role') === 'steward')>Steward</option>
                         </select>
@@ -52,5 +52,6 @@
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

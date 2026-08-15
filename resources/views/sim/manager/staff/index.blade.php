@@ -14,24 +14,8 @@
         .sim-happy > div{height:100%;border-radius:4px;}
     </style>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
-        <div class="dash-sidebar">
-            <div class="dash-section-label" style="margin-bottom:4px;">Modules</div>
-            <a href="{{ route('manager.dashboard') }}" class="dash-sidebar-link">Overview</a>
-            <a href="{{ route('manager.staff.index') }}" class="dash-sidebar-link active">Staff</a>
-            <a href="{{ route('manager.inventory.index') }}" class="dash-sidebar-link">Inventory</a>
-            <a href="{{ route('manager.bookings.index') }}" class="dash-sidebar-link">Bookings</a>
-            <a href="{{ route('manager.bans.index') }}" class="dash-sidebar-link">Bans</a>
-            <a href="{{ route('manager.complaints.index') }}" class="dash-sidebar-link">Complaints</a>
-            <a href="{{ route('manager.confrontations.index') }}" class="dash-sidebar-link">Confrontations</a>
-            <a href="{{ route('manager.reviews.index') }}" class="dash-sidebar-link">Reviews</a>
-            <a href="{{ route('manager.touring.index') }}" class="dash-sidebar-link">Touring</a>
-            <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-navy" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px;">{{ ucfirst(Auth::user()->name) }}</div>
-                <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px;">Manager</span>
-            </div>
-        </div>
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
+        @include('sim.partials.module-dock')
         <div style="padding:1.25rem;overflow:hidden;">
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;">
                 <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:10px;text-align:center;">
@@ -54,7 +38,7 @@
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                 <div class="dash-section-label" style="margin:0;">Active Roster</div>
-                <a href="{{ route('manager.staff.create') }}" class="btn-lane primary" style="font-size:0.6rem;padding:5px 14px;">+ Hire Staff</a>
+                <button type="button" onclick="openHireModal()" class="btn-lane primary" style="font-size:0.75rem;font-weight:700;padding:6px 18px;">+ Hire Staff</button>
             </div>
 
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
@@ -95,7 +79,94 @@
         </div>
     </div>
 
+    <div class="modal-back" id="hireModal">
+        <div class="modal">
+            <div class="modal-top">Hire Staff <button type="button" onclick="closeHireModal()">&times;</button></div>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('manager.staff.store') }}" id="hireForm" novalidate class="gutter-form" style="display:flex;flex-direction:column;gap:12px;">
+                    @csrf
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="gutter-field">
+                            <label class="label" for="hm-name">Full name <span class="req">*</span></label>
+                            <div class="inp-wrap">
+                                <input class="input{{ $errors->has('name') ? ' bad' : '' }}" id="hm-name" name="name" type="text" required value="{{ old('name') }}">
+                                <span class="gutter-flag">&#10003;</span>
+                            </div>
+                            <div class="gutter-err">@error('name'){{ $message }}@else Name is required @enderror</div>
+                        </div>
+                        <div class="gutter-field">
+                            <label class="label" for="hm-email">Email <span class="req">*</span></label>
+                            <div class="inp-wrap">
+                                <input class="input{{ $errors->has('email') ? ' bad' : '' }}" id="hm-email" name="email" type="email" required value="{{ old('email') }}">
+                                <span class="gutter-flag">&#10003;</span>
+                            </div>
+                            <div class="gutter-err">@error('email'){{ $message }}@else Email is required @enderror</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="gutter-field">
+                            <label class="label" for="hm-role">Role <span class="req">*</span></label>
+                            <div class="inp-wrap">
+                                <select class="input fold-select" id="hm-role" name="role">
+                                    <option value="caretaker">Caretaker</option>
+                                    <option value="steward">Steward</option>
+                                </select>
+                                <span class="gutter-flag">&#10003;</span>
+                            </div>
+                        </div>
+                        <div class="gutter-field">
+                            <label class="label" for="hm-salary">Monthly salary ($) <span class="req">*</span></label>
+                            <div class="inp-wrap">
+                                <input class="input{{ $errors->has('base_salary') ? ' bad' : '' }}" id="hm-salary" name="base_salary" type="number" step="0.01" min="0" required data-stepper="edit" value="{{ old('base_salary', 2500) }}">
+                                <span class="gutter-flag">&#10003;</span>
+                            </div>
+                            <div class="gutter-err">@error('base_salary'){{ $message }}@else Salary is required @enderror</div>
+                        </div>
+                    </div>
+                    <div class="lane-stage">
+                        <div class="pin-rack">
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span></div>
+                        </div>
+                        <span class="ball-dot"></span>
+                    </div>
+                    <button type="submit" class="submit" style="background:var(--gold);color:var(--navy);border-color:var(--navy);">Hire &rarr;</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var modal = document.getElementById('hireModal');
+        var form = document.getElementById('hireForm');
+        if (!modal || !form) return;
+
+        window.openHireModal = function () { modal.classList.add('open'); };
+        window.closeHireModal = function () { modal.classList.remove('open'); };
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') modal.classList.remove('open');
+        });
+
+        form.addEventListener('submit', function () {
+            if (!form.checkValidity()) return;
+            window.closeHireModal();
+        });
+
+        @if($errors->has('name') || $errors->has('email') || $errors->has('base_salary'))
+        modal.classList.add('open');
+        @endif
+    })();
+    </script>
+
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

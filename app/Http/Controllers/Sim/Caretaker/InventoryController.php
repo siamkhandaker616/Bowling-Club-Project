@@ -23,6 +23,11 @@ class InventoryController extends Controller
 
     public function adjust(Request $request, Inventory $inventory)
     {
+        $staff = $request->user()->staff;
+        if (! $staff || ! $staff->is_active) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'change' => ['required', 'integer', 'between:-9999,9999'],
             'reason' => ['nullable', 'string', 'max:500'],
@@ -33,10 +38,26 @@ class InventoryController extends Controller
             $data['change'],
             $data['change'] > 0 ? 'restock' : 'usage',
             $data['reason'] ?? 'Caretaker adjustment',
-            $request->user()->staff->id,
+            $staff->id,
         );
 
-        session()->flash('success', $inventory->name . ' adjusted by ' . $data['change'] . '.');
+        session()->flash('success', $inventory->name . ' adjusted by ' . $data['change'] . '. Now at ' . $inventory->quantity . '.');
+
+        return redirect()->route('caretaker.inventory.index');
+    }
+
+    public function restock(Request $request, Inventory $inventory)
+    {
+        $staff = $request->user()->staff;
+        if (! $staff || ! $staff->is_active) {
+            abort(403);
+        }
+
+        $before = $inventory->quantity;
+
+        $this->service->restock($inventory, $staff->id);
+
+        session()->flash('success', $inventory->name . ' restocked to max (' . $before . ' -> ' . $inventory->quantity . ').');
 
         return redirect()->route('caretaker.inventory.index');
     }

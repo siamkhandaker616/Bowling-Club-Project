@@ -7,7 +7,11 @@
         </div>
     </x-slot>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:180px 1fr 220px;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
+
+        @include('sim.partials.module-dock')
+
+        <div style="display:grid;grid-template-columns:180px 1fr 220px;gap:0;">
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label">Shift Context</div>
             <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
@@ -88,6 +92,7 @@
                 <span class="dash-stat-label">Pending</span>
             </div>
         </div>
+    </div>
     </div>
 
     <x-toast />

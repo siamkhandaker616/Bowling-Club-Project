@@ -28,31 +28,52 @@ class VisitorSpawner
             $slot = $slots[array_rand($slots)];
             $lane = $this->pickFreeLane($date, $slot);
 
-            $booking = LaneBooking::create([
-                'visitor_id' => $visitor->id,
-                'lane_id' => $lane ? $lane->id : null,
-                'date' => $date,
-                'time_slot' => $slot,
-                'status' => $lane ? 'confirmed' : 'pending',
-                'queue_position' => $lane ? null : BookingQueue::whereDate('date', $date)->max('position') + 1,
-            ]);
-
-            if (! $lane) {
-                BookingQueue::create([
-                    'booking_id' => $booking->id,
+            if ($lane) {
+                LaneBooking::create([
                     'visitor_id' => $visitor->id,
-                    'lane_id' => $this->queuedLaneId($date, $slot),
+                    'lane_id' => $lane->id,
                     'date' => $date,
                     'time_slot' => $slot,
-                    'position' => $booking->queue_position,
-                    'status' => 'waiting',
+                    'status' => 'confirmed',
                 ]);
+            } else {
+                $this->queueVisitor($visitor, $date, $slot);
             }
 
             $created++;
         }
 
         return $created;
+    }
+
+    private function queueVisitor(Visitor $visitor, Carbon $date, string $slot): void
+    {
+        $targetLane = Lane::orderBy('id')->first();
+
+        if (! $targetLane) {
+            return;
+        }
+
+        $position = (BookingQueue::whereDate('date', $date)->max('position') ?? 0) + 1;
+
+        $booking = LaneBooking::create([
+            'visitor_id' => $visitor->id,
+            'lane_id' => $targetLane->id,
+            'date' => $date,
+            'time_slot' => $slot,
+            'status' => 'pending',
+            'queue_position' => $position,
+        ]);
+
+        BookingQueue::create([
+            'booking_id' => $booking->id,
+            'visitor_id' => $visitor->id,
+            'lane_id' => $targetLane->id,
+            'date' => $date,
+            'time_slot' => $slot,
+            'position' => $position,
+            'status' => 'waiting',
+        ]);
     }
 
     public function pickFreeLane(Carbon $date, string $slot): ?Lane
@@ -93,9 +114,12 @@ class VisitorSpawner
     public function promoteQueues(Carbon $date, array &$log): void
     {
         $queues = BookingQueue::with('booking')
-            ->whereDate('date', $date)
-            ->where('status', 'waiting')
-            ->orderBy('position')
+            ->leftJoin('visitors', 'booking_queues.visitor_id', '=', 'visitors.id')
+            ->whereDate('booking_queues.date', $date)
+            ->where('booking_queues.status', 'waiting')
+            ->orderByDesc('visitors.reputation_score')
+            ->orderBy('booking_queues.position')
+            ->select('booking_queues.*')
             ->get();
 
         foreach ($queues as $entry) {
@@ -123,19 +147,5 @@ class VisitorSpawner
 
             $log['queues_promoted'] = ($log['queues_promoted'] ?? 0) + 1;
         }
-    }
-
-    private function queuedLaneId(Carbon $date, string $slot): int
-    {
-        $busy = LaneBooking::whereDate('date', $date)
-            ->where('time_slot', $slot)
-            ->where('status', 'confirmed')
-            ->pluck('lane_id')
-            ->countBy()
-            ->all();
-
-        $lane = Lane::orderBy('id')->get(['id'])->sortBy(fn ($lane) => $busy[$lane->id] ?? 0)->first();
-
-        return $lane->id;
     }
 }

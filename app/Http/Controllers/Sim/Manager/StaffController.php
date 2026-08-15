@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
 {
+    private const CONTRADICTIONS = [
+        'honest' => ['opportunistic'],
+        'overtly_friendly' => ['rude', 'creepy'],
+        'nerd' => ['stoner'],
+    ];
+
     public function index()
     {
         $staff = Staff::with('user', 'personalities')
@@ -35,11 +41,38 @@ class StaffController extends Controller
         return view('sim.manager.staff.index', compact('staff', 'counts'));
     }
 
-    public function create()
+    private function assignPersonalities(): array
     {
-        $personalities = Personality::all();
+        $names = Personality::pluck('name')->all();
+        $target = mt_rand(2, 4);
 
-        return view('sim.manager.staff.create', compact('personalities'));
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            shuffle($names);
+
+            $picked = [];
+            foreach ($names as $name) {
+                if (count($picked) >= $target) {
+                    break;
+                }
+
+                $conflicts = [];
+                foreach ($picked as $have) {
+                    $conflicts = array_merge($conflicts, self::CONTRADICTIONS[$have] ?? []);
+                }
+
+                if (in_array($name, $conflicts, true) || array_intersect($picked, self::CONTRADICTIONS[$name] ?? [])) {
+                    continue;
+                }
+
+                $picked[] = $name;
+            }
+
+            if (count($picked) === $target) {
+                return $picked;
+            }
+        }
+
+        return $picked ?? [];
     }
 
     public function store(Request $request)
@@ -49,8 +82,6 @@ class StaffController extends Controller
             'email' => ['required', 'email', 'unique:users,email'],
             'role' => ['required', 'in:steward,caretaker'],
             'base_salary' => ['required', 'numeric', 'min:0'],
-            'personalities' => ['array'],
-            'personalities.*' => ['integer', 'exists:personalities,id'],
         ]);
 
         $user = User::create([
@@ -74,20 +105,19 @@ class StaffController extends Controller
             'is_active' => true,
         ]);
 
-        if (! empty($data['personalities'])) {
-            $staff->personalities()->attach($data['personalities']);
-        }
+        $traits = $this->assignPersonalities();
+        $staff->personalities()->attach(Personality::whereIn('name', $traits)->pluck('id'));
 
         StaffEvent::create([
             'staff_id' => $staff->id,
             'event_type' => 'hired',
             'severity' => 'positive',
-            'description' => 'New hire onboarded as ' . $data['role'],
+            'description' => 'New hire onboarded as ' . $data['role'] . ' — traits: ' . implode(', ', $traits),
             'date' => Clock::date(),
             'happiness_change' => 5,
         ]);
 
-        session()->flash('success', $data['name'] . ' hired.');
+        session()->flash('success', $data['name'] . ' hired. Traits: ' . implode(', ', $traits) . '.');
 
         return redirect()->route('manager.staff.show', $staff);
     }
@@ -106,9 +136,7 @@ class StaffController extends Controller
 
     public function edit(Staff $staff)
     {
-        $personalities = Personality::all();
-
-        return view('sim.manager.staff.edit', compact('staff', 'personalities'));
+        return view('sim.manager.staff.edit', compact('staff'));
     }
 
     public function update(Request $request, Staff $staff)
@@ -122,8 +150,6 @@ class StaffController extends Controller
             'performance_score' => ['required', 'integer', 'between:0,100'],
             'honesty_score' => ['required', 'integer', 'between:0,100'],
             'is_active' => ['nullable', 'boolean'],
-            'personalities' => ['array'],
-            'personalities.*' => ['integer', 'exists:personalities,id'],
         ]);
 
         $staff->user->update(['name' => $data['name']]);
@@ -137,8 +163,6 @@ class StaffController extends Controller
             'honesty_score' => $data['honesty_score'],
             'is_active' => $request->boolean('is_active'),
         ]);
-
-        $staff->personalities()->sync($data['personalities'] ?? []);
 
         session()->flash('success', $staff->user->name . ' updated.');
 

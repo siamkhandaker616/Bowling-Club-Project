@@ -1,8 +1,6 @@
-<section>
-    <header>
-        <h2 style="font-family:var(--font-sub);font-size:1.1rem;color:var(--coral);">
-            {{ __('Delete Account') }}
-        </h2>
+<section class="card" style="max-width:640px;border-color:var(--coral-dark);">
+    <header style="margin-bottom:1.2rem;">
+        <h3 style="color:var(--coral-dark);">{{ __('Delete Account') }}</h3>
         <p style="font-family:var(--font-body);font-size:0.85rem;color:var(--slate);margin-top:0.25rem;">
             {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
         </p>

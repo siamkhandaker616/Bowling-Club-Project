@@ -19,25 +19,9 @@
         .sim-happy > div{height:100%;border-radius:4px;}
     </style>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
-        <div class="dash-sidebar">
-            <div class="dash-section-label" style="margin-bottom:4px;">Modules</div>
-            <a href="{{ route('manager.dashboard') }}" class="dash-sidebar-link">&#127918; Overview</a>
-            <a href="{{ route('manager.staff.index') }}" class="dash-sidebar-link active">&#128101; Staff</a>
-            <a href="{{ route('manager.inventory.index') }}" class="dash-sidebar-link">&#128230; Inventory</a>
-            <a href="{{ route('manager.bookings.index') }}" class="dash-sidebar-link">&#127903; Bookings</a>
-            <a href="{{ route('manager.bans.index') }}" class="dash-sidebar-link">&#128683; Bans</a>
-            <a href="{{ route('manager.complaints.index') }}" class="dash-sidebar-link">&#9878; Complaints</a>
-            <a href="{{ route('manager.confrontations.index') }}" class="dash-sidebar-link">&#9881; Confrontations</a>
-            <a href="{{ route('manager.reviews.index') }}" class="dash-sidebar-link">&#11088; Reviews</a>
-            <a href="{{ route('manager.touring.index') }}" class="dash-sidebar-link">&#128742; Touring</a>
-            <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-navy" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px;">{{ ucfirst(Auth::user()->name) }}</div>
-                <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px;">Manager</span>
-            </div>
-        </div>
+        @include('sim.partials.module-dock')
 
         <div style="padding:1.25rem;overflow:hidden;">
 
@@ -108,12 +92,12 @@
                         <div class="dash-section-label">Award Bonus</div>
                         <form method="POST" action="{{ route('manager.staff.bonus', $staff) }}" style="display:grid;gap:8px;">
                             @csrf
-                            <select name="type" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <select name="type" class="fold-select" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                                 <option value="cash">Cash</option>
                                 <option value="time_off">Time Off</option>
                                 <option value="recognition">Recognition</option>
                             </select>
-                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required data-stepper="edit" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             <input name="reason" type="text" placeholder="Reason" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             <button type="submit" class="btn-lane primary" style="font-size:0.6rem;padding:5px 12px;">Give Bonus</button>
                         </form>
@@ -123,12 +107,12 @@
                         <div class="dash-section-label">Issue Penalty</div>
                         <form method="POST" action="{{ route('manager.staff.penalty', $staff) }}" style="display:grid;gap:8px;">
                             @csrf
-                            <select name="type" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <select name="type" class="fold-select" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                                 <option value="pay_dock">Pay Dock</option>
                                 <option value="extra_hours">Extra Hours</option>
                                 <option value="written_warning">Written Warning</option>
                             </select>
-                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required data-stepper="edit" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             <input name="reason" type="text" placeholder="Reason" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                             <button type="submit" class="btn-lane danger" style="font-size:0.6rem;padding:5px 12px;">Issue Penalty</button>
                         </form>
@@ -180,5 +164,6 @@
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

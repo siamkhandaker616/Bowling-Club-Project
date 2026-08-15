@@ -12,6 +12,8 @@ use App\Http\Controllers\Sim\Manager\TouringController;
 use App\Http\Controllers\Sim\Steward\BanRequestController;
 use App\Http\Controllers\Sim\Steward\ComplaintController as StewardComplaintController;
 use App\Http\Controllers\Sim\Steward\ScheduleController as StewardScheduleController;
+use App\Http\Controllers\Sim\Steward\SnitchController;
+use App\Http\Controllers\Sim\Steward\ReviewController as StewardReviewController;
 use App\Http\Controllers\Sim\Steward\VisitorController;
 use App\Http\Controllers\Sim\Caretaker\CrewController;
 use App\Http\Controllers\Sim\Caretaker\InventoryController as CaretakerInventoryController;
@@ -40,7 +42,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('manager')->name('
     Route::post('/day/toggle-bad-day', [DayController::class, 'toggleBadDay'])->name('day.toggleBadDay');
 
     Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
-    Route::get('/staff/create', [StaffController::class, 'create'])->name('staff.create');
     Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
     Route::get('/staff/{staff}', [StaffController::class, 'show'])->name('staff.show');
     Route::get('/staff/{staff}/edit', [StaffController::class, 'edit'])->name('staff.edit');
@@ -86,6 +87,7 @@ Route::middleware(['auth', 'verified', 'role:steward'])->prefix('steward')->name
     Route::post('/shifts/{shift}/complete', [StewardScheduleController::class, 'complete'])->name('schedule.complete');
 
     Route::get('/visitors', [VisitorController::class, 'index'])->name('visitors.index');
+    Route::post('/visitors/{visitor}/review', [StewardReviewController::class, 'store'])->name('reviews.store');
 
     Route::get('/bans', [BanRequestController::class, 'index'])->name('bans.index');
     Route::post('/bans', [BanRequestController::class, 'store'])->name('bans.store');
@@ -93,6 +95,10 @@ Route::middleware(['auth', 'verified', 'role:steward'])->prefix('steward')->name
     Route::get('/complaints', [StewardComplaintController::class, 'index'])->name('complaints.index');
     Route::post('/complaints', [StewardComplaintController::class, 'store'])->name('complaints.store');
     Route::post('/complaints/{complaint}/escalate', [StewardComplaintController::class, 'escalate'])->name('complaints.escalate');
+
+    Route::get('/snitch', [SnitchController::class, 'index'])->name('snitch.index');
+    Route::post('/snitch/{report}/escalate', [SnitchController::class, 'escalate'])->name('snitch.escalate');
+    Route::post('/snitch/{report}/dismiss', [SnitchController::class, 'dismiss'])->name('snitch.dismiss');
 });
 
 Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->name('caretaker.')->group(function () {
@@ -102,9 +108,15 @@ Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->
 
     Route::get('/inventory', [CaretakerInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory/{inventory}/adjust', [CaretakerInventoryController::class, 'adjust'])->name('inventory.adjust');
+    Route::post('/inventory/{inventory}/restock', [CaretakerInventoryController::class, 'restock'])->name('inventory.restock');
 
     Route::get('/crew', [CrewController::class, 'index'])->name('crew.index');
+    Route::get('/crew/messages', [CrewController::class, 'poll'])->name('crew.poll');
+    Route::get('/crew/dm', [CrewController::class, 'dm'])->name('crew.dm');
+    Route::post('/crew/send', [CrewController::class, 'send'])->name('crew.send');
+    Route::post('/crew/messages/{message}/reply', [CrewController::class, 'reply'])->name('crew.reply');
     Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');
+    Route::post('/crew/respond/{confrontation}', [CrewController::class, 'respond'])->name('crew.respond');
 });
 
 // Lane maintenance — caretaker AND admin may run it (A_1's facility-map panel buttons call this).

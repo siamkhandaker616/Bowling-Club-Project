@@ -20,33 +20,33 @@
                 90deg,
                 transparent 0px,
                 transparent 59px,
-                rgba(201, 168, 108, 0.12) 59px,
-                rgba(201, 168, 108, 0.12) 61px
+                rgba(165, 121, 63, 0.12) 59px,
+                rgba(165, 121, 63, 0.12) 61px
             ) !important,
 
             /* Layer 3: Dot pattern (gold + white) */
-            radial-gradient(circle, rgba(212, 168, 76, 0.15) 2px, transparent 2px) !important,
-            radial-gradient(circle, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px) !important,
+            radial-gradient(circle, rgba(201, 143, 61, 0.16) 2px, transparent 2px) !important,
+            radial-gradient(circle, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px) !important,
 
             /* Layer 5: Faint lane lines (horizontal stripes) */
             repeating-linear-gradient(
                 180deg,
-                rgba(26, 42, 58, 0.04) 0px,
-                rgba(26, 42, 58, 0.04) 2px,
+                rgba(42, 31, 22, 0.04) 0px,
+                rgba(42, 31, 22, 0.04) 2px,
                 transparent 2px,
                 transparent 20px
             ) !important;
 
         background-size:
             100% 100%,
-            32px 32px,
-            32px 32px,
+            34px 34px,
+            34px 34px,
             100% 120px !important;
 
         background-position:
             0 0,
             0 0,
-            16px 16px,
+            17px 17px,
             0 0 !important;
     }
 

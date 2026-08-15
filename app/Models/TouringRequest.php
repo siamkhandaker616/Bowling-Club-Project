@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TouringRequest extends Model
 {
     protected $fillable = [
-        'team_name', 'home_club', 'arrival_date',
+        'team_name', 'home_club', 'contact_email', 'arrival_date',
         'player_count', 'message', 'status',
     ];
 

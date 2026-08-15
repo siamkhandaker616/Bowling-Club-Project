@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PublicPortal;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TouringWelcome;
+use App\Mail\TouringWelcomePack;
 use App\Models\Club;
 use App\Models\TouringRequest;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,7 @@ class TouringController extends Controller
         $data = $request->validate([
             'team_name' => ['required', 'string', 'max:120'],
             'home_club' => ['nullable', 'string', 'max:120'],
+            'contact_email' => ['required', 'email', 'max:190'],
             'arrival_date' => ['required', 'date', 'after_or_equal:today'],
             'player_count' => ['required', 'integer', 'min:1', 'max:24'],
             'message' => ['nullable', 'string', 'max:2000'],
@@ -39,7 +41,11 @@ class TouringController extends Controller
             Mail::to($club->email)->send(new TouringWelcome($touring, $club));
         }
 
-        session()->flash('success', 'Request sent! Welcome pack is ready to print.');
+        if ($club && $touring->contact_email) {
+            Mail::to($touring->contact_email)->send(new TouringWelcomePack($touring, $club));
+        }
+
+        session()->flash('success', 'Request sent! Welcome pack is on its way to your team inbox.');
 
         return redirect()->route('public.touring.welcome', $touring);
     }

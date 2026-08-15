@@ -10,6 +10,7 @@ use App\Models\LaneBooking;
 use App\Models\Visitor;
 use App\Models\VisitorReview;
 use App\Services\Simulation\Clock;
+use App\Services\Simulation\VisitorRegistry;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -18,7 +19,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $visitor = Visitor::where('user_id', $user->id)->first();
+        $visitor = app(VisitorRegistry::class)->forUser($user);
 
         $nextBooking = $visitor
             ? LaneBooking::with('lane')->where('visitor_id', $visitor->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('date')->first()

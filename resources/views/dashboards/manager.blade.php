@@ -10,28 +10,10 @@
         </div>
     </x-slot>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
         <!-- LEFT SIDEBAR: Module Navigation -->
-        <div class="dash-sidebar">
-            <div class="dash-section-label" style="margin-bottom:4px;">Modules</div>
-            <a href="{{ route('manager.dashboard') }}" class="dash-sidebar-link active">&#127918; Overview</a>
-            <a href="{{ route('manager.staff.index') }}" class="dash-sidebar-link">&#128101; Staff</a>
-            <a href="{{ route('manager.inventory.index') }}" class="dash-sidebar-link">&#128230; Inventory</a>
-            <a href="{{ route('public.fixtures') }}" class="dash-sidebar-link">&#128197; Fixtures</a>
-            <a href="{{ route('manager.bookings.index') }}" class="dash-sidebar-link">&#127903; Bookings</a>
-            <a href="{{ route('site.announcements.index') }}" class="dash-sidebar-link">&#128227; Announcements</a>
-            <a href="{{ route('manager.complaints.index') }}" class="dash-sidebar-link">&#9878; Complaints</a>
-            <a href="{{ route('manager.confrontations.index') }}" class="dash-sidebar-link">&#9881; Confrontations</a>
-            <a href="{{ route('manager.bans.index') }}" class="dash-sidebar-link">&#128683; Bans</a>
-            <a href="{{ route('manager.reviews.index') }}" class="dash-sidebar-link">&#11088; Reviews</a>
-            <a href="{{ route('manager.touring.index') }}" class="dash-sidebar-link">&#128742; Touring</a>
-            <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-navy" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px;">{{ ucfirst($user->name) }}</div>
-                <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px;">Manager</span>
-            </div>
-        </div>
+        @include('sim.partials.manager-sidebar')
 
         <!-- CENTER CONTENT -->
         <div style="padding:1.25rem;overflow:hidden;">

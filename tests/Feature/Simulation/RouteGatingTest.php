@@ -25,6 +25,9 @@ class RouteGatingTest extends TestCase
             'manager.day.toggleBadDay',
             'caretaker.shifts.index',
             'caretaker.crew.vent',
+            'caretaker.inventory.index',
+            'caretaker.inventory.adjust',
+            'caretaker.inventory.restock',
             'caretaker.lanes.maintain',
             'steward.schedule.index',
             'visitor.bookings.cancel',
@@ -68,5 +71,17 @@ class RouteGatingTest extends TestCase
         $this->actingAs($admin)->post(route('caretaker.crew.vent'))->assertForbidden();
         $this->actingAs($idleCaretaker)->post(route('caretaker.crew.vent'))->assertForbidden();
         $this->actingAs($caretaker)->post(route('caretaker.crew.vent'))->assertRedirect();
+    }
+
+    public function test_only_caretakers_with_staff_can_restock_inventory(): void
+    {
+        $caretaker = $this->makeStaff()->user;
+        $admin = $this->makeUser(['role' => 'admin']);
+        $idleCaretaker = $this->makeUser(['role' => 'caretaker']);
+        $item = $this->makeInventory();
+
+        $this->actingAs($admin)->post(route('caretaker.inventory.restock', $item))->assertForbidden();
+        $this->actingAs($idleCaretaker)->post(route('caretaker.inventory.restock', $item))->assertForbidden();
+        $this->actingAs($caretaker)->post(route('caretaker.inventory.restock', $item))->assertRedirect();
     }
 }

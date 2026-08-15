@@ -5,16 +5,16 @@ namespace App\Http\Controllers\Sim\Visitor;
 use App\Http\Controllers\Controller;
 use App\Models\LaneBooking;
 use App\Models\ReviewVote;
-use App\Models\StaffReview;
 use App\Models\Visitor;
 use App\Models\VisitorReview;
+use App\Services\Simulation\VisitorRegistry;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $visitor = Visitor::where('user_id', $request->user()->id)->first();
+        $visitor = app(VisitorRegistry::class)->forUser($request->user());
 
         $allReviews = VisitorReview::with('visitor', 'booking.lane')->orderByDesc('created_at')->limit(30)->get();
 
@@ -30,14 +30,12 @@ class ReviewController extends Controller
             ? ReviewVote::where('voter_id', $request->user()->id)->pluck('review_id')->all()
             : [];
 
-        $staff = \App\Models\Staff::with('user')->where('is_active', true)->get();
-
-        return view('sim.visitor.reviews.index', compact('allReviews', 'mine', 'completedBookings', 'votedReviewIds', 'staff'));
+        return view('sim.visitor.reviews.index', compact('allReviews', 'mine', 'completedBookings', 'votedReviewIds'));
     }
 
     public function store(Request $request, LaneBooking $booking)
     {
-        $visitor = Visitor::where('user_id', $request->user()->id)->first();
+        $visitor = app(VisitorRegistry::class)->forUser($request->user());
 
         if (! $visitor || $booking->visitor_id !== $visitor->id) {
             abort(403);
@@ -60,18 +58,6 @@ class ReviewController extends Controller
             'rating' => $data['rating'],
             'body' => $data['body'] ?? null,
         ]);
-
-        if ($request->has('staff_id')) {
-            $request->validate(['staff_id' => ['required', 'exists:staff,id']]);
-
-            StaffReview::create([
-                'staff_id' => $request->staff_id,
-                'visitor_id' => $visitor->id,
-                'booking_id' => $booking->id,
-                'rating' => $data['rating'],
-                'body' => $data['body'] ?? null,
-            ]);
-        }
 
         session()->flash('success', 'Thanks for your review!');
 

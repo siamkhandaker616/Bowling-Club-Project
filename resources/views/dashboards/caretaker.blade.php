@@ -18,7 +18,7 @@
     </x-slot>
 
     @if ($staff && ! $staff->is_active)
-        <div style="zoom:1.25;margin:0.75rem 0;padding:0.75rem 1rem;border:2px solid var(--coral-dark);background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <div style="margin:0.75rem 0;padding:0.75rem 1rem;border:2px solid var(--coral-dark);background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
             <div>
                 <div style="font-family:var(--font-sub);font-size:0.75rem;color:var(--navy);font-weight:700;">You are no longer on the roster.</div>
                 <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Your employment ended with the club. You can reapply with a new identity.</div>
@@ -27,8 +27,11 @@
         </div>
     @endif
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:180px 1fr 220px;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
+        @include('sim.partials.caretaker-sidebar')
+
+        <div style="display:grid;grid-template-columns:180px 1fr 220px;gap:0;">
         <!-- LEFT: My Tasks (Shifts) -->
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label" style="margin-bottom:8px;">My Tasks Today</div>
@@ -152,6 +155,7 @@
                     <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:2px;">{{ $personalities->pluck('trait_name')->implode(' · ') }}</div>
                 @endif
             </div>
+        </div>
         </div>
 
     </div>

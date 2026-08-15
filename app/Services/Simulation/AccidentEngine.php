@@ -3,6 +3,7 @@
 namespace App\Services\Simulation;
 
 use App\Models\Accident;
+use App\Models\Inventory;
 use App\Models\Lane;
 use App\Models\LaneBooking;
 use App\Models\Shift;
@@ -11,6 +12,15 @@ use Carbon\Carbon;
 
 class AccidentEngine
 {
+    public const INVENTORY_DAMAGE = [
+        'pinsetter_jam' => ['Pinsetter Belts', 1],
+        'ball_damage' => ['Bowling Balls', 1],
+        'shoe_issue' => ['Bowling Shoes', 1],
+        'cleaning_issue' => ['Cleaning Wipes', 2],
+        'oil_spill' => ['Lane Oil', 1],
+        'supply_mishap' => ['Tool Kit', 1],
+    ];
+
     public const ACCIDENT_TYPES = [
         'pinsetter_jam' => 'Pinsetter jam — lane stopped mid-frame',
         'oil_spill' => 'Oil spill on the approach — slip hazard',
@@ -136,15 +146,23 @@ class AccidentEngine
                 'happiness_change' => $happinessHit,
             ]);
 
+            $inventoryDamage = $this->damageInventory($type, $staff->id);
+
             $log['accidents']->push([
                 'id' => $accident->id,
+                'staff_id' => $staff->id,
                 'staff_name' => $staff->user->name ?? 'Staff',
                 'type' => $type,
                 'severity' => $severity,
                 'description' => $pools[$type],
                 'cost' => self::COSTS[$severity],
                 'happiness_change' => $happinessHit,
+                'inventory_damage' => $inventoryDamage,
             ]);
+
+            if ($inventoryDamage > 0) {
+                $log['inventory_damage'] = ($log['inventory_damage'] ?? 0) + $inventoryDamage;
+            }
 
             if ($booking) {
                 $booking->status = 'cancelled';
@@ -161,5 +179,34 @@ class AccidentEngine
             'steward' => 0.04,
             default => 0.02,
         };
+    }
+
+    private function damageInventory(string $type, int $staffId): int
+    {
+        $map = self::INVENTORY_DAMAGE[$type] ?? null;
+
+        if (! $map) {
+            return 0;
+        }
+
+        [$name, $qty] = $map;
+
+        $item = Inventory::where('name', $name)->first();
+
+        if (! $item) {
+            return 0;
+        }
+
+        $change = -$qty;
+
+        app(InventoryService::class)->adjust(
+            $item,
+            $change,
+            'accident_damage',
+            'Damaged in '.str_replace('_', ' ', $type),
+            $staffId
+        );
+
+        return abs($change);
     }
 }

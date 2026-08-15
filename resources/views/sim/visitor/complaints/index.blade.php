@@ -7,29 +7,20 @@
         </div>
     </x-slot>
 
-    <style>
-        .sim-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
-        .sim-nav a{padding:6px 14px;border-radius:50px;border:2px solid var(--navy);font-family:var(--font-sub);font-size:0.65rem;text-transform:uppercase;text-decoration:none;color:var(--navy);background:var(--pin-white);}
-        .sim-nav a.active{background:var(--navy);color:var(--pin-white);}
-    </style>
 
-    <div style="zoom:1.25;padding:0 1rem;max-width:900px;margin:0 auto;">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
-        <div class="sim-nav">
-            <a href="{{ route('visitor.dashboard') }}">Dashboard</a>
-            <a href="{{ route('visitor.bookings.create') }}">Book a Lane</a>
-            <a href="{{ route('visitor.bookings.index') }}">My Bookings</a>
-            <a href="{{ route('visitor.queues.index') }}">Queue</a>
-            <a href="{{ route('visitor.reviews.index') }}">Reviews</a>
-            <a href="{{ route('visitor.complaints.index') }}" class="active">Complaints</a>
-            <a href="/game">Play Bowling</a>
-        </div>
+        @include('sim.partials.module-dock')
+
+        <div style="padding:0 1rem;max-width:900px;margin:0 auto;">
+
+        
 
         <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">
             <div class="dash-section-label">Submit a Complaint</div>
             <form method="POST" action="{{ route('visitor.complaints.store') }}" style="display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-top:8px;">
                 @csrf
-                <select name="type" required style="font-family:var(--font-body);font-size:0.7rem;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                <select name="type" required class="fold-select" style="font-family:var(--font-body);font-size:0.7rem;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
                     <option value="service">Service</option>
                     <option value="cleanliness">Cleanliness</option>
                     <option value="behavior">Behavior</option>
@@ -62,8 +53,10 @@
         </div>
 
     </div>
+    </div>
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>

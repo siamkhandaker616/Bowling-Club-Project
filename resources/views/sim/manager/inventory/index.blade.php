@@ -14,25 +14,9 @@
         .sim-stock > div{height:100%;border-radius:5px;}
     </style>
 
-    <div style="zoom:1.25;display:grid;grid-template-columns:200px 1fr;gap:0;min-height:calc(100vh - 200px);">
+    <div class="mod-grid" style="min-height:calc(100vh - 200px);">
 
-        <div class="dash-sidebar">
-            <div class="dash-section-label" style="margin-bottom:4px;">Modules</div>
-            <a href="{{ route('manager.dashboard') }}" class="dash-sidebar-link">&#127918; Overview</a>
-            <a href="{{ route('manager.staff.index') }}" class="dash-sidebar-link">&#128101; Staff</a>
-            <a href="{{ route('manager.inventory.index') }}" class="dash-sidebar-link active">&#128230; Inventory</a>
-            <a href="{{ route('manager.bookings.index') }}" class="dash-sidebar-link">&#127903; Bookings</a>
-            <a href="{{ route('manager.bans.index') }}" class="dash-sidebar-link">&#128683; Bans</a>
-            <a href="{{ route('manager.complaints.index') }}" class="dash-sidebar-link">&#9878; Complaints</a>
-            <a href="{{ route('manager.confrontations.index') }}" class="dash-sidebar-link">&#9881; Confrontations</a>
-            <a href="{{ route('manager.reviews.index') }}" class="dash-sidebar-link">&#11088; Reviews</a>
-            <a href="{{ route('manager.touring.index') }}" class="dash-sidebar-link">&#128742; Touring</a>
-            <div style="margin-top:auto;padding-top:0.75rem;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-navy" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">SK</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.65rem;margin-top:4px;">{{ ucfirst(Auth::user()->name) }}</div>
-                <span class="badge-role manager" style="font-size:0.5rem;padding:2px 8px;">Manager</span>
-            </div>
-        </div>
+        @include('sim.partials.module-dock')
 
         <div style="padding:1.25rem;overflow:hidden;">
 
@@ -70,7 +54,7 @@
                         <div style="display:flex;gap:6px;align-items:center;">
                             <form method="POST" action="{{ route('manager.inventory.adjust', $item) }}">
                                 @csrf
-                                <input name="change" type="number" placeholder="±qty" style="width:70px;font-family:var(--font-mono);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;">
+                                <input name="change" type="number" placeholder="±qty" data-stepper="edit" style="width:70px;font-family:var(--font-mono);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;">
                                 <button type="submit" style="font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);cursor:pointer;">Apply</button>
                             </form>
                             <form method="POST" action="{{ route('manager.inventory.restock', $item) }}">
@@ -96,5 +80,6 @@
 
     <x-toast />
 
+    @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')
 </x-app-layout>
