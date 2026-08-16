@@ -22,6 +22,7 @@ class DayCycle
         private InventoryService $inventory,
         private VisitorSpawner $spawner,
         private SocialEngine $social,
+        private MatchService $matches,
     ) {
     }
 
@@ -49,6 +50,9 @@ class DayCycle
             'snitches' => [],
             'snitch_bonuses' => 0,
             'turnaways' => 0,
+            'matches' => collect(),
+            'match_revenue' => 0,
+            'league_penalties' => 0,
         ];
 
         $this->spawner->promoteQueues($today, $log);
@@ -63,6 +67,9 @@ class DayCycle
         $this->social->dailyDrift($today, $log);
         $this->inventory->dailyDecay($log);
         $this->autoComplaints($today, $log);
+
+        $this->matches->resolveDueMatches($today, $log);
+        $this->matches->resolveCompletedMatches($today, $log);
 
         $this->finance($today, $log);
         $this->updateReputation($log);
@@ -256,6 +263,8 @@ class DayCycle
 
         $openComplaints = Complaint::where('status', 'open')->count();
         $delta -= $openComplaints;
+
+        $delta -= $log['league_penalties'] ?? 0;
 
         $delta -= ($log['quits'] ?? 0) * 2;
 

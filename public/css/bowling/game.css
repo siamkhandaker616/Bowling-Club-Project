@@ -40,6 +40,21 @@
 .game-hud-label{display:block;font-family:var(--font-mono);font-size:0.55rem;color:var(--gold-light);text-transform:uppercase;letter-spacing:1px}
 .game-hud-value{display:block;font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--pin-white);margin-top:0.2rem}
 
+.game-custom{display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap}
+.game-custom-label{font-family:var(--font-sub);font-size:0.75rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px}
+.game-swatches{display:flex;gap:0.5rem;flex-wrap:wrap}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);cursor:pointer;padding:0;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease}
+.swatch:hover{transform:translateY(-2px)}
+.swatch.active{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-2px)}
+.swatch-coral{background:radial-gradient(circle at 35% 30%,#e88a83,#d4574f 55%,#8f3a36)}
+.swatch-gold{background:radial-gradient(circle at 35% 30%,#e2b866,#c98f3d 55%,#8a6228)}
+.swatch-violet{background:radial-gradient(circle at 35% 30%,#b28ce8,#8a5bc9 55%,#5c3a8c)}
+.swatch-teal{background:radial-gradient(circle at 35% 30%,#6fcfbe,#2a9d8f 55%,#1d6f66)}
+.swatch-blue{background:radial-gradient(circle at 35% 30%,#7f9fe8,#3d6fd4 55%,#2a4a92)}
+.swatch-emerald{background:radial-gradient(circle at 35% 30%,#82c77f,#2f9e44 55%,#1f6b2f)}
+.swatch-pink{background:radial-gradient(circle at 35% 30%,#f7a1d3,#f15bb5 55%,#a63d7a)}
+.swatch-black{background:radial-gradient(circle at 35% 30%,#4d4d4d,#1f1f1f 55%,#000000)}
+
 .game-help{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem}
 .game-help li{font-size:0.8rem;color:var(--navy);line-height:1.5}
 .game-help li::before{content:'\2022';color:var(--coral);font-weight:700;display:inline-block;width:1rem}

@@ -6,6 +6,7 @@ use App\Http\Controllers\Sim\Manager\ComplaintController;
 use App\Http\Controllers\Sim\Manager\ConfrontationController;
 use App\Http\Controllers\Sim\Manager\DayController;
 use App\Http\Controllers\Sim\Manager\InventoryController;
+use App\Http\Controllers\Sim\Manager\LeagueController;
 use App\Http\Controllers\Sim\Manager\ReviewController;
 use App\Http\Controllers\Sim\Manager\StaffController;
 use App\Http\Controllers\Sim\Manager\TouringController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Sim\Steward\VisitorController;
 use App\Http\Controllers\Sim\Caretaker\CrewController;
 use App\Http\Controllers\Sim\Caretaker\InventoryController as CaretakerInventoryController;
 use App\Http\Controllers\Sim\Caretaker\LaneController;
+use App\Http\Controllers\Sim\Caretaker\PrepController;
 use App\Http\Controllers\Sim\Caretaker\ShiftController;
 use App\Http\Controllers\Sim\Visitor\BookingController as VisitorBookingController;
 use App\Http\Controllers\Sim\Visitor\ComplaintController as VisitorComplaintController;
@@ -80,6 +82,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('manager')->name('
     Route::get('/touring', [TouringController::class, 'index'])->name('touring.index');
     Route::post('/touring/{touringRequest}/confirm', [TouringController::class, 'confirm'])->name('touring.confirm');
     Route::post('/touring/{touringRequest}/decline', [TouringController::class, 'decline'])->name('touring.decline');
+
+    Route::get('/league', [LeagueController::class, 'index'])->name('league.index');
+    Route::post('/league/{fixture}/welcome', [LeagueController::class, 'welcome'])->name('league.welcome');
 });
 
 Route::middleware(['auth', 'verified', 'role:steward'])->prefix('steward')->name('steward.')->group(function () {
@@ -117,6 +122,9 @@ Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->
     Route::post('/crew/messages/{message}/reply', [CrewController::class, 'reply'])->name('crew.reply');
     Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');
     Route::post('/crew/respond/{confrontation}', [CrewController::class, 'respond'])->name('crew.respond');
+
+    Route::get('/prep', [PrepController::class, 'index'])->name('prep.index');
+    Route::post('/prep/{fixture}/{kind}', [PrepController::class, 'prepare'])->name('prep.prepare');
 });
 
 // Lane maintenance — caretaker AND admin may run it (A_1's facility-map panel buttons call this).

@@ -169,7 +169,30 @@
                             <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['snitch_bonuses'] ?? 0) > 0 ? 'var(--sky-dark)' : 'var(--slate)' }};">{{ count($dayReport['snitches'] ?? []) }}</div>
                             <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">SNITCH REPORTS</div>
                         </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--sky-dark);">{{ $dayReport['matches']?->count() ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCHES</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--gold);">${{ number_format($dayReport['match_revenue'] ?? 0, 0) }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCH REVENUE</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['league_penalties'] ?? 0) > 0 ? 'var(--coral)' : 'var(--sky-dark)' }};">{{ $dayReport['league_penalties'] ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">PREP PENALTIES</div>
+                        </div>
                     </div>
+                    @if (count($dayReport['matches'] ?? []))
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
+                            @foreach (collect($dayReport['matches'])->take(4) as $m)
+                                <div style="text-align:center;">
+                                    <div style="font-family:var(--font-mono);font-size:0.6rem;font-weight:700;color:{{ $m['status'] === 'live' ? 'var(--gold)' : 'var(--sky-dark)' }};text-transform:uppercase;">{{ $m['status'] }}</div>
+                                    <div style="font-family:var(--font-sub);font-size:0.6rem;color:var(--navy);margin-top:2px;">{{ $m['label'] }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.65rem;font-weight:700;color:var(--navy);">{{ $m['home_score'] }} — {{ $m['away_score'] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @endif
 
