@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Route;
 | working. All names live under the sim layer via these prefixes.
 */
 
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('manager')->name('manager.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchUpSim::class])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/day/stats', [DayController::class, 'stats'])->name('day.stats');
     Route::post('/day/advance', [DayController::class, 'advance'])->name('day.advance');
     Route::post('/day/toggle-bad-day', [DayController::class, 'toggleBadDay'])->name('day.toggleBadDay');
@@ -87,7 +87,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('manager')->name('
     Route::post('/league/{fixture}/welcome', [LeagueController::class, 'welcome'])->name('league.welcome');
 });
 
-Route::middleware(['auth', 'verified', 'role:steward'])->prefix('steward')->name('steward.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:steward', \App\Http\Middleware\CatchUpSim::class])->prefix('steward')->name('steward.')->group(function () {
     Route::get('/schedule', [StewardScheduleController::class, 'index'])->name('schedule.index');
     Route::post('/shifts/{shift}/complete', [StewardScheduleController::class, 'complete'])->name('schedule.complete');
 
@@ -106,7 +106,7 @@ Route::middleware(['auth', 'verified', 'role:steward'])->prefix('steward')->name
     Route::post('/snitch/{report}/dismiss', [SnitchController::class, 'dismiss'])->name('snitch.dismiss');
 });
 
-Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->name('caretaker.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:caretaker', \App\Http\Middleware\CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
     Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
     Route::post('/shifts/{shift}/complete', [ShiftController::class, 'complete'])->name('shifts.complete');
     Route::post('/shifts/{shift}/cancel', [ShiftController::class, 'cancel'])->name('shifts.cancel');
@@ -128,11 +128,11 @@ Route::middleware(['auth', 'verified', 'role:caretaker'])->prefix('caretaker')->
 });
 
 // Lane maintenance — caretaker AND admin may run it (A_1's facility-map panel buttons call this).
-Route::middleware(['auth', 'verified', 'role:caretaker,admin'])->prefix('caretaker')->name('caretaker.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:caretaker,admin', \App\Http\Middleware\CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
     Route::post('/lanes/{lane}/maintenance', [LaneController::class, 'maintain'])->name('lanes.maintain');
 });
 
-Route::middleware(['auth', 'verified', 'role:customer'])->prefix('visitor')->name('visitor.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:customer', \App\Http\Middleware\CatchUpSim::class])->prefix('visitor')->name('visitor.')->group(function () {
     Route::get('/book', [VisitorBookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [VisitorBookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings', [VisitorBookingController::class, 'index'])->name('bookings.index');

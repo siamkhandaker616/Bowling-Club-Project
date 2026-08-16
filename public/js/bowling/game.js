@@ -10,9 +10,9 @@
     var ctx = canvas.getContext('2d');
 
     var W = canvas.width, H = canvas.height;
-    var LANE_L = 96, LANE_R = 404, CENTER = 250;
-    var GUTTER_LX = LANE_L - 13, GUTTER_RX = LANE_R + 13;
-    var BALL_R = 14, PIN_R = 7, PIN_FALL = 18;
+    var LANE_L = 120, LANE_R = 380, CENTER = 250;
+    var GUTTER_LX = LANE_L - 25, GUTTER_RX = LANE_R + 25;
+    var BALL_R = 17.5, PIN_R = 10, PIN_FALL = 25;
     var FOUL_Y = 560, BALL_START_Y = 590, PIT_Y = 118;
     var LANE_DAMP = 0.30;
     var MAX_ANGLE = 30;
@@ -23,11 +23,11 @@
         { min: 0, time: null, speed: null, color: '#584a8c', weak: 1 },
         { min: 12, time: null, speed: null, color: '#5b5bd6', weak: 2 },
         { min: 28, time: null, speed: null, color: '#9b5de5', weak: 3 },
-        { min: 44, time: 1.0, speed: 433, color: '#f15bb5' },
-        { min: 58, time: 0.8, speed: 525, color: '#fb8500' },
-        { min: 72, time: 0.6, speed: 680, color: '#ffd23f' },
-        { min: 86, time: 0.4, speed: 992, color: '#ff4d3d' },
-        { min: 94, time: 0.2, speed: 1928, color: '#ffe15a', max: true }
+        { min: 44, time: 1.15, speed: 433, color: '#f15bb5' },
+        { min: 58, time: 0.95, speed: 525, color: '#fb8500' },
+        { min: 72, time: 0.75, speed: 680, color: '#ffd23f' },
+        { min: 86, time: 0.55, speed: 992, color: '#ff4d3d' },
+        { min: 94, time: 0.35, speed: 1928, color: '#ffe15a', max: true }
     ];
 
     function weakSpeedFor(pct, tier) {
@@ -37,10 +37,10 @@
     }
 
     var PIN_SPOTS = [
-        [0, 216],
-        [-18, 186], [18, 186],
-        [-36, 156], [0, 156], [36, 156],
-        [-54, 126], [-18, 126], [18, 126], [54, 126]
+        [0, 240],
+        [-40, 205], [40, 205],
+        [-80, 170], [0, 170], [80, 170],
+        [-120, 135], [-40, 135], [40, 135], [120, 135]
     ];
 
     function cssVar(name) {
@@ -433,7 +433,8 @@
                 if (ball.maxShot && !burst) startBurst(ball.x, ball.y);
                 if (dist === 0) { dist = 0.01; dxb = 0.01; dyb = 0; }
                 var nx = dxb / dist, ny = dyb / dist;
-                var push = (minD - dist) / dt;
+                var ballSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                var push = Math.min(ballSpeed, (minD - dist) / dt);
                 p.vx += ball.vx * 0.8 + nx * push * 0.5;
                 p.vy += ball.vy * 0.8 + ny * push * 0.5;
                 if (!p.down) {
@@ -450,7 +451,7 @@
                 if (b.dead) continue;
                 var ax = a.x - b.x, ay = a.y - b.y;
                 var ad = Math.sqrt(ax * ax + ay * ay);
-                var amd = PIN_R * 2 + 10;
+                var amd = 42;
                 if (ad < amd && ad > 0) {
                     var s = (amd - ad) / ad * 0.5;
                     a.x += ax * s; a.y += ay * s;
@@ -458,7 +459,7 @@
                     var rvx = a.vx - b.vx, rvy = a.vy - b.vy;
                     var rel = (rvx * ax + rvy * ay) / ad;
                     if (rel < 0) {
-                        var imp = -rel / 2;
+                        var imp = -rel * 0.7;
                         a.vx += (ax / ad) * imp; a.vy += (ay / ad) * imp;
                         b.vx -= (ax / ad) * imp; b.vy -= (ay / ad) * imp;
                     }
@@ -557,7 +558,7 @@
     }
 
     function drawGutterChannel(x) {
-        var w = 26;
+        var w = 25;
         var grad = ctx.createLinearGradient(x - w, 0, x + w, 0);
         grad.addColorStop(0, palette.rubber);
         grad.addColorStop(0.5, palette.slate);
@@ -590,7 +591,7 @@
         ctx.strokeStyle = palette.slate;
         ctx.lineWidth = 2;
         for (var i = 0; i < 3; i++) {
-            var x = CENTER - 34 + i * 34;
+            var x = CENTER - 50 + i * 50;
             ctx.beginPath();
             ctx.moveTo(x, PIT_Y + 4);
             ctx.lineTo(x, FOUL_Y - 4);
@@ -606,13 +607,13 @@
 
         ctx.fillStyle = palette.slate;
         var chevronY = 320;
-        var chevs = [-44, -22, 0, 22, 44];
+        var chevs = [-60, -30, 0, 30, 60];
         for (var c = 0; c < chevs.length; c++) {
             var cx = CENTER + chevs[c];
             ctx.beginPath();
-            ctx.moveTo(cx - 9, chevronY + 8);
-            ctx.lineTo(cx, chevronY - 4);
-            ctx.lineTo(cx + 9, chevronY + 8);
+            ctx.moveTo(cx - 11, chevronY + 9);
+            ctx.lineTo(cx, chevronY - 5);
+            ctx.lineTo(cx + 11, chevronY + 9);
             ctx.closePath();
             ctx.fill();
         }
@@ -621,7 +622,7 @@
         for (var p = 0; p < pins.length; p++) {
             var spot = PIN_SPOTS[p];
             ctx.beginPath();
-            ctx.arc(CENTER + spot[0], spot[1], 6, 0, Math.PI * 2);
+            ctx.arc(CENTER + spot[0], spot[1], 8, 0, Math.PI * 2);
             ctx.fill();
         }
     }
@@ -646,8 +647,8 @@
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = palette.coral;
-        ctx.fillRect(-3, -3, 6, 2);
-        ctx.fillRect(-3, 1, 6, 2);
+        ctx.fillRect(-PIN_R * 0.6, -PIN_R * 0.42, PIN_R * 1.2, PIN_R * 0.28);
+        ctx.fillRect(-PIN_R * 0.6, -PIN_R * 0.05, PIN_R * 1.2, PIN_R * 0.28);
         ctx.restore();
     }
 

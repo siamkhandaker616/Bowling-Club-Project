@@ -12,9 +12,9 @@
         @include('sim.partials.module-dock')
 
         <div style="display:flex;flex-direction:column;gap:1.2rem;">
-            <div class="card">
-                <div class="panel-head">
-                    <h3 class="panel-title">Waiting on Your Desk</h3>
+            <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                    <span class="dash-section-label" style="margin:0;">Waiting on Your Desk</span>
                     <span class="badge coral">{{ $pending->count() }} REPORTS</span>
                 </div>
 
@@ -50,9 +50,9 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="panel-head">
-                    <h3 class="panel-title">Snitch Ledger</h3>
+            <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                    <span class="dash-section-label" style="margin:0;">Snitch Ledger</span>
                     <span class="badge sky">HANDLED</span>
                 </div>
 

@@ -113,6 +113,22 @@ class VisitorSpawner
 
     public function promoteQueues(Carbon $date, array &$log): void
     {
+        $priority = BookingQueue::with('booking')
+            ->whereHas('booking', fn ($q) => $q->where('compensation_type', 'priority_queue')->where('status', 'pending'))
+            ->whereDate('date', $date)
+            ->where('status', 'waiting')
+            ->orderBy('position')
+            ->get();
+
+        foreach ($priority as $entry) {
+            $lane = $this->pickFreeLane($date, $entry->time_slot);
+            if (! $lane) {
+                continue;
+            }
+
+            $this->promoteEntry($entry, $lane, $log);
+        }
+
         $queues = BookingQueue::with('booking')
             ->leftJoin('visitors', 'booking_queues.visitor_id', '=', 'visitors.id')
             ->whereDate('booking_queues.date', $date)
@@ -139,6 +155,11 @@ class VisitorSpawner
             $booking->lane_id = $lane->id;
             $booking->status = 'confirmed';
             $booking->queue_position = null;
+
+            if ($booking->compensation_type === 'priority_queue') {
+                $booking->compensation_type = null;
+            }
+
             $booking->save();
 
             $entry->status = 'notified';

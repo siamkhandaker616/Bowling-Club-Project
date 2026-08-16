@@ -7,6 +7,7 @@ use App\Models\Fixture;
 use App\Models\FixturePrep;
 use App\Models\Inventory;
 use App\Models\Lane;
+use App\Models\League;
 use App\Models\Team;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -143,6 +144,71 @@ class MatchService
             ->orderBy('date')
             ->orderBy('time')
             ->get();
+    }
+
+    public function generateNextRound(Carbon $today): int
+    {
+        $created = 0;
+
+        $laneIds = Lane::orderBy('id')->pluck('id')->all();
+
+        foreach (League::with('teams')->get() as $league) {
+            $upcoming = Fixture::where('league_id', $league->id)->where('status', 'upcoming')->get();
+
+            if ($upcoming->count() >= 2 || $league->teams->count() < 2) {
+                continue;
+            }
+
+            $latest = $upcoming->max('date');
+            $nextDate = $latest ? Carbon::parse($latest)->addDay() : $today->copy()->addDay();
+
+            $pairKey = fn ($a, $b) => min($a, $b) . '-' . max($a, $b);
+            $playedKeys = Fixture::where('league_id', $league->id)
+                ->get()
+                ->map(fn (Fixture $f) => $pairKey($f->home_team_id, $f->away_team_id))
+                ->all();
+
+            $teams = $league->teams->shuffle()->values();
+            $used = collect();
+            $pairs = [];
+
+            foreach ($teams as $team) {
+                if ($used->contains($team->id)) {
+                    continue;
+                }
+
+                $opponent = $teams->first(fn ($t) => $t->id !== $team->id && ! $used->contains($t->id) && ! in_array($pairKey($team->id, $t->id), $playedKeys, true));
+
+                if (! $opponent) {
+                    continue;
+                }
+
+                $used->push($team->id, $opponent->id);
+                $pairs[] = [$team, $opponent];
+
+                if (count($pairs) >= 2) {
+                    break;
+                }
+            }
+
+            foreach ($pairs as $index => [$home, $away]) {
+                $laneId = $laneIds[$index % max(1, count($laneIds))] ?? null;
+
+                Fixture::create([
+                    'home_team_id' => $home->id,
+                    'away_team_id' => $away->id,
+                    'league_id' => $league->id,
+                    'date' => $nextDate->copy()->addDays($index)->toDateString(),
+                    'time' => '18:00',
+                    'lane_id' => $laneId,
+                    'status' => 'upcoming',
+                ]);
+
+                $created++;
+            }
+        }
+
+        return $created;
     }
 
     public function resolveDueMatches(Carbon $date, array &$log): void

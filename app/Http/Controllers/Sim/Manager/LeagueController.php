@@ -29,7 +29,7 @@ class LeagueController extends Controller
             ->orderBy('date')
             ->get();
 
-        $leagues = League::with(['teams' => fn ($q) => $q->orderByDesc('wins')])->get();
+        $leagues = League::with('teams')->get();
 
         return view('sim.manager.league.index', compact('today', 'upcoming', 'live', 'leagues'));
     }

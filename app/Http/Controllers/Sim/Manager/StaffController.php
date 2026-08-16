@@ -216,6 +216,12 @@ class StaffController extends Controller
         $staff->happiness = max(0, min(100, $staff->happiness + $lift));
         $staff->save();
 
+        if ($data['type'] === 'cash') {
+            $cfg = \App\Models\ClubConfig::singleton();
+            $cfg->total_expenses = $cfg->total_expenses + $data['amount_or_hours'];
+            $cfg->save();
+        }
+
         StaffEvent::create([
             'staff_id' => $staff->id,
             'event_type' => 'bonus',

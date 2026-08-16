@@ -116,6 +116,10 @@ class ConfrontationService
                 'date' => Clock::date(),
                 'issued_by' => null,
             ]);
+
+            $accused->current_salary = max(0, $accused->current_salary - $penaltyAmount);
+            $accused->warnings_count = $accused->warnings_count + 1;
+            $accused->save();
         }
     }
 

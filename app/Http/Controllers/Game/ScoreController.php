@@ -13,6 +13,7 @@ class ScoreController extends Controller
     public function index(Request $request)
     {
         $topScores = BowlingScore::query()
+            ->with('visitor')
             ->orderByDesc('score')
             ->orderBy('played_at')
             ->take(10)
@@ -52,7 +53,7 @@ class ScoreController extends Controller
         $total = ScoringEngine::total($data['frames_data']);
 
         if ($total !== (int) $data['score']) {
-            return response()->json(['error' => 'score does not match frames_data'], 422);
+            return response()->json(['error' => 'That score didn\'t add up — the frame keeps its tally.'], 422);
         }
 
         $visitorId = null;

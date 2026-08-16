@@ -36,7 +36,7 @@
             <div style="display:flex;flex-direction:column;gap:10px;">
                 @forelse ($items as $item)
                     @php
-                        $pct = round($item->quantity / max(1, $item->max_quantity) * 100);
+                        $pct = min(100, round($item->quantity / max(1, $item->max_quantity) * 100));
                         $barColor = $item->isLowStock() ? 'var(--coral)' : ($pct < 40 ? 'var(--gold)' : 'var(--sky-dark)');
                     @endphp
                     <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;">

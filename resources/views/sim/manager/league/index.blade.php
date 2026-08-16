@@ -82,7 +82,7 @@
             </div>
 
             <div class="dash-section-label" style="margin:1.25rem 0 8px;">League Standings</div>
-            <div style="display:grid;grid-template-columns:repeat({{ count($leagues) }},1fr);gap:10px;">
+            <div style="display:grid;grid-template-columns:repeat({{ max(count($leagues), 1) }},1fr);gap:10px;">
                 @foreach ($leagues as $league)
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:0.8rem 1rem;">
                         <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">{{ $league->name }}</div>

@@ -31,17 +31,25 @@ class ReconcilePayments extends Command
         }
 
         $settled = 0;
+        $expired = 0;
 
         foreach ($payments as $payment) {
             if ($settler->settleIfPossible($payment)) {
                 $settled++;
                 $this->info("Settled payment {$payment->transaction_id}.");
             } else {
-                $this->warn("Could not settle payment {$payment->transaction_id}.");
+                $payment->refresh();
+
+                if ($payment->status === 'failed') {
+                    $expired++;
+                    $this->warn("Expired payment {$payment->transaction_id} — gateway never confirmed it.");
+                } else {
+                    $this->warn("Could not settle payment {$payment->transaction_id}.");
+                }
             }
         }
 
-        $this->info("Reconciled {$settled} of {$payments->count()} payment(s).");
+        $this->info("Reconciled {$settled} of {$payments->count()} payment(s) ({$expired} expired).");
 
         return self::SUCCESS;
     }

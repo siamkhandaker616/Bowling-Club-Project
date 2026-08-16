@@ -50,6 +50,7 @@
         </section>
 
         @if($visitor)
+            @php $myBest = $myScores->max('score'); @endphp
             <section class="game-panel">
                 <h2 class="game-panel-head">My Best Games</h2>
                 @forelse($myScores as $score)
@@ -61,7 +62,7 @@
                                 <span class="game-row-star" title="High score">&#9733;</span>
                             @endif
                         </span>
-                        <span class="game-row-date">{{ $score->score === $myScores->max('score') ? 'Personal best' : '' }}</span>
+                        <span class="game-row-date">{{ $score->score === $myBest ? 'Personal best' : '' }}</span>
                         <span class="game-row-score">{{ $score->score }}</span>
                     </div>
                 @empty

@@ -12,23 +12,10 @@
 </head>
 <body style="min-height:100vh;">
 
-    <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(245,248,250,0.95);backdrop-filter:blur(8px);border-bottom:3px solid var(--navy);padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <div class="ball-accent" style="width:32px;height:32px;"></div>
-            <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
-        </a>
-        <nav style="display:flex;align-items:center;gap:1.5rem;">
-            <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
-            <a href="{{ route('public.fixtures') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
-                @endauth
-            @endif
-        </nav>
-    </header>
+    @component('site.partials.core-header')
+        <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
+        <a href="{{ route('public.fixtures') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+    @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:1100px;margin:0 auto;">
 
@@ -225,7 +212,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($league->teams->sortByDesc('wins')->sortByDesc('draws') as $team)
+                                @foreach($league->teams->sortByDesc(['wins', 'draws']) as $team)
                                     <tr style="border-bottom:1px solid var(--fog);" onmouseover="this.style.background='var(--mist)'" onmouseout="this.style.background=''">
                                         <td style="font-family:var(--font-sub);font-size:0.85rem;padding:0.5rem 1rem;color:var(--navy);">{{ $team->name }}</td>
                                         <td style="font-family:var(--font-mono);font-size:0.85rem;text-align:center;color:var(--gold);font-weight:700;">{{ $team->wins }}</td>
@@ -243,11 +230,7 @@
 
     </main>
 
-    <footer style="background:var(--navy);color:var(--fog);padding:3rem 2rem;text-align:center;margin-top:4rem;">
-        <div class="ball-accent" style="width:28px;height:28px;margin:0 auto 1rem;"></div>
-        <p style="font-family:var(--font-display);font-size:1.2rem;color:var(--pin-white);margin-bottom:0.5rem;">The Tenth Frame</p>
-        <p style="font-family:var(--font-sub);font-size:0.85rem;color:var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }} &bull; Strike fast, roll loud.</p>
-    </footer>
+    @include('site.partials.core-footer')
 
     <script>
     (function() {

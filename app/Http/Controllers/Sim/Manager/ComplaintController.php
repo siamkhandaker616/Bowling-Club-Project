@@ -54,19 +54,32 @@ class ComplaintController extends Controller
         return redirect()->route('manager.complaints.index');
     }
 
+    private function nextBooking(Complaint $complaint): ?LaneBooking
+    {
+        return LaneBooking::where('visitor_id', $complaint->visitor_id)
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->where('date', '>=', Clock::date()->toDateString())
+            ->orderBy('date')
+            ->orderBy('id')
+            ->first();
+    }
+
     private function applyCompensation(Complaint $complaint, ?string $type): void
     {
-        if ($type === 'free_game') {
-            $booking = LaneBooking::where('visitor_id', $complaint->visitor_id)
-                ->whereIn('status', ['confirmed', 'pending'])
-                ->where('date', '>=', Clock::date()->toDateString())
-                ->orderBy('date')
-                ->orderBy('id')
-                ->first();
+        if ($type === 'apology') {
+            $cfg = ClubConfig::singleton();
+            $cfg->reputation = max(0, min(100, $cfg->reputation + 1));
+            $cfg->save();
+
+            return;
+        }
+
+        if ($type === 'free_game' || $type === 'refund' || $type === 'discount') {
+            $booking = $this->nextBooking($complaint);
 
             if ($booking) {
                 $booking->compensation_claimed = true;
-                $booking->compensation_type = 'free_game';
+                $booking->compensation_type = $type;
                 $booking->save();
             }
 
@@ -84,6 +97,9 @@ class ComplaintController extends Controller
             if (! $booking) {
                 return;
             }
+
+            $booking->compensation_type = 'priority_queue';
+            $booking->save();
 
             $entry = BookingQueue::where('booking_id', $booking->id)->first();
 

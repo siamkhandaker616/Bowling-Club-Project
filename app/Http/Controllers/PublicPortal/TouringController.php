@@ -38,11 +38,19 @@ class TouringController extends Controller
         $club = Club::first();
 
         if ($club && $club->email) {
-            Mail::to($club->email)->send(new TouringWelcome($touring, $club));
+            try {
+                Mail::to($club->email)->send(new TouringWelcome($touring, $club));
+            } catch (\Throwable $e) {
+                Log::warning('Touring booking notice email failed: '.$e->getMessage());
+            }
         }
 
         if ($club && $touring->contact_email) {
-            Mail::to($touring->contact_email)->send(new TouringWelcomePack($touring, $club));
+            try {
+                Mail::to($touring->contact_email)->send(new TouringWelcomePack($touring, $club));
+            } catch (\Throwable $e) {
+                Log::warning('Touring welcome pack email failed: '.$e->getMessage());
+            }
         }
 
         session()->flash('success', 'Request sent! Welcome pack is on its way to your team inbox.');

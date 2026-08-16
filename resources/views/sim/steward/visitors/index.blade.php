@@ -43,7 +43,7 @@
                         <div style="display:flex;align-items:center;gap:10px;">
                             @php
                                 $initials = strtoupper(substr($visitor->name, 0, 1)) . (strlen($visitor->name) > 1 ? strtoupper(substr(str_replace(' ', '', $visitor->name), -1)) : '');
-                                $ballColor = $visitor->is_banned ? 'ball-coral' : ($visitor->vip ? 'ball-gold' : 'ball-sky');
+                                $ballColor = $visitor->is_banned ? 'ball-coral' : ($visitor->tier === 'premium' ? 'ball-gold' : 'ball-sky');
                             @endphp
                             <div class="ball-avatar ball-sm {{ $ballColor }}"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ $initials }}</span></div>
                             <div>
@@ -57,8 +57,8 @@
                             @else
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);">regular</span>
                             @endif
-                            @if ($visitor->vip)
-                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--gold-light);color:var(--gold-dust);border:1px solid var(--gold);">VIP</span>
+                            @if ($visitor->tier === 'premium')
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--gold-light);color:var(--gold-dust);border:1px solid var(--gold);">Premium</span>
                             @endif
                         </div>
                     </div>

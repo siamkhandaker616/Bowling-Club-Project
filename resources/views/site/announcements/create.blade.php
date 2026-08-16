@@ -63,7 +63,7 @@
                     <label style="display:block;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-bottom:6px;">Published At</label>
                     @php
                         $pubVal = old('published_at', date('Y-m-d\TH:i'));
-                        $pubDate = \Carbon\Carbon::parse($pubVal);
+                        try { $pubDate = \Carbon\Carbon::parse($pubVal); } catch (\Throwable) { $pubDate = \Carbon\Carbon::now(); }
                     @endphp
                     <div class="lc" id="published-at-lc" data-year="{{ $pubDate->year }}">
                         <div class="lc-head">
@@ -83,7 +83,7 @@
                 <input type="hidden" name="is_active" value="0">
                 <label class="pin-check" style="cursor:pointer;font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);">
                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}>
-                    <span class="pin-box"></span> Active (visible on ticker)
+                    <span class="pin-box"></span> Show on the home page ticker
                 </label>
             </div>
 

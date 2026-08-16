@@ -1,6 +1,6 @@
 <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f8f6f0;border:2px solid #1a2a3a;border-radius:10px;color:#1a2a3a;">
     <div style="font-family:Georgia,serif;font-size:22px;text-transform:uppercase;color:#1a2a3a;margin-bottom:4px;">The Tenth Frame</div>
-    <div style="font-size:13px;color:#6b7a8d;margin-bottom:20px;">Touring Team Welcome Portal</div>
+    <div style="font-size:13px;color:#6b7a8d;margin-bottom:20px;">Touring Team Visit</div>
 
     <p style="font-size:15px;line-height:1.6;">A touring team has booked a visit. Details below.</p>
 

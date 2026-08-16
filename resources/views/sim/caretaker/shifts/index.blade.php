@@ -56,7 +56,7 @@
                             @endif
                         </div>
                         <div style="display:flex;gap:8px;">
-                            @if (in_array($shift->status, ['assigned', 'in_progress', 'scheduled']))
+                            @if (in_array($shift->status, ['in_progress', 'scheduled']))
                                 <form method="POST" action="{{ route('caretaker.shifts.complete', $shift) }}">
                                     @csrf
                                     <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Complete</button>
@@ -88,7 +88,7 @@
                 <span class="dash-stat-label">Completed</span>
             </div>
             <div class="dash-stat" style="margin-top:6px;">
-                <span class="dash-stat-num" style="color:var(--gold);">{{ $shifts->where('status','assigned')->count() + $shifts->where('status','in_progress')->count() }}</span>
+                <span class="dash-stat-num" style="color:var(--gold);">{{ $shifts->whereIn('status', ['scheduled', 'in_progress'])->count() }}</span>
                 <span class="dash-stat-label">Pending</span>
             </div>
         </div>

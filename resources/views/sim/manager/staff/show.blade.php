@@ -72,16 +72,16 @@
             <div style="display:flex;flex-direction:column;gap:12px;">
 
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;" style="text-align:center;">
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
                         <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ $staff->happiness < 50 ? 'var(--coral)' : ($staff->happiness < 70 ? 'var(--gold-dust)' : 'var(--sky-dark)') }};">{{ $staff->happiness }}</div>
                         <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">HAPPINESS</div>
                         <div class="sim-happy" style="margin-top:6px;"><div style="width:{{ $staff->happiness }}%;background:{{ $staff->happiness < 50 ? 'var(--coral)' : ($staff->happiness < 70 ? 'var(--gold)' : 'var(--sky-dark)') }};"></div></div>
                     </div>
-                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;" style="text-align:center;">
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
                         <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--navy);">{{ $staff->performance_score }}</div>
                         <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">PERFORMANCE</div>
                     </div>
-                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;" style="text-align:center;">
+                    <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
                         <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--navy);">{{ $staff->honesty_score }}</div>
                         <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">HONESTY</div>
                     </div>

@@ -71,15 +71,16 @@
                             {{ $review->created_at->format('M j, H:i') }}
                         </span>
                         <div style="display:flex;gap:6px;">
+                            @php $myVote = $myVotes[$review->id] ?? null; @endphp
                             <form method="POST" action="{{ route('visitor.reviews.vote', $review) }}">
                                 @csrf
                                 <input type="hidden" name="vote" value="helpful">
-                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;">Helpful ({{ $review->helpful_count ?? 0 }})</button>
+                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;{{ $myVote === 'helpful' ? 'background:var(--sky-dark);color:var(--pin-white);' : '' }}">Helpful ({{ $review->helpful_count ?? 0 }})</button>
                             </form>
                             <form method="POST" action="{{ route('visitor.reviews.vote', $review) }}">
                                 @csrf
                                 <input type="hidden" name="vote" value="not_helpful">
-                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;">Not helpful ({{ $review->not_helpful_count ?? 0 }})</button>
+                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;{{ $myVote === 'not_helpful' ? 'background:var(--coral);color:var(--pin-white);' : '' }}">Not helpful ({{ $review->not_helpful_count ?? 0 }})</button>
                             </form>
                         </div>
                     </div>

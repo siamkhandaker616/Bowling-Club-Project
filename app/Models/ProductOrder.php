@@ -33,10 +33,10 @@ class ProductOrder extends Model
     public function fulfill(): void
     {
         foreach ($this->items as $item) {
-            $product = $item->product;
+            $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
 
             if ($product) {
-                $product->update(['stock' => max(0, $product->stock - $item->quantity)]);
+                $product->update(['stock' => max(0, (int) $product->stock - (int) $item->quantity)]);
             }
         }
     }

@@ -32,7 +32,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $bagCount = (int) \App\Models\CartItem::where('session_id', session()->getId())->sum('quantity');
+    return view('welcome', compact('bagCount'));
 })->name('home');
 
 Route::get('/api/lanes', function () {

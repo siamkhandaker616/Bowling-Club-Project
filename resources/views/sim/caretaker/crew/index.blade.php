@@ -272,32 +272,32 @@
             </div>
 
             <aside class="sim-crew-menu card">
-                <a href="#crew" class="sim-crew-menu-item on" data-tab="crew">
+                <a href="#tab-crew" class="sim-crew-menu-item on" data-tab="crew">
                     <span>Group Chat</span>
                     <span class="sim-crew-menu-cnt badge navy">&#128172;</span>
                 </a>
-                <a href="#dm" class="sim-crew-menu-item" data-tab="dm">
+                <a href="#tab-dm" class="sim-crew-menu-item" data-tab="dm">
                     <span>Direct Messages</span>
                     @if ($dms->sum('unread') > 0)
                         <span class="sim-crew-menu-cnt badge coral">{{ $dms->sum('unread') }}</span>
                     @endif
                 </a>
-                <a href="#reported" class="sim-crew-menu-item" data-tab="reported">
+                <a href="#tab-reported" class="sim-crew-menu-item" data-tab="reported">
                     <span>You've Been Reported</span>
                     @if ($accusations->count() > 0)
                         <span class="sim-crew-menu-cnt badge coral">{{ $accusations->count() }}</span>
                     @endif
                 </a>
-                <a href="#relationships" class="sim-crew-menu-item" data-tab="relationships">
+                <a href="#tab-relationships" class="sim-crew-menu-item" data-tab="relationships">
                     <span>Relationship Meter</span>
                 </a>
-                <a href="#ledger" class="sim-crew-menu-item" data-tab="ledger">
+                <a href="#tab-ledger" class="sim-crew-menu-item" data-tab="ledger">
                     <span>Snitch Ledger</span>
                     @if ($ledger->count() > 0)
                         <span class="sim-crew-menu-cnt badge gold">{{ $ledger->count() }}</span>
                     @endif
                 </a>
-                <a href="#history" class="sim-crew-menu-item" data-tab="history">
+                <a href="#tab-history" class="sim-crew-menu-item" data-tab="history">
                     <span>Confrontation History</span>
                 </a>
             </aside>

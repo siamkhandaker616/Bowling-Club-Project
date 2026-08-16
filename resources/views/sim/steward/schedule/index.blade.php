@@ -74,8 +74,8 @@
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ $shift->staff->role }}</span>
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->is_complete ? 'var(--sky)' : 'var(--gold-light)' }};color:var(--navy);border:1px solid var(--navy);">{{ $shift->is_complete ? 'complete' : 'on shift' }}</span>
-                                @if (! $shift->is_complete)
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->status === 'completed' ? 'var(--sky)' : 'var(--gold-light)' }};color:var(--navy);border:1px solid var(--navy);">{{ $shift->status === 'completed' ? 'complete' : ($shift->status === 'cancelled' ? 'cancelled' : 'on shift') }}</span>
+                                @if (in_array($shift->status, ['scheduled', 'in_progress']))
                                     <form method="POST" action="{{ route('steward.schedule.complete', $shift) }}">
                                         @csrf
                                         <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Mark Complete</button>

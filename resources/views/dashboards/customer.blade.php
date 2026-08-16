@@ -110,8 +110,8 @@
                                 <div style="font-family:var(--font-mono);font-size:0.45rem;color:{{ $event->price > 0 ? 'var(--navy)' : 'rgba(248,246,240,0.8)' }};">{{ strtoupper($eventMonth) }}</div>
                             </div>
                             <div style="flex:1;">
-                                <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $event->name }}</div>
-                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $event->date?->format('M j') }} · {{ $event->location ?? 'All Lanes' }}</div>
+                                <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $event->title }}</div>
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $event->date?->format('M j') }} · {{ $event->venue ?? 'All Lanes' }}</div>
                             </div>
                             @if($event->price > 0)
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold);">${{ number_format($event->price, 0) }}</span>

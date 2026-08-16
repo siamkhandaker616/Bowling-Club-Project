@@ -32,8 +32,8 @@
                         <div style="font-family:var(--font-body);font-size:0.7rem;color:var(--navy);margin-top:4px;">{{ $review->body }}</div>
                         <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:4px;">
                             Lane {{ $review->booking?->lane?->lane_number ?? '—' }} · {{ $review->created_at->format('M j, H:i') }}
-                            @if ($review->incident_type)<span style="color:var(--coral-dark);"> · incident: {{ $review->incident_type }}</span>@endif
-                            @if ($review->satisfaction)<span> · satisfaction {{ number_format($review->satisfaction, 1) }}</span>@endif
+                            @if (($review->helpful_count ?? 0) > 0)<span style="color:var(--ok);"> · {{ $review->helpful_count }} helpful</span>@endif
+                            @if (($review->not_helpful_count ?? 0) > 0)<span style="color:var(--coral-dark);"> · {{ $review->not_helpful_count }} not helpful</span>@endif
                         </div>
                     </div>
                 @empty

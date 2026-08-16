@@ -50,6 +50,7 @@ class DayCycle
             'snitches' => [],
             'snitch_bonuses' => 0,
             'turnaways' => 0,
+            'refunds' => 0,
             'matches' => collect(),
             'match_revenue' => 0,
             'league_penalties' => 0,
@@ -70,11 +71,13 @@ class DayCycle
 
         $this->matches->resolveDueMatches($today, $log);
         $this->matches->resolveCompletedMatches($today, $log);
+        $this->matches->generateNextRound($today);
 
         $this->finance($today, $log);
         $this->updateReputation($log);
 
         $cfg->current_day = $cfg->current_day + 1;
+        $cfg->last_advanced_at = now();
         $cfg->save();
 
         $this->ensureSchedule(Clock::date());
@@ -105,9 +108,17 @@ class DayCycle
             $booking->save();
 
             $price = ($booking->visitor->tier ?? 'regular') === 'premium' ? 25.0 : 15.0;
-            if (! $booking->compensation_claimed) {
+
+            if ($booking->compensation_type === 'discount') {
+                $log['revenue'] += round($price * 0.5, 2);
+            } elseif ($booking->compensation_type === 'free_game') {
+                $log['revenue'] += 0;
+            } elseif ($booking->compensation_type === 'refund') {
+                $log['refunds'] += $price;
+            } else {
                 $log['revenue'] += $price;
             }
+
             $log['bookings_served']++;
         }
     }
@@ -241,7 +252,7 @@ class DayCycle
 
         $accidentCost = collect($log['accidents'])->sum(fn ($a) => $a['cost']);
 
-        $expenses = $salaries + $accidentCost;
+        $expenses = $salaries + $accidentCost + ($log['refunds'] ?? 0);
 
         $cfg->total_revenue = $cfg->total_revenue + $log['revenue'];
         $cfg->total_expenses = $cfg->total_expenses + $expenses;

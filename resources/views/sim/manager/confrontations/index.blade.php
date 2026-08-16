@@ -101,7 +101,7 @@
                                 </select>
                                 <button type="submit" class="btn-lane secondary" style="font-size:0.55rem;padding:5px 12px;">Record Response</button>
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">or</span>
-                                <button type="submit" name="auto" value="1" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Auto-Investigate</button>
+                                <button type="submit" name="auto" value="1" formnovalidate class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Auto-Investigate</button>
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">(honesty-weighted confession + DB evidence)</span>
                             </form>
                         @elseif (! $confrontation->manager_verdict)
