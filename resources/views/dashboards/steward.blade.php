@@ -25,7 +25,7 @@
         @include('sim.partials.steward-sidebar')
 
         <!-- LEFT: Today's Schedule -->
-        <div style="display:grid;grid-template-columns:220px 1fr 180px;gap:0;">
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:0;">
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label" style="margin-bottom:8px;">Today's Schedule</div>
             <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
@@ -106,19 +106,8 @@
 
         </div>
 
-        <!-- RIGHT: Quick Actions -->
-        <div style="background:var(--sky-light);border-left:3px solid var(--navy);padding:0.75rem;display:flex;flex-direction:column;gap:6px;align-items:center;">
-            <div class="dash-section-label" style="margin-bottom:2px;width:100%;">Quick Actions</div>
-            <a href="{{ route('steward.schedule.index') }}" class="shoe-tag" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128197;</div><h4 style="font-size:0.6rem;">Schedule</h4></div></a>
-            <a href="{{ route('steward.bans.index') }}" class="shoe-tag white" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128683;</div><h4 style="font-size:0.6rem;">Ban Request</h4></div></a>
-            <a href="{{ route('steward.complaints.index') }}" class="shoe-tag coral" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#9878;</div><h4 style="font-size:0.6rem;">Complaints</h4></div></a>
-            <a href="{{ route('steward.visitors.index') }}" class="shoe-tag" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128100;</div><h4 style="font-size:0.6rem;">Visitors</h4></div></a>
-            <div style="margin-top:auto;padding-top:8px;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-sky" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">MR</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.6rem;margin-top:4px;">{{ ucfirst($user->name) }}</div>
-                <span class="badge-role steward" style="font-size:0.45rem;padding:2px 6px;">Steward</span>
-            </div>
-        </div>
+        <!-- RIGHT rail removed: those links already live in the dock above -->
+
         </div>
 
     </div>

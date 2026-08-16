@@ -6,6 +6,7 @@ use App\Http\Controllers\Sim\Manager\ComplaintController;
 use App\Http\Controllers\Sim\Manager\ConfrontationController;
 use App\Http\Controllers\Sim\Manager\DayController;
 use App\Http\Controllers\Sim\Manager\InventoryController;
+use App\Http\Controllers\Sim\Manager\InventoryPurchaseController;
 use App\Http\Controllers\Sim\Manager\LeagueController;
 use App\Http\Controllers\Sim\Manager\ReviewController;
 use App\Http\Controllers\Sim\Manager\StaffController;
@@ -61,6 +62,13 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
     Route::post('/inventory/{inventory}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
 
+    Route::get('/inventory/purchases', [InventoryPurchaseController::class, 'index'])->name('inventory.purchases.index');
+    Route::post('/inventory/purchases/{purchase}/accept', [InventoryPurchaseController::class, 'accept'])->name('inventory.purchases.accept');
+    Route::post('/inventory/purchases/{purchase}/reject', [InventoryPurchaseController::class, 'reject'])->name('inventory.purchases.reject');
+    Route::get('/inventory/purchases/{payment}/success', [InventoryPurchaseController::class, 'success'])->name('inventory.purchases.success');
+    Route::get('/inventory/purchases/{payment}/fail', [InventoryPurchaseController::class, 'fail'])->name('inventory.purchases.fail');
+    Route::get('/inventory/purchases/{payment}/cancel', [InventoryPurchaseController::class, 'cancel'])->name('inventory.purchases.cancel');
+
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
@@ -74,6 +82,9 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
 
     Route::get('/confrontations', [ConfrontationController::class, 'index'])->name('confrontations.index');
     Route::post('/confrontations', [ConfrontationController::class, 'store'])->name('confrontations.store');
+    Route::get('/confrontations/{confrontation}/interview', [ConfrontationController::class, 'interview'])->name('confrontations.interview');
+    Route::post('/confrontations/{confrontation}/interrogate', [ConfrontationController::class, 'interrogate'])->name('confrontations.interrogate');
+    Route::post('/confrontations/{confrontation}/conclude', [ConfrontationController::class, 'conclude'])->name('confrontations.conclude');
     Route::post('/confrontations/{confrontation}/respond', [ConfrontationController::class, 'respond'])->name('confrontations.respond');
     Route::post('/confrontations/{confrontation}/verdict', [ConfrontationController::class, 'verdict'])->name('confrontations.verdict');
 
@@ -152,3 +163,8 @@ Route::middleware(['auth', 'verified'])->name('reapply.')->group(function () {
     Route::get('/reapply', [ReapplyController::class, 'index'])->name('index');
     Route::post('/reapply', [ReapplyController::class, 'store'])->name('store');
 });
+
+// SSLCommerz IPN callback for inventory purchase bills — server-to-server, no CSRF/session.
+Route::post('/sim/inventory/purchases/ipn', [InventoryPurchaseController::class, 'ipn'])
+    ->name('sim.inventory.purchases.ipn')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);

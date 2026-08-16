@@ -139,13 +139,6 @@
                 @endforeach
             </div>
 
-            <!-- Crew Button -->
-            <a href="{{ route('caretaker.crew.index') }}" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:var(--navy);border-radius:8px;text-decoration:none;cursor:pointer;margin-top:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                <span style="font-family:var(--font-sub);font-size:0.65rem;color:var(--pin-white);">My Crew</span>
-                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--gold);">{{ $relationships->count() }} &#8594;</span>
-            </a>
-
             <!-- Profile -->
             <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--fog);text-align:center;">
                 <div class="ball-avatar ball-sm ball-coral" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr($user->name, strrpos($user->name, ' ') + 1, 1)) }}</span></div>

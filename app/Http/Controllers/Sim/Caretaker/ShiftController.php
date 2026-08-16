@@ -15,7 +15,18 @@ class ShiftController extends Controller
 
         $shifts = Shift::with('lane')->where('staff_id', $staff->id)->orderBy('date', 'desc')->limit(30)->get();
 
-        return view('sim.caretaker.shifts.index', compact('shifts'));
+        $weekStart = now()->copy()->startOfWeek();
+        $weekEnd = now()->copy()->endOfWeek();
+        $weekShifts = Shift::with('lane')
+            ->where('staff_id', $staff->id)
+            ->whereDate('date', '>=', $weekStart->toDateString())
+            ->whereDate('date', '<=', $weekEnd->toDateString())
+            ->get();
+        $weekLabel = $weekStart->format('M j') . ' – ' . $weekEnd->format('M j');
+        $weekTotal = $weekShifts->count();
+        $weekDone = $weekShifts->where('status', 'completed')->count();
+
+        return view('sim.caretaker.shifts.index', compact('shifts', 'weekLabel', 'weekTotal', 'weekDone'));
     }
 
     public function complete(Request $request, Shift $shift)

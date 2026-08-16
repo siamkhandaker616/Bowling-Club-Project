@@ -54,7 +54,7 @@
                         <div style="display:flex;gap:6px;align-items:center;">
                             <form method="POST" action="{{ route('manager.inventory.adjust', $item) }}">
                                 @csrf
-                                <input name="change" type="number" placeholder="±qty" data-stepper="edit" style="width:70px;font-family:var(--font-mono);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;">
+                                <input name="change" type="number" placeholder="±qty" data-stepper="edit" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" style="width:70px;font-family:var(--font-mono);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;">
                                 <button type="submit" style="font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);cursor:pointer;">Apply</button>
                             </form>
                             <form method="POST" action="{{ route('manager.inventory.restock', $item) }}">

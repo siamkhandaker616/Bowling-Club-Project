@@ -67,6 +67,27 @@ class ConfrontationServiceTest extends TestCase
         $this->assertDatabaseHas('staff_events', ['staff_id' => $accused->id, 'event_type' => 'confession']);
     }
 
+    public function test_reporter_penalized_verdict_warns_the_reporter_and_exonerates_the_accused(): void
+    {
+        $this->clubConfig();
+        $accused = $this->makeStaff(['happiness' => 70]);
+        $reporter = $this->makeStaff(['happiness' => 70]);
+
+        $confrontation = $this->makeConfrontation($reporter->id, $accused->id);
+        app(ConfrontationService::class)->respond($confrontation, 'innocent');
+        app(ConfrontationService::class)->verdict($confrontation, 'reporter_penalized');
+
+        $this->assertSame('reporter_penalized', $confrontation->fresh()->manager_verdict);
+        $this->assertSame(70, $accused->fresh()->happiness);
+        $this->assertSame(58, $reporter->fresh()->happiness);
+        $this->assertSame(1, $reporter->fresh()->warnings_count);
+        $this->assertDatabaseHas('penalties', [
+            'staff_id' => $reporter->id,
+            'type' => 'written_warning',
+            'amount_or_hours' => 0,
+        ]);
+    }
+
     public function test_penalized_verdict_creates_a_penalty(): void
     {
         $this->clubConfig();

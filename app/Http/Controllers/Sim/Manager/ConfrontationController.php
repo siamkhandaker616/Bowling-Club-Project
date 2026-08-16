@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Sim\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\Confrontation;
 use App\Models\Staff;
+use App\Models\StaffMessage;
 use App\Services\Simulation\ConfrontationService;
+use App\Services\Simulation\InterrogationEngine;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ConfrontationController extends Controller
@@ -48,17 +51,63 @@ class ConfrontationController extends Controller
 
     public function respond(Request $request, Confrontation $confrontation)
     {
-        $data = $request->validate([
-            'staff_response' => ['nullable', 'in:confessed,bs,innocent'],
-        ]);
-
-        if ($request->boolean('auto')) {
-            $this->service->autoRespond($confrontation);
-            session()->flash('success', 'Investigation complete — system evaluated the accused honesty score and DB evidence.');
-        } else {
-            $this->service->respond($confrontation, $data['staff_response']);
-            session()->flash('success', 'Accused response recorded.');
+        if ($confrontation->staff_response) {
+            return redirect()->route('manager.confrontations.index');
         }
+
+        $this->service->autoRespond($confrontation);
+        session()->flash('success', 'Investigation complete — the accused was weighed against the records.');
+
+        return redirect()->route('manager.confrontations.index');
+    }
+
+    public function interview(Confrontation $confrontation): JsonResponse
+    {
+        if ($confrontation->staff_response) {
+            abort(409, 'This confrontation has already been answered.');
+        }
+
+        $engine = app(InterrogationEngine::class);
+        $engine->openInterview($confrontation);
+
+        $accused = $confrontation->accused;
+
+        return response()->json([
+            'messages' => $engine->transcript($confrontation)->map(fn (StaffMessage $m) => $this->payload($m))->values(),
+            'chips' => $engine->chips(),
+            'accused' => [
+                'id' => $accused->id,
+                'name' => $accused->user->name ?? 'The accused',
+                'initials' => $engine->initials($accused),
+            ],
+        ]);
+    }
+
+    public function interrogate(Request $request, Confrontation $confrontation): JsonResponse
+    {
+        if ($confrontation->staff_response) {
+            abort(409, 'This confrontation has already been answered.');
+        }
+
+        $key = (string) $request->validate(['key' => ['required', 'in:where,log,witness,reporter']])['key'];
+
+        $engine = app(InterrogationEngine::class);
+        $reply = $engine->ask($confrontation, $key);
+
+        return response()->json([
+            'reply' => $this->payload($reply),
+            'chips' => $engine->chips(),
+        ]);
+    }
+
+    public function conclude(Confrontation $confrontation)
+    {
+        if ($confrontation->staff_response) {
+            return redirect()->route('manager.confrontations.index');
+        }
+
+        app(InterrogationEngine::class)->conclude($confrontation);
+        session()->flash('success', 'Investigation concluded.');
 
         return redirect()->route('manager.confrontations.index');
     }
@@ -66,7 +115,7 @@ class ConfrontationController extends Controller
     public function verdict(Request $request, Confrontation $confrontation)
     {
         $data = $request->validate([
-            'verdict' => ['required', 'in:upheld,dismissed,penalized'],
+            'verdict' => ['required', 'in:upheld,dismissed,penalized,reporter_penalized'],
             'penalty_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -75,5 +124,18 @@ class ConfrontationController extends Controller
         session()->flash('success', 'Verdict applied.');
 
         return redirect()->route('manager.confrontations.index');
+    }
+
+    private function payload(StaffMessage $message): array
+    {
+        $staff = $message->staff;
+
+        return [
+            'id' => $message->id,
+            'name' => $staff->user->name ?? 'Crew',
+            'initials' => app(InterrogationEngine::class)->initials($staff),
+            'bubble_type' => $message->bubble_type,
+            'body' => $message->body,
+        ];
     }
 }

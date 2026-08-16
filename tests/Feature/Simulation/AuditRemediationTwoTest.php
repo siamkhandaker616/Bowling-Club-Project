@@ -365,6 +365,20 @@ class AuditRemediationTwoTest extends TestCase
             ->assertSee('Premium');
     }
 
+    public function test_steward_dashboard_drops_the_duplicate_quick_actions_rail(): void
+    {
+        $this->clubConfig();
+        $steward = $this->makeStaff(['role' => 'steward']);
+        $this->makeBooking();
+        $this->makeShift(['staff_id' => $steward->id]);
+
+        $this->actingAs($steward->user)
+            ->get(route('steward.dashboard'))
+            ->assertOk()
+            ->assertSee('Visitor Directory')
+            ->assertDontSee('Quick Actions');
+    }
+
     public function test_caretaker_shifts_render_with_valid_statuses(): void
     {
         $this->clubConfig();
@@ -375,7 +389,9 @@ class AuditRemediationTwoTest extends TestCase
         $this->actingAs($caretaker->user)
             ->get(route('caretaker.shifts.index'))
             ->assertOk()
-            ->assertSee('>Complete</button>', false);
+            ->assertSee('>Complete</button>', false)
+            ->assertSee('This Week')
+            ->assertSee('shifts done');
     }
 
     public function test_manager_reviews_show_helpful_counts(): void

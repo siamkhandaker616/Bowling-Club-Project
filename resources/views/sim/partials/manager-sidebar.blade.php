@@ -5,6 +5,7 @@
         ['route' => 'manager.dashboard',    'label' => 'Overview',      'icon' => '&#127918;'],
         ['route' => 'manager.staff.index',   'label' => 'Staff',         'icon' => '&#128101;'],
         ['route' => 'manager.inventory.index','label' => 'Inventory',    'icon' => '&#128230;'],
+        ['route' => 'manager.inventory.purchases.index','label' => 'Purchase Bills','icon' => '&#128176;'],
         ['route' => 'manager.league.index',  'label' => 'League',       'icon' => '&#127944;'],
         ['route' => 'manager.bookings.index','label' => 'Bookings',      'icon' => '&#127903;'],
         ['route' => 'site.announcements.index','label' => 'Announcements','icon' => '&#128227;'],
