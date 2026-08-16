@@ -45,6 +45,11 @@ return [
         'store_id' => env('SSLCZ_STORE_ID'),
         'store_password' => env('SSLCZ_STORE_PASSWORD'),
         'sandbox' => env('SSLCZ_SANDBOX', true),
+        'shipping_address' => env('SSLCZ_SHIPPING_ADDRESS', 'Dhaka'),
+        'shipping_city' => env('SSLCZ_SHIPPING_CITY', 'Dhaka'),
+        'shipping_state' => env('SSLCZ_SHIPPING_STATE', 'Dhaka'),
+        'shipping_postcode' => env('SSLCZ_SHIPPING_POSTCODE', '1000'),
+        'shipping_country' => env('SSLCZ_SHIPPING_COUNTRY', 'Bangladesh'),
     ],
 
     'groq' => [
