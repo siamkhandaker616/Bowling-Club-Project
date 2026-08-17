@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Manager Dashboard</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--navy);">Day {{ $stats['current_day'] }}{{ $stats['bad_day_mode'] ? ' · ⚠ BAD DAY' : '' }}</span>
-                <span class="badge-role manager">Manager</span>
+
             </div>
         </div>
     </x-slot>
@@ -179,7 +179,7 @@
                         </div>
                         <div style="text-align:center;">
                             <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['league_penalties'] ?? 0) > 0 ? 'var(--coral)' : 'var(--sky-dark)' }};">{{ $dayReport['league_penalties'] ?? 0 }}</div>
-                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">PREP PENALTIES</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCH PREP PENALTIES</div>
                         </div>
                     </div>
                     @if (count($dayReport['matches'] ?? []))
@@ -204,7 +204,7 @@
                         @foreach($recentEvents->take(6) as $event)
                             <div>
                                 <span style="color:var(--navy);font-weight:700;">{{ $event->staff->user->name ?? 'Staff' }}</span>
-                                · {{ ucfirst(str_replace('_', ' ', $event->event_type)) }}
+                                · {{ \App\Helpers\Label::staffEventType($event->event_type) }}
                                 @if($event->description) — {{ $event->description }} @endif
                             </div>
                         @endforeach

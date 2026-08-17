@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Match Prep</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--navy);">{{ $today->format('D, M j Y') }}</span>
-                <span class="badge-role caretaker">Caretaker</span>
+
             </div>
         </div>
     </x-slot>
@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <div class="dash-section-label" style="margin-bottom:8px;">Prep Queue — next {{ \App\Services\Simulation\MatchService::PREP_WINDOW_DAYS }} days</div>
+            <div class="dash-section-label" style="margin-bottom:8px;">Prep Queue — next {{ $prepDays }} days</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
                 @forelse ($fixtures as $row)
                     @php

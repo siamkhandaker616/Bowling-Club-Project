@@ -1,6 +1,7 @@
 @php
     $type = 'neutral';
     $message = null;
+    $toastImage = session('toast_image');
 
     if (session('success')) {
         $type = 'success';
@@ -21,8 +22,11 @@
 
 @if ($message)
     <div id="x-toast" role="status" class="toast {{ $type === 'error' ? 'err' : '' }}" style="position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;">
+        @if ($toastImage)
+            <img src="{{ $toastImage }}" alt="" style="position:absolute;top:-18px;left:-14px;width:64px;height:64px;object-fit:cover;border:3px solid var(--pin-white);box-shadow:2px 3px 8px rgba(0,0,0,.35);border-radius:2px;transform:rotate(-8deg);z-index:1;pointer-events:none;">
+        @endif
         <span class="t-ball"></span>
-        <span>{{ $message }}</span>
+        <span style="white-space:pre-line;">{{ $message }}</span>
     </div>
     <script>
     (function() {
@@ -33,7 +37,7 @@
         setTimeout(function() {
             t.classList.remove('show');
             setTimeout(function() { t.remove(); }, 400);
-        }, 3000);
+        }, 4000);
     })();
     </script>
 @endif

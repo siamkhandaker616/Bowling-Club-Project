@@ -9,7 +9,7 @@
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-lane danger" style="font-size:0.6rem;padding:5px 14px;">Fire</button>
                 </form>
-                <span class="badge-role manager">Manager</span>
+
             </div>
         </div>
     </x-slot>
@@ -34,7 +34,7 @@
                         <span class="ball-initials">{{ strtoupper(substr($staff->user->name, 0, 1)) }}{{ strtoupper(substr(str_replace(' ', '', $staff->user->name), -1)) }}</span>
                     </div>
                     <div style="font-family:var(--font-sub);font-size:0.8rem;margin-top:8px;">{{ $staff->user->name }}</div>
-                    <span class="badge-role {{ $staff->role === 'club_manager' ? 'manager' : ($staff->role === 'steward' ? 'steward' : 'caretaker') }}" style="font-size:0.5rem;margin-top:4px;">{{ $staff->role }}</span>
+                    <span class="badge-role {{ $staff->role === 'club_manager' ? 'manager' : ($staff->role === 'steward' ? 'steward' : 'caretaker') }}" style="font-size:0.5rem;margin-top:4px;">{{ \App\Helpers\Label::staffRole($staff->role) }}</span>
                     <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:6px;">Hired {{ $staff->hire_date?->format('M j, Y') ?? '—' }}</div>
                     <div style="font-family:var(--font-mono);font-size:0.55rem;color:{{ $staff->is_active ? 'var(--sky-dark)' : 'var(--coral-dark)' }};margin-top:2px;">{{ $staff->is_active ? '● Active' : '○ Inactive' }}</div>
                 </div>
@@ -90,30 +90,62 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;">
                         <div class="dash-section-label">Award Bonus</div>
-                        <form method="POST" action="{{ route('manager.staff.bonus', $staff) }}" style="display:grid;gap:8px;">
+                        <form method="POST" action="{{ route('manager.staff.bonus', $staff) }}" class="gutter-form" style="display:grid;gap:8px;">
                             @csrf
-                            <select name="type" class="fold-select" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                                <option value="cash">Cash</option>
-                                <option value="time_off">Time Off</option>
-                                <option value="recognition">Recognition</option>
-                            </select>
-                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required data-stepper="edit" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                            <input name="reason" type="text" placeholder="Reason" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <div class="select-wrap">
+                                <select name="type" class="input select">
+                                    <option value="cash">Cash</option>
+                                    <option value="time_off">Time Off</option>
+                                    <option value="recognition">Recognition</option>
+                                </select>
+                                <span class="select-arrow">&#9662;</span>
+                            </div>
+                            <div class="gutter-field">
+                                <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" data-stepper="edit" class="input">
+                                <div class="gutter-err">Amount is required</div>
+                                <div class="gutter-flag">&#10003;</div>
+                            </div>
+                            <input name="reason" type="text" placeholder="Reason" class="input">
+                            <div class="lane-stage">
+                                <div class="pin-rack">
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span></div>
+                                </div>
+                                <span class="ball-dot"></span>
+                            </div>
                             <button type="submit" class="btn-lane primary" style="font-size:0.6rem;padding:5px 12px;">Give Bonus</button>
                         </form>
                     </div>
 
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;">
                         <div class="dash-section-label">Issue Penalty</div>
-                        <form method="POST" action="{{ route('manager.staff.penalty', $staff) }}" style="display:grid;gap:8px;">
+                        <form method="POST" action="{{ route('manager.staff.penalty', $staff) }}" class="gutter-form" style="display:grid;gap:8px;">
                             @csrf
-                            <select name="type" class="fold-select" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                                <option value="pay_dock">Pay Dock</option>
-                                <option value="extra_hours">Extra Hours</option>
-                                <option value="written_warning">Written Warning</option>
-                            </select>
-                            <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" required data-stepper="edit" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                            <input name="reason" type="text" placeholder="Reason" style="font-family:var(--font-body);font-size:0.8rem;padding:6px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <div class="select-wrap">
+                                <select name="type" class="input select">
+                                    <option value="pay_dock">Pay Dock</option>
+                                    <option value="extra_hours">Extra Hours</option>
+                                    <option value="written_warning">Written Warning</option>
+                                </select>
+                                <span class="select-arrow">&#9662;</span>
+                            </div>
+                            <div class="gutter-field">
+                                <input name="amount_or_hours" type="number" step="0.01" min="0" placeholder="$ or hours" data-stepper="edit" class="input">
+                                <div class="gutter-err">Amount is required</div>
+                                <div class="gutter-flag">&#10003;</div>
+                            </div>
+                            <input name="reason" type="text" placeholder="Reason" class="input">
+                            <div class="lane-stage">
+                                <div class="pin-rack">
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                                    <div class="pin-row"><span class="pin"></span></div>
+                                </div>
+                                <span class="ball-dot"></span>
+                            </div>
                             <button type="submit" class="btn-lane danger" style="font-size:0.6rem;padding:5px 12px;">Issue Penalty</button>
                         </form>
                     </div>
@@ -124,7 +156,7 @@
                     <div style="display:flex;flex-direction:column;gap:6px;">
                         @forelse ($staff->bonuses as $b)
                             <div style="display:flex;justify-content:space-between;padding:6px 8px;background:var(--sky);border-radius:8px;border-left:3px solid var(--sky-dark);">
-                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--sky-dark);">BONUS · {{ $b->type }} · {{ $b->amount_or_hours }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--sky-dark);">BONUS · {{ \App\Helpers\Label::bonusType($b->type) }} · {{ $b->amount_or_hours }}</span>
                                 <span style="font-family:var(--font-body);font-size:0.65rem;color:var(--slate);">{{ $b->reason }}</span>
                             </div>
                         @empty
@@ -132,7 +164,7 @@
                         @endforelse
                         @forelse ($staff->penalties as $p)
                             <div style="display:flex;justify-content:space-between;padding:6px 8px;background:var(--coral-light);border-radius:8px;border-left:3px solid var(--coral);">
-                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--coral-dark);">PENALTY · {{ $p->type }} · {{ $p->amount_or_hours }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--coral-dark);">PENALTY · {{ \App\Helpers\Label::penaltyType($p->type) }} · {{ $p->amount_or_hours }}</span>
                                 <span style="font-family:var(--font-body);font-size:0.65rem;color:var(--slate);">{{ $p->reason }}</span>
                             </div>
                         @empty
@@ -150,7 +182,7 @@
                         @forelse ($staff->staffEvents->sortByDesc('created_at')->take(12) as $event)
                             <div style="display:flex;gap:8px;align-items:center;">
                                 <span style="color:{{ $event->happiness_change > 0 ? 'var(--sky-dark)' : ($event->happiness_change < 0 ? 'var(--coral)' : 'var(--fog)') }};">{{ $event->happiness_change > 0 ? '+' : '' }}{{ $event->happiness_change }}</span>
-                                <span>{{ $event->event_type }} — {{ $event->description }}</span>
+                                <span>{{ \App\Helpers\Label::staffEventType($event->event_type) }} — {{ $event->description }}</span>
                             </div>
                         @empty
                             <span>No recorded events.</span>

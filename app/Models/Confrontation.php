@@ -9,7 +9,7 @@ class Confrontation extends Model
 {
     protected $fillable = [
         'reporter_staff_id', 'accused_staff_id', 'incident_type',
-        'incident_description', 'db_verified', 'staff_response',
+        'incident_description', 'db_verified', 'staff_response', 'response_text',
         'investigation_result', 'manager_verdict', 'date', 'happiness_impacts',
     ];
 

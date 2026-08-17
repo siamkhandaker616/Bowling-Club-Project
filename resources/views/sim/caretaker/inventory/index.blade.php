@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Inventory</h2>
-            <span class="badge-role caretaker">Caretaker</span>
+
         </div>
     </x-slot>
 
@@ -48,7 +48,7 @@
                             @endif
                             <div style="min-width:0;">
                                 <div style="display:flex;align-items:center;gap:8px;">
-                                    <span class="badge-role" style="background:var(--mist);color:var(--slate);border:1px solid var(--fog);font-family:var(--font-mono);font-size:0.52rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $item->category }}</span>
+                                    <span class="badge-role" style="background:var(--mist);color:var(--slate);border:1px solid var(--fog);font-family:var(--font-mono);font-size:0.52rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ ucfirst($item->category) }}</span>
                                     <span style="font-family:var(--font-sub);font-size:0.75rem;">{{ $item->name }}</span>
                                 </div>
                                 <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
@@ -57,18 +57,22 @@
                                     </div>
                                     <span style="font-family:var(--font-mono);font-size:0.62rem;font-weight:700;color:{{ $item->isLowStock() ? 'var(--coral-dark)' : 'var(--navy)' }};">{{ $item->quantity }} / {{ $item->max_quantity }}</span>
                                 </div>
-                                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">reorder @ {{ $item->reorder_threshold }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">Restock at {{ $item->reorder_threshold }}</span>
                             </div>
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;">
-                            <form method="POST" action="{{ route('caretaker.inventory.adjust', $item) }}" style="display:flex;align-items:center;gap:6px;">
+                            <form method="POST" action="{{ route('caretaker.inventory.adjust', $item) }}" class="gutter-form" style="display:flex;align-items:center;gap:6px;">
                                 @csrf
-                                <input name="change" type="number" step="1" value="0" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" data-stepper="edit" style="width:64px;font-family:var(--font-mono);font-size:0.7rem;padding:4px 6px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);text-align:center;">
-                                <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;" title="Positive = restock, negative = usage">Adjust</button>
+                                <div class="stepper">
+                                    <button type="button" data-stepper="edit" data-dir="-1">-</button>
+                                    <input name="change" type="number" step="1" value="0" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" data-stepper="edit" class="input" style="width:64px;text-align:center;">
+                                    <button type="button" data-stepper="edit" data-dir="1">+</button>
+                                </div>
+                                <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;" title="Log usage or restock">Adjust</button>
                             </form>
                             <form method="POST" action="{{ route('caretaker.inventory.restock', $item) }}">
                                 @csrf
-                                <button type="submit" class="btn-lane solid" style="font-size:0.55rem;padding:4px 10px;" title="Fill to max capacity (costs money)" @if ($full) disabled @endif>Restock</button>
+                                <button type="submit" class="btn-lane solid" style="font-size:0.55rem;padding:4px 10px;" title="Top up stock" @if ($full) disabled @endif>Restock</button>
                             </form>
                         </div>
                     </div>
@@ -106,7 +110,7 @@
                 <span class="dash-stat-label">Low Stock</span>
             </div>
             <div class="dash-section-label" style="margin-top:16px;">How it works</div>
-            <p style="font-family:var(--font-body);font-size:0.6rem;color:var(--slate);margin:6px 0 0;line-height:1.5;">Use <span style="font-family:var(--font-mono);font-weight:700;">&#8722;</span>/<span style="font-family:var(--font-mono);font-weight:700;">&#43;</span> to nudge the count, or type a delta and hit Adjust. <span style="font-family:var(--font-mono);font-weight:700;">Restock</span> tops the shelf to max — any added stock raises a purchase bill the manager must accept and pay for.</p>
+            <p style="font-family:var(--font-body);font-size:0.6rem;color:var(--slate);margin:6px 0 0;line-height:1.5;">Type a &#43; or &#8722; change and hit Adjust. Restock refills to max.</p>
         </div>
     </div>
     </div>

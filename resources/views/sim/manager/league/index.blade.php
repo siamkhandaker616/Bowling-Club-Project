@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">League Office</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--navy);">{{ $today->format('D, M j Y') }}</span>
-                <span class="badge-role manager">Manager</span>
+
             </div>
         </div>
     </x-slot>

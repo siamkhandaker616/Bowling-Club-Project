@@ -26,7 +26,9 @@ class PrepController extends Controller
 
         $lowStock = Inventory::whereColumn('quantity', '<=', 'reorder_threshold')->orderBy('name')->get();
 
-        return view('sim.caretaker.prep.index', compact('today', 'fixtures', 'lowStock'));
+        $prepDays = \App\Services\Simulation\MatchService::PREP_WINDOW_DAYS;
+
+        return view('sim.caretaker.prep.index', compact('today', 'fixtures', 'lowStock', 'prepDays'));
     }
 
     public function prepare(Request $request, Fixture $fixture, string $kind)

@@ -108,7 +108,7 @@
                         <span style="font-family:var(--font-mono);color:var(--gold);">({{ $team->top_member->average_score }})</span>
                     </div>
                     @else
-                    <div style="font-family:var(--font-sub);font-size:0.75rem;color:var(--slate);">Roster listing soon.</div>
+                    <div style="font-family:var(--font-sub);font-size:0.75rem;color:var(--slate);">Team rosters are being typed up — check back after the next fixture.</div>
                     @endif
                 </div>
                 @endforeach

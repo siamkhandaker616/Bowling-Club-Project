@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Snitch Inbox</h2>
-            <span class="badge-role steward">Steward</span>
+
         </div>
     </x-slot>
 
@@ -31,9 +31,9 @@
                                 Overheard: &ldquo;{{ $report->quote ?? 'trash-talking management' }}&rdquo;
                             </div>
                             <div style="display:flex;gap:0.6rem;margin-top:0.75rem;flex-wrap:wrap;">
-                                <form method="POST" action="{{ route('steward.snitch.escalate', $report) }}">
+                                <form method="POST" action="{{ route('steward.snitch.escalate', $report) }}" class="gutter-form">
                                     @csrf
-                                    <input name="note" type="text" placeholder="Optional steward note" maxlength="300" style="font-family:var(--font-body);font-size:0.65rem;padding:0.4rem 0.6rem;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);margin-right:0.4rem;">
+                                    <input name="note" type="text" placeholder="Optional steward note" maxlength="300" class="input" style="margin-right:0.4rem;">
                                     <button type="submit" class="btn btn-xs">Escalate to Manager &#8594;</button>
                                 </form>
                                 <form method="POST" action="{{ route('steward.snitch.dismiss', $report) }}">
@@ -60,10 +60,10 @@
                     @forelse ($recent as $report)
                         <div style="display:flex;align-items:center;gap:0.5rem;border-bottom:1px dashed var(--fog);padding:0.6rem 0.2rem;">
                             <span style="font-family:var(--font-sub);font-size:0.74rem;color:var(--navy);font-weight:700;min-width:150px;">{{ $report->reporter->user->name ?? 'Caretaker' }} &#8594; {{ $report->accused->user->name ?? 'Coworker' }}</span>
-                            <span class="badge {{ match($report->status) { 'escalated' => 'sky', 'resolved' => 'ok', default => 'coral' } }}" style="font-size:0.52rem;">{{ strtoupper($report->status) }}</span>
+                            <span class="badge {{ match($report->status) { 'escalated' => 'sky', 'resolved' => 'ok', default => 'coral' } }}" style="font-size:0.52rem;">{{ \App\Helpers\Label::complaintStatus($report->status) }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ $report->created_at->format('M j') }}</span>
                             @if ($report->confrontation && $report->confrontation->manager_verdict)
-                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold-dust);">verdict: {{ $report->confrontation->manager_verdict }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold-dust);">verdict: {{ \App\Helpers\Label::confrontationVerdict($report->confrontation->manager_verdict) }}</span>
                             @endif
                         </div>
                     @empty

@@ -12,7 +12,7 @@
                         <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--gold);color:var(--navy);">&#9889; L{{ $lane->lane_number }} LOW OIL</span>
                     @endforeach
                 </div>
-                <span class="badge-role caretaker">Caretaker</span>
+
             </div>
         </div>
     </x-slot>
@@ -46,7 +46,7 @@
                     <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:{{ $bg }};border-radius:6px;border-left:3px solid {{ $border }};">
                         <div class="{{ $pinClass }}" style="transform:scale(0.7);margin:-8px -4px;"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
                         <div style="flex:1;">
-                            <div style="font-family:var(--font-sub);font-size:0.6rem;">{{ ucfirst($shift->time_slot) }} · Lane {{ $shift->lane?->lane_number ?? '?' }}</div>
+                            <div style="font-family:var(--font-sub);font-size:0.6rem;">{{ \App\Helpers\Label::timeSlotFull($shift->time_slot) }} · Lane {{ $shift->lane?->lane_number ?? '?' }}</div>
                             <div style="font-family:var(--font-mono);font-size:0.45rem;color:{{ $isCompleted ? 'var(--slate)' : 'var(--navy)' }};">{{ $isCompleted ? 'Done' : 'Scheduled' }}</div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                             <div>
                                 <span style="color:var(--navy);font-weight:700;">{{ $conf->reporter->user->name ?? 'Staff' }}</span>
                                 reported {{ $conf->accused->user->name ?? 'Staff' }}
-                                @if($conf->manager_verdict) — Verdict: {{ $conf->manager_verdict }} @endif
+                                @if($conf->manager_verdict) — Verdict: {{ \App\Helpers\Label::confrontationVerdict($conf->manager_verdict) }} @endif
                             </div>
                         @endforeach
                     </div>

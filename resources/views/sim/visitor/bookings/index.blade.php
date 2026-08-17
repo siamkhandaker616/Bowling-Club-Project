@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">My Bookings</h2>
-            <span class="badge-role member">Visitor</span>
+
         </div>
     </x-slot>
 
@@ -20,10 +20,10 @@
             @forelse ($bookings as $booking)
                 <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;">
                     <div style="display:flex;gap:10px;align-items:center;">
-                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">{{ $booking->time_slot }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">{{ \App\Helpers\Label::timeSlot($booking->time_slot) }}</span>
                         <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);">{{ $booking->date->format('M j, Y') }}</span>
                         <span style="font-family:var(--font-sub);font-size:0.75rem;">Lane {{ $booking->lane?->lane_number ?? '—' }}</span>
-                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ match($booking->status) { 'confirmed' => 'var(--sky)', 'completed' => 'var(--mist)', 'pending' => 'var(--gold-light)', default => 'var(--coral-light)' } }};color:var(--navy);border:1px solid var(--navy);">{{ $booking->status }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ match($booking->status) { 'confirmed' => 'var(--sky)', 'completed' => 'var(--mist)', 'pending' => 'var(--gold-light)', default => 'var(--coral-light)' } }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::bookingStatus($booking->status) }}</span>
                         @if ($booking->queue_position)
                             <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--gold-light);color:var(--gold-dust);border:1px solid var(--gold);">Queue #{{ $booking->queue_position }}</span>
                         @endif

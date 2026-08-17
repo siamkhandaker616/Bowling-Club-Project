@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Visitor & Staff Reviews</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 

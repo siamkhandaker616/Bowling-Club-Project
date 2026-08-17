@@ -79,7 +79,7 @@
     $cfg = \App\Models\ClubConfig::singleton();
     $day = $role === 'admin' ? $cfg->current_day : null;
     $roleLabels = [
-        'admin' => 'MANAGER &middot; REP ' . $cfg->reputation,
+        'admin' => 'MANAGER &middot; REPUTATION ' . $cfg->reputation,
         'steward' => 'STEWARD',
         'caretaker' => 'CARETAKER &middot; LANE CREW',
         'customer' => 'CLIENT &middot; MEMBER',
@@ -105,15 +105,9 @@
     @endif
 
     @foreach ($dock['links'] as $link)
-        @if (! empty($link['off']))
-            <span class="mod-link" style="opacity:.4;cursor:not-allowed;" title="Coming soon">
-                <span class="ml-dot"></span><span class="ml-num">{{ $link['num'] }}</span>{{ $link['label'] }}
-            </span>
-        @else
             <a href="{{ route($link['route']) }}" class="mod-link {{ $on($link['route']) ? 'on' : '' }}">
                 <span class="ml-dot"></span><span class="ml-num">{{ $link['num'] }}</span>{{ $link['label'] }}
             </a>
-        @endif
     @endforeach
 
     @if (! empty($dock['actions']))

@@ -21,4 +21,4 @@
 /vendor
 /bootstrap/cache/*.php
 Thumbs.db
-/docs
+/docs/docs

@@ -27,7 +27,7 @@ class CaretakerInventoryTest extends TestCase
             ->assertOk()
             ->assertSee('Lane Oil')
             ->assertSee('4 / 20')
-            ->assertSee('reorder @ 5')
+            ->assertSee('Restock at 5')
             ->assertSee('Adjust')
             ->assertSee('Restock');
     }

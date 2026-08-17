@@ -49,7 +49,16 @@ class ComplaintController extends Controller
 
         $this->applyCompensation($complaint, $data['compensation_type'] ?? null);
 
-        session()->flash('success', 'Complaint #' . $complaint->id . ' resolved' . ($matched->isNotEmpty() ? ' — matched ' . $matched->count() . ' accident(s) in the log.' : '') . '.');
+        $compensationMsg = match ($data['compensation_type'] ?? null) {
+            'apology' => ' — apology issued, +2 visitor rep, +1 club rep.',
+            'refund' => ' — refund credited ($50 to expenses), +5 visitor rep, +2 club rep.',
+            'discount' => ' — discount applied, +3 visitor rep, +1 club rep.',
+            'free_game' => ' — free game flagged on next booking, +4 visitor rep, +2 club rep.',
+            'priority_queue' => ' — visitor promoted in queue.',
+            default => '',
+        };
+
+        session()->flash('success', 'Complaint #' . $complaint->id . ' resolved' . $compensationMsg . ($matched->isNotEmpty() ? ' — matched ' . $matched->count() . ' accident(s).' : '.'));
 
         return redirect()->route('manager.complaints.index');
     }
@@ -66,20 +75,76 @@ class ComplaintController extends Controller
 
     private function applyCompensation(Complaint $complaint, ?string $type): void
     {
+        $cfg = ClubConfig::singleton();
+        $visitor = $complaint->visitor;
+
         if ($type === 'apology') {
-            $cfg = ClubConfig::singleton();
             $cfg->reputation = max(0, min(100, $cfg->reputation + 1));
             $cfg->save();
+
+            if ($visitor) {
+                $visitor->reputation_score = max(0, min(100, $visitor->reputation_score + 2));
+                $visitor->save();
+            }
 
             return;
         }
 
-        if ($type === 'free_game' || $type === 'refund' || $type === 'discount') {
+        if ($type === 'refund') {
+            $cfg->reputation = max(0, min(100, $cfg->reputation + 2));
+            $cfg->total_expenses = (float) $cfg->total_expenses + 50;
+            $cfg->save();
+
+            if ($visitor) {
+                $visitor->reputation_score = max(0, min(100, $visitor->reputation_score + 5));
+                $visitor->save();
+            }
+
             $booking = $this->nextBooking($complaint);
 
             if ($booking) {
                 $booking->compensation_claimed = true;
-                $booking->compensation_type = $type;
+                $booking->compensation_type = 'refund';
+                $booking->save();
+            }
+
+            return;
+        }
+
+        if ($type === 'discount') {
+            $cfg->reputation = max(0, min(100, $cfg->reputation + 1));
+            $cfg->save();
+
+            if ($visitor) {
+                $visitor->reputation_score = max(0, min(100, $visitor->reputation_score + 3));
+                $visitor->save();
+            }
+
+            $booking = $this->nextBooking($complaint);
+
+            if ($booking) {
+                $booking->compensation_claimed = true;
+                $booking->compensation_type = 'discount';
+                $booking->save();
+            }
+
+            return;
+        }
+
+        if ($type === 'free_game') {
+            $cfg->reputation = max(0, min(100, $cfg->reputation + 2));
+            $cfg->save();
+
+            if ($visitor) {
+                $visitor->reputation_score = max(0, min(100, $visitor->reputation_score + 4));
+                $visitor->save();
+            }
+
+            $booking = $this->nextBooking($complaint);
+
+            if ($booking) {
+                $booking->compensation_claimed = true;
+                $booking->compensation_type = 'free_game';
                 $booking->save();
             }
 

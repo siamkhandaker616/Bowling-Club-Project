@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Inventory Management</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -42,7 +40,7 @@
                     <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;">
                         <div style="flex:1;min-width:180px;">
                             <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $item->name }}</div>
-                            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ $item->category }} · ${{ $item->cost_per_unit }}/unit · {{ $item->condition }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ ucfirst($item->category) }} · ${{ $item->cost_per_unit }}/unit · {{ \App\Helpers\Label::inventoryCondition($item->condition) }}</div>
                         </div>
                         <div style="flex:1;">
                             <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.6rem;margin-bottom:4px;">
@@ -52,10 +50,14 @@
                             <div class="sim-stock"><div style="width:{{ $pct }}%;background:{{ $barColor }};"></div></div>
                         </div>
                         <div style="display:flex;gap:6px;align-items:center;">
-                            <form method="POST" action="{{ route('manager.inventory.adjust', $item) }}">
+                            <form method="POST" action="{{ route('manager.inventory.adjust', $item) }}" class="gutter-form">
                                 @csrf
-                                <input name="change" type="number" placeholder="±qty" data-stepper="edit" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" style="width:70px;font-family:var(--font-mono);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;">
-                                <button type="submit" style="font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;background:var(--pin-white);cursor:pointer;">Apply</button>
+                                <div class="stepper">
+                                    <button type="button" data-stepper="edit" data-dir="-1">-</button>
+                                    <input name="change" type="number" placeholder="±qty" data-stepper="edit" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" class="input" style="width:70px;text-align:center;">
+                                    <button type="button" data-stepper="edit" data-dir="1">+</button>
+                                </div>
+                                <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Apply</button>
                             </form>
                             <form method="POST" action="{{ route('manager.inventory.restock', $item) }}">
                                 @csrf

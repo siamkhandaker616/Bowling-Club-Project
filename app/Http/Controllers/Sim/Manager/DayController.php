@@ -55,7 +55,12 @@ class DayController extends Controller
         $cfg->bad_day_mode = ! $cfg->bad_day_mode;
         $cfg->save();
 
-        session()->flash('success', $cfg->bad_day_mode ? 'Bad Day mode ON — expect trouble tomorrow.' : 'Bad Day mode OFF.');
+        if ($cfg->bad_day_mode) {
+            session()->flash('toast_image', '/images/fluffy.png');
+            session()->flash('success', "Meow!\nMarcus brought his furry friend along today");
+        } else {
+            session()->flash('success', "Phew! Kitty's finally gone home");
+        }
 
         return redirect()->back();
     }

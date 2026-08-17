@@ -7,7 +7,7 @@
                 @if ($pendingBills->count())
                     <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--gold);">${{ number_format($pendingTotal, 2) }} awaiting approval</span>
                 @endif
-                <span class="badge-role manager">Manager</span>
+
             </div>
         </div>
     </x-slot>
@@ -35,7 +35,7 @@
                         <div style="flex:1;min-width:180px;">
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <span style="font-family:var(--font-sub);font-size:0.75rem;">{{ $bill->item_name }}</span>
-                                <span class="badge-role" style="background:var(--pin-white);color:{{ $statusColor }};border:2px solid {{ $statusColor }};font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $bill->status }}</span>
+                                <span class="badge-role" style="background:var(--pin-white);color:{{ $statusColor }};border:2px solid {{ $statusColor }};font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ \App\Helpers\Label::billStatus($bill->status) }}</span>
                                 @if ($bill->auto_approved)
                                     <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">auto-approved</span>
                                 @endif

@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Steward Dashboard</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--pin-white);">{{ $stats['checked_in'] }} checked in</span>
-                <span class="badge-role steward">Steward</span>
+
             </div>
         </div>
     </x-slot>
@@ -47,7 +47,7 @@
                                 @php $b = $slotBookings->first(); @endphp
                                 <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark);">
                                     <div style="font-family:var(--font-sub);font-size:0.65rem;">Lane {{ $b->lane?->lane_number ?? '?' }} · {{ $b->visitor->name ?? 'Guest' }}</div>
-                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ $b->status }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ \App\Helpers\Label::bookingStatus($b->status) }}</div>
                                 </div>
                             @else
                                 @php $s = $slotShifts->first(); @endphp
@@ -96,7 +96,7 @@
                         <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;{{ !$loop->last ? 'border-bottom:1px solid var(--fog);' : '' }}gap:8px;align-items:center;">
                             <div class="ball-avatar ball-sm {{ $ballColor }}"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ $initials }}</span></div>
                             <div><div style="font-family:var(--font-sub);font-size:0.7rem;">{{ $v->name }}</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $v->email ?? '' }}</div></div>
-                            <span class="badge-role {{ $v->tier === 'premium' ? 'member' : 'steward' }}" style="font-size:0.5rem;width:fit-content;">{{ ucfirst($v->tier) }}</span>
+                            <span class="badge-role {{ $v->tier === 'premium' ? 'member' : 'steward' }}" style="font-size:0.5rem;width:fit-content;">{{ \App\Helpers\Label::tier($v->tier) }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.6rem;">{{ $v->bookings_count ?? 0 }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.55rem;color:{{ $v->is_banned ? 'var(--coral-dark)' : 'var(--sky-dark)' }};">{{ $v->is_banned ? '&#10008; Banned' : '&#9679; Active' }}</span>
                         </div>

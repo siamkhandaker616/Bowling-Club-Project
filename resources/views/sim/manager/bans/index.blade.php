@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Ban Requests</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -34,9 +32,9 @@
                             @endif
                         </div>
                         <div style="display:flex;flex-direction:column;gap:6px;min-width:160px;">
-                            <form method="POST" action="{{ route('manager.bans.approve', $request) }}">
+                            <form method="POST" action="{{ route('manager.bans.approve', $request) }}" class="gutter-form">
                                 @csrf
-                                <input name="notes" type="text" placeholder="Admin notes" style="width:100%;font-family:var(--font-body);font-size:0.65rem;padding:4px 8px;border:2px solid var(--navy);border-radius:6px;margin-bottom:4px;">
+                                <input name="notes" type="text" placeholder="Admin notes" class="input" style="margin-bottom:4px;">
                                 <button type="submit" class="btn-lane primary" style="width:100%;font-size:0.55rem;padding:5px 10px;">Approve Ban</button>
                             </form>
                             <form method="POST" action="{{ route('manager.bans.deny', $request) }}">
@@ -60,7 +58,7 @@
                             <span style="font-family:var(--font-sub);font-size:0.7rem;">{{ $request->visitor->name }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-left:8px;">{{ $request->reviewed_at?->format('M j, H:i') }}</span>
                         </div>
-                        <span class="ban-badge" style="background:{{ $request->status === 'approved' ? 'var(--sky)' : 'var(--coral-light)' }};color:{{ $request->status === 'approved' ? 'var(--sky-dark)' : 'var(--coral-dark)' }};border:1px solid {{ $request->status === 'approved' ? 'var(--sky-dark)' : 'var(--coral)' }};">{{ $request->status }}</span>
+                        <span class="ban-badge" style="background:{{ $request->status === 'approved' ? 'var(--sky)' : 'var(--coral-light)' }};color:{{ $request->status === 'approved' ? 'var(--sky-dark)' : 'var(--coral-dark)' }};border:1px solid {{ $request->status === 'approved' ? 'var(--sky-dark)' : 'var(--coral)' }};">{{ \App\Helpers\Label::banStatus($request->status) }}</span>
                     </div>
                 @empty
                     <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">No decisions yet.</div>

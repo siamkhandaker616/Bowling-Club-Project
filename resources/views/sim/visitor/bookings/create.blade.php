@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Book a Lane</h2>
-            <span class="badge-role member">Visitor</span>
+
         </div>
     </x-slot>
 
@@ -18,7 +18,7 @@
 
         @if (! $visitor)
             <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
-                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--slate);">No visitor profile is linked to your account yet. The simulation seeds visitors automatically — check back soon.</span>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--slate);">No visitor profile is linked to your account yet. The front desk auto-registers walk-in guests — check back on your next visit.</span>
             </div>
         @elseif ($visitor->is_banned)
             <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
@@ -52,7 +52,7 @@
                             </div>
                             <div class="br-lane-strip">
                                 @foreach ($lanes as $lane)
-                                    <div class="br-lane{{ $selectedLaneId === $lane->id ? ' on' : '' }}" data-v="{{ $lane->id }}">Lane {{ $lane->lane_number }}<small>{{ $lane->status }}</small></div>
+                                    <div class="br-lane{{ $selectedLaneId === $lane->id ? ' on' : '' }}" data-v="{{ $lane->id }}">Lane {{ $lane->lane_number }}<small>{{ \App\Helpers\Label::laneStatus($lane->status) }}</small></div>
                                 @endforeach
                             </div>
                             <input type="hidden" name="lane_id" value="{{ $selectedLaneId ?? '' }}">
@@ -60,7 +60,7 @@
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">TIME SLOT</label>
-                        <select name="time_slot" required class="fold-select" style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                        <select name="time_slot" class="input select" style="width:100%;">
                             @foreach ($slots as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach

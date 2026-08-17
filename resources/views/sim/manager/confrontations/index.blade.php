@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Confrontations</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -26,33 +24,51 @@
 
             <div class="con-card" style="margin-bottom:1.25rem;">
                 <div class="dash-section-label">Log a Confrontation</div>
-                <form method="POST" action="{{ route('manager.confrontations.store') }}" class="con-form">
+                <form method="POST" action="{{ route('manager.confrontations.store') }}" class="con-form gutter-form">
                     @csrf
-                    <select name="reporter_staff_id" required class="con-input fold-select">
-                        <option value="" disabled selected>Reporter…</option>
-                        @foreach ($activeStaff as $s)
-                            <option value="{{ $s->id }}">{{ $s->user->name }}</option>
-                        @endforeach
-                    </select>
-                    <select name="accused_staff_id" required class="con-input fold-select">
-                        <option value="" disabled selected>Accused…</option>
-                        @foreach ($activeStaff as $s)
-                            <option value="{{ $s->id }}">{{ $s->user->name }}</option>
-                        @endforeach
-                    </select>
-                    <select name="incident_type" required class="con-input fold-select">
-                        <option value="theft">Theft</option>
-                        <option value="sabotage">Sabotage</option>
-                        <option value="harassment">Harassment</option>
-                        <option value="negligence">Negligence</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <div class="select-wrap">
+                        <select name="reporter_staff_id" class="input select">
+                            <option value="" disabled selected>Reporter…</option>
+                            @foreach ($activeStaff as $s)
+                                <option value="{{ $s->id }}">{{ $s->user->name }}</option>
+                            @endforeach
+                        </select>
+                        <span class="select-arrow">&#9662;</span>
+                    </div>
+                    <div class="select-wrap">
+                        <select name="accused_staff_id" class="input select">
+                            <option value="" disabled selected>Accused…</option>
+                            @foreach ($activeStaff as $s)
+                                <option value="{{ $s->id }}">{{ $s->user->name }}</option>
+                            @endforeach
+                        </select>
+                        <span class="select-arrow">&#9662;</span>
+                    </div>
+                    <div class="select-wrap">
+                        <select name="incident_type" class="input select">
+                            <option value="theft">Theft</option>
+                            <option value="sabotage">Sabotage</option>
+                            <option value="harassment">Harassment</option>
+                            <option value="negligence">Negligence</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <span class="select-arrow">&#9662;</span>
+                    </div>
                     <div style="display:flex;gap:8px;">
-                        <input name="incident_description" type="text" placeholder="What happened…" style="flex:1;" class="con-input">
-                        <label class="pin-check" style="font-family:var(--font-mono);font-size:0.55rem;color:var(--navy);cursor:pointer;">
+                        <input name="incident_description" type="text" placeholder="What happened…" class="input" style="flex:1;">
+                        <label class="pin-check" style="font-size:0.55rem;margin:0;">
                             <input type="checkbox" name="db_verified" value="1"><span class="pin-box"></span> Backed by records
                         </label>
                         <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Log</button>
+                    </div>
+                    <div class="lane-stage">
+                        <div class="pin-rack">
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span></div>
+                        </div>
+                        <span class="ball-dot"></span>
                     </div>
                 </form>
             </div>
@@ -62,13 +78,13 @@
                     <div class="con-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;">
                             <div style="display:flex;gap:8px;align-items:center;">
-                                <span class="con-badge" style="background:var(--navy);color:var(--pin-white);">{{ $confrontation->incident_type }}</span>
+                                <span class="con-badge" style="background:var(--navy);color:var(--pin-white);">{{ \App\Helpers\Label::incidentType($confrontation->incident_type) }}</span>
                                 @if ($confrontation->db_verified)
                                     <span class="con-badge" style="background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);">VERIFIED</span>
                                 @endif
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ $confrontation->date }}</span>
                             </div>
-                            <span class="con-badge" style="background:{{ $confrontation->manager_verdict ? 'var(--mist)' : 'var(--gold-light)' }};color:var(--navy);border:1px solid var(--navy);">{{ $confrontation->manager_verdict ?? 'awaiting verdict' }}</span>
+                            <span class="con-badge" style="background:{{ $confrontation->manager_verdict ? 'var(--mist)' : 'var(--gold-light)' }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::confrontationVerdict($confrontation->manager_verdict ?? '') }}</span>
                         </div>
 
                         <div style="display:flex;gap:14px;margin-top:10px;">
@@ -100,17 +116,24 @@
                                 </form>
                             </div>
                         @elseif (! $confrontation->manager_verdict)
-                            <form method="POST" action="{{ route('manager.confrontations.verdict', $confrontation) }}" style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+                            <form method="POST" action="{{ route('manager.confrontations.verdict', $confrontation) }}" class="gutter-form" style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
                                 @csrf
-                                <select name="verdict" required class="con-input fold-select">
-                                    <option value="upheld">Upheld</option>
-                                    <option value="dismissed">Dismissed</option>
-                                    <option value="penalized">Penalized</option>
-                                    <option value="reporter_penalized">Clear accused — penalize the reporter</option>
-                                </select>
-                                <input name="penalty_amount" type="number" step="0.01" min="0" placeholder="Penalty $" style="width:120px;" class="con-input" data-stepper="edit">
+                                <div class="select-wrap">
+                                    <select name="verdict" class="input select">
+                                        <option value="upheld">Upheld</option>
+                                        <option value="dismissed">Dismissed</option>
+                                        <option value="penalized">Penalized</option>
+                                        <option value="reporter_penalized">Clear accused — penalize the reporter</option>
+                                    </select>
+                                    <span class="select-arrow">&#9662;</span>
+                                </div>
+                                <div class="gutter-field">
+                                    <input name="penalty_amount" type="number" step="0.01" min="0" placeholder="Penalty $" class="input" data-stepper="edit" style="width:120px;">
+                                    <div class="gutter-err">Enter a valid amount</div>
+                                    <div class="gutter-flag">&#10003;</div>
+                                </div>
                                 <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Apply Verdict</button>
-                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Accused responded: {{ $confrontation->staff_response }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Accused responded: {{ $confrontation->response_text ?? $confrontation->staff_response }}</span>
                             </form>
                         @endif
                     </div>

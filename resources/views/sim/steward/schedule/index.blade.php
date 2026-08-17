@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Today's Schedule</h2>
-            <span class="badge-role steward">Steward</span>
+
         </div>
     </x-slot>
 
@@ -34,7 +34,7 @@
                                 @php $b = $slotBookings->first(); @endphp
                                 <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark);">
                                     <div style="font-family:var(--font-sub);font-size:0.65rem;">Lane {{ $b->lane?->lane_number ?? '?' }} · {{ $b->visitor->name ?? 'Guest' }}</div>
-                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ $b->status }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ \App\Helpers\Label::bookingStatus($b->status) }}</div>
                                 </div>
                             @else
                                 @php $s = $slotShifts->first(); @endphp
@@ -95,10 +95,10 @@
                     @forelse ($bookings as $booking)
                         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;{{ !$loop->last ? 'border-bottom:1px solid var(--fog);' : '' }}">
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">{{ $booking->time_slot }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">{{ \App\Helpers\Label::timeSlot($booking->time_slot) }}</span>
                                 <span style="font-family:var(--font-sub);font-size:0.75rem;">{{ $booking->visitor->name }}</span>
                             </div>
-                            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Lane {{ $booking->lane?->lane_number ?? '—' }} · {{ $booking->status }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Lane {{ $booking->lane?->lane_number ?? '—' }} · {{ \App\Helpers\Label::bookingStatus($booking->status) }}</span>
                         </div>
                     @empty
                         <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);padding:12px;">No bookings today.</span>

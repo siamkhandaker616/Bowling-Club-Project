@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Welcome, {{ auth()->user()->name }}</h2>
-            <span class="badge-role {{ auth()->user()->role }}">{{ auth()->user()->role }}</span>
+
         </div>
     </x-slot>
 

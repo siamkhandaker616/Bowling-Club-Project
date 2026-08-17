@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">My Shifts</h2>
-            <span class="badge-role caretaker">Caretaker</span>
+
         </div>
     </x-slot>
 
@@ -19,7 +19,7 @@
                     <div style="padding:8px;border-radius:8px;background:var(--pin-white);border:2px solid var(--navy);">
                         <div style="font-family:var(--font-sub);font-size:0.7rem;color:var(--navy);font-weight:700;">Active Shift</div>
                         <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);margin-top:4px;">{{ $shift->date }}</div>
-                        <span class="dash-stat-num" style="font-size:0.75rem;">{{ $shift->time_slot }}</span>
+                        <span class="dash-stat-num" style="font-size:0.75rem;">{{ \App\Helpers\Label::timeSlot($shift->time_slot) }}</span>
                         @if ($shift->lane)
                             <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:4px;">Lane {{ $shift->lane->lane_number }}</div>
                         @endif
@@ -42,11 +42,11 @@
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;">
                         <div style="display:flex;gap:10px;align-items:center;">
                             <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">{{ $shift->date }}</span>
-                            <span class="badge-role" style="background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $shift->time_slot }}</span>
+                            <span class="badge-role" style="background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ \App\Helpers\Label::timeSlot($shift->time_slot) }}</span>
                             @if ($shift->lane)
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Lane {{ $shift->lane->lane_number }}</span>
                             @endif
-                            <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->status === 'completed' ? 'var(--sky)' : ($shift->status === 'cancelled' ? 'var(--coral-light)' : 'var(--gold-light)') }};color:var(--navy);border:1px solid var(--navy);">{{ $shift->status }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->status === 'completed' ? 'var(--sky)' : ($shift->status === 'cancelled' ? 'var(--coral-light)' : 'var(--gold-light)') }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::shiftStatus($shift->status) }}</span>
                             @if ($shift->status === 'completed')
                                 <span class="pin standing" title="Completed" style="color:var(--sky-dark);font-size:0.75rem;">&#9679;</span>
                             @elseif ($shift->status === 'cancelled')
