@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Reviews</h2>
-            <span class="badge-role member">Visitor</span>
+
         </div>
     </x-slot>
 
@@ -21,17 +21,20 @@
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
                 @foreach ($completedBookings as $booking)
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;">
-                        <div style="font-family:var(--font-sub);font-size:0.72rem;margin-bottom:8px;">Lane {{ $booking->lane?->lane_number ?? '—' }} · {{ $booking->date->format('M j, Y') }} · {{ $booking->time_slot }}</div>
-                        <form method="POST" action="{{ route('visitor.reviews.store', $booking) }}" style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;">
+                        <div style="font-family:var(--font-sub);font-size:0.72rem;margin-bottom:8px;">Lane {{ $booking->lane?->lane_number ?? '—' }} · {{ $booking->date->format('M j, Y') }} · {{ \App\Helpers\Label::timeSlot($booking->time_slot) }}</div>
+                        <form method="POST" action="{{ route('visitor.reviews.store', $booking) }}" class="gutter-form" style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;">
                             @csrf
-                            <select name="rating" required class="fold-select" style="font-family:var(--font-body);font-size:0.7rem;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                                <option value="5">5 ★</option>
-                                <option value="4">4 ★</option>
-                                <option value="3">3 ★</option>
-                                <option value="2">2 ★</option>
-                                <option value="1">1 ★</option>
-                            </select>
-                            <input name="body" type="text" placeholder="Your comments (optional)" style="font-family:var(--font-body);font-size:0.7rem;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                            <div class="select-wrap">
+                                <select name="rating" class="input select">
+                                    <option value="5">5 &#9733;</option>
+                                    <option value="4">4 &#9733;</option>
+                                    <option value="3">3 &#9733;</option>
+                                    <option value="2">2 &#9733;</option>
+                                    <option value="1">1 &#9733;</option>
+                                </select>
+                                <span class="select-arrow">&#9662;</span>
+                            </div>
+                            <input name="body" type="text" placeholder="Your comments (optional)" class="input">
                             <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:6px 12px;">Submit</button>
                         </form>
                     </div>
@@ -71,15 +74,16 @@
                             {{ $review->created_at->format('M j, H:i') }}
                         </span>
                         <div style="display:flex;gap:6px;">
+                            @php $myVote = $myVotes[$review->id] ?? null; @endphp
                             <form method="POST" action="{{ route('visitor.reviews.vote', $review) }}">
                                 @csrf
                                 <input type="hidden" name="vote" value="helpful">
-                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;">Helpful ({{ $review->helpful_count ?? 0 }})</button>
+                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;{{ $myVote === 'helpful' ? 'background:var(--sky-dark);color:var(--pin-white);' : '' }}">Helpful ({{ $review->helpful_count ?? 0 }})</button>
                             </form>
                             <form method="POST" action="{{ route('visitor.reviews.vote', $review) }}">
                                 @csrf
                                 <input type="hidden" name="vote" value="not_helpful">
-                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;">Not helpful ({{ $review->not_helpful_count ?? 0 }})</button>
+                                <button type="submit" class="btn-lane secondary" style="font-size:0.5rem;padding:3px 8px;{{ $myVote === 'not_helpful' ? 'background:var(--coral);color:var(--pin-white);' : '' }}">Not helpful ({{ $review->not_helpful_count ?? 0 }})</button>
                             </form>
                         </div>
                     </div>

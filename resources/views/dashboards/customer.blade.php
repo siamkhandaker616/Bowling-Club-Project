@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Welcome, {{ $user->name }}</h2>
             <div style="display:flex;align-items:center;gap:10px;">
                 <div class="ball-avatar ball-sm ball-coral"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr($user->name, strrpos($user->name, ' ') + 1, 1)) }}</span></div>
-                <span class="badge-role member">Member</span>
+
             </div>
         </div>
     </x-slot>
@@ -22,7 +22,7 @@
 
         @if (! $visitor)
             <div class="sim-card" style="text-align:center;">
-                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--slate);">No visitor profile linked to your account yet. The simulation seeds visitors automatically.</span>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--slate);">No visitor profile linked to your account yet. The front desk auto-registers walk-in guests — check back on your next visit.</span>
             </div>
         @elseif ($visitor->is_banned)
             <div class="sim-card" style="text-align:center;border-color:var(--coral);">
@@ -38,9 +38,9 @@
                     <div style="background:var(--sky-light);border-radius:10px;padding:1.25rem;display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;border:2px solid var(--navy);">
                         <div>
                             <div style="font-family:var(--font-header);font-size:1.1rem;color:var(--navy);">Lane {{ $nextBooking->lane?->lane_number ?? '?' }} · {{ $nextBooking->date->format('l') }}</div>
-                            <div style="font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-top:4px;">{{ $nextBooking->date->format('M j, Y') }} · {{ ucfirst($nextBooking->time_slot) }}</div>
+                            <div style="font-family:var(--font-sub);font-size:0.85rem;color:var(--slate);margin-top:4px;">{{ $nextBooking->date->format('M j, Y') }} · {{ \App\Helpers\Label::timeSlotFull($nextBooking->time_slot) }}</div>
                             <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
-                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">{{ ucfirst($nextBooking->status) }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">{{ \App\Helpers\Label::bookingStatus($nextBooking->status) }}</span>
                             </div>
                         </div>
                         <div style="text-align:center;">
@@ -88,7 +88,7 @@
                 @endif
                 @if($visitor)
                     <div style="margin-top:8px;padding:8px;background:var(--pin-white);border:2px solid var(--fog);border-radius:8px;text-align:center;">
-                        <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Tier: <strong style="color:var(--navy);">{{ ucfirst($visitor->tier) }}</strong> · Rep: {{ $visitor->reputation_score }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">{{ \App\Helpers\Label::tier($visitor->tier) }} Member · Reputation {{ $visitor->reputation_score }}</span>
                     </div>
                 @endif
             </div>
@@ -110,8 +110,8 @@
                                 <div style="font-family:var(--font-mono);font-size:0.45rem;color:{{ $event->price > 0 ? 'var(--navy)' : 'rgba(248,246,240,0.8)' }};">{{ strtoupper($eventMonth) }}</div>
                             </div>
                             <div style="flex:1;">
-                                <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $event->name }}</div>
-                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $event->date?->format('M j') }} · {{ $event->location ?? 'All Lanes' }}</div>
+                                <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $event->title }}</div>
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $event->date?->format('M j') }} · {{ $event->venue ?? 'All Lanes' }}</div>
                             </div>
                             @if($event->price > 0)
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--gold);">${{ number_format($event->price, 0) }}</span>

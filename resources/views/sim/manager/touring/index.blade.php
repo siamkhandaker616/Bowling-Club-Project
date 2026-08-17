@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Touring Teams</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -26,7 +24,7 @@
                     <div class="tour-card">
                         <div style="flex:1;">
                             <div style="display:flex;gap:8px;align-items:center;">
-                                <span class="tour-badge" style="background:{{ match($request->status) { 'pending' => 'var(--gold-light)', 'confirmed' => 'var(--sky)', default => 'var(--mist)' } }};color:var(--navy);border:1px solid var(--navy);">{{ $request->status }}</span>
+                                <span class="tour-badge" style="background:{{ match($request->status) { 'pending' => 'var(--gold-light)', 'confirmed' => 'var(--sky)', default => 'var(--mist)' } }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::touringStatus($request->status) }}</span>
                                 <span style="font-family:var(--font-header);font-size:0.85rem;color:var(--navy);text-transform:uppercase;">{{ $request->team_name }}</span>
                             </div>
                             <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);margin-top:4px;">

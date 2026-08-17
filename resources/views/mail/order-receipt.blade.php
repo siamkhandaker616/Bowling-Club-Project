@@ -16,23 +16,23 @@
         <tr>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;">{{ $line->product?->name ?? 'Item' }}</td>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;text-align:right;">{{ $line->quantity }}</td>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-align:right;">BDT {{ number_format((float) $line->unit_price * $line->quantity, 0) }}</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-align:right;">৳ {{ number_format((float) $line->unit_price * $line->quantity, 0) }}</td>
         </tr>
         @endforeach
         <tr>
             <td colspan="2" style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;font-weight:bold;">Total</td>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-align:right;font-weight:bold;">BDT {{ number_format((float) $order->total(), 0) }}</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-align:right;font-weight:bold;">৳ {{ number_format((float) $order->total(), 0) }}</td>
         </tr>
     </table>
 
     <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:12px;">
         <tr>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;width:40%;">Transaction</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;width:40%;">Receipt No.</td>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;">{{ $order->payment?->transaction_id }}</td>
         </tr>
         <tr>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;">Status</td>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-transform:uppercase;">{{ $order->payment?->status }}</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;">{{ $order->payment?->isSuccessful() ? 'Paid in full' : 'Awaiting payment' }}</td>
         </tr>
     </table>
 

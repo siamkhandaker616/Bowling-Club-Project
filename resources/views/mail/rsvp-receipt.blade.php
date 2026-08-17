@@ -25,21 +25,21 @@
         </tr>
         <tr>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;">Status</td>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-transform:uppercase;">{{ $rsvp->status }}</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;text-transform:uppercase;">{{ $rsvp->isConfirmed() ? 'You\'re in!' : ($rsvp->status === 'pending' ? 'Booking pending' : 'Cancelled') }}</td>
         </tr>
         @if($rsvp->payment && (float) $rsvp->payment->amount > 0)
         <tr>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;">Paid</td>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;font-weight:bold;">BDT {{ number_format((float) $rsvp->payment->amount, 0) }}</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;font-weight:bold;">৳ {{ number_format((float) $rsvp->payment->amount, 0) }}</td>
         </tr>
         <tr>
-            <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;">Transaction</td>
+            <td style="padding:8px 10px;border:1px solid #1a2a3a;background:#eef3f7;">Receipt No.</td>
             <td style="padding:8px 10px;border:1px solid #1a2a3a;">{{ $rsvp->payment->transaction_id }}</td>
         </tr>
         @endif
     </table>
 
     <p style="font-size:13px;color:#6b7a8d;margin-top:20px;line-height:1.6;">
-        Filled {{ $rsvp->event->current_rsvps }} of {{ $rsvp->event->max_capacity }} spots. Questions? Email the club secretary at {{ $rsvp->event->venue ?: 'the club desk' }}.
+        Filled {{ $rsvp->event->current_rsvps }} of {{ $rsvp->event->max_capacity }} spots. Questions? Email the club secretary at {{ $contactEmail ?: 'the club desk' }}.
     </p>
 </div>

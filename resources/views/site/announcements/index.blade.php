@@ -35,7 +35,7 @@
 
         <div style="background:var(--pin-white);border:var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);">
             <div style="background:var(--navy);padding:0.75rem 1.5rem;display:grid;grid-template-columns:60px 1fr 100px 80px 120px;gap:1rem;font-family:var(--font-mono);font-size:0.7rem;color:var(--sky-light);text-transform:uppercase;letter-spacing:1px;">
-                <span>ID</span>
+                <span>#</span>
                 <span>Title</span>
                 <span>Priority</span>
                 <span>Active</span>
@@ -50,7 +50,7 @@
                         <p style="font-size:0.75rem;color:var(--slate);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;">{{ $a->body }}</p>
                     </div>
                     <span style="font-family:var(--font-sub);font-size:0.75rem;padding:3px 10px;border-radius:50px;text-align:center;{{ $a->priority === 'urgent' ? 'background:var(--coral-light);color:var(--coral-dark);' : 'background:var(--sky-light);color:var(--navy);' }}">
-                        {{ $a->priority }}
+                        {{ $a->priority === 'urgent' ? 'Urgent' : 'Standard' }}
                     </span>
                     <span style="font-family:var(--font-mono);font-size:0.75rem;color:{{ $a->is_active ? 'var(--navy)' : 'var(--slate)' }};">
                         {{ $a->is_active ? 'ON' : 'OFF' }}

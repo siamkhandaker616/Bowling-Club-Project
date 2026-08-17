@@ -23,29 +23,32 @@ class ConfrontationService
 
     public function autoRespond(Confrontation $confrontation): void
     {
+        $this->respond($confrontation, $this->rollResponse($confrontation));
+    }
+
+    public function rollResponse(Confrontation $confrontation): string
+    {
         $accused = $confrontation->accused;
 
-        if ($confrontation->db_verified) {
-            $confessChance = 0.3 + ($accused->honesty_score / 100) * 0.5;
-
-            foreach ($accused->personalities->pluck('name')->all() as $name) {
-                $confessChance += match ($name) {
-                    'honest' => 0.15,
-                    'rude' => 0.1,
-                    'nerd' => 0.05,
-                    'cliquey' => -0.15,
-                    'opportunistic' => -0.2,
-                    'creepy' => -0.1,
-                    default => 0,
-                };
-            }
-
-            $response = mt_rand(1, 100) / 100 <= min(0.95, max(0.05, $confessChance)) ? 'confessed' : 'bs';
-        } else {
-            $response = 'innocent';
+        if (! $confrontation->db_verified) {
+            return 'innocent';
         }
 
-        $this->respond($confrontation, $response);
+        $confessChance = 0.3 + ($accused->honesty_score / 100) * 0.5;
+
+        foreach ($accused->personalities->pluck('name')->all() as $name) {
+            $confessChance += match ($name) {
+                'honest' => 0.15,
+                'rude' => 0.1,
+                'nerd' => 0.05,
+                'cliquey' => -0.15,
+                'opportunistic' => -0.2,
+                'creepy' => -0.1,
+                default => 0,
+            };
+        }
+
+        return mt_rand(1, 100) / 100 <= min(0.95, max(0.05, $confessChance)) ? 'confessed' : 'bs';
     }
 
     public function respond(Confrontation $confrontation, string $response): void
@@ -102,6 +105,22 @@ class ConfrontationService
                 $this->apply($reporter, -4, 'report_partly_credited', $impacts);
                 $confrontation->investigation_result = 'Manager issued a formal penalty to the accused.';
                 break;
+
+            case 'reporter_penalized':
+                $this->apply($reporter, -12, 'report_deemed_false', $impacts);
+                $this->apply($accused, +5, 'exonerated', $impacts);
+                $reporter->warnings_count = $reporter->warnings_count + 1;
+                $reporter->save();
+                \App\Models\Penalty::create([
+                    'staff_id' => $reporter->id,
+                    'type' => 'written_warning',
+                    'reason' => 'Filed a false confrontation report: ' . $confrontation->incident_type,
+                    'amount_or_hours' => 0,
+                    'date' => Clock::date(),
+                    'issued_by' => null,
+                ]);
+                $confrontation->investigation_result = 'Manager cleared the accused and disciplined the reporter for a false report.';
+                break;
         }
 
         $confrontation->happiness_impacts = $impacts;
@@ -116,6 +135,10 @@ class ConfrontationService
                 'date' => Clock::date(),
                 'issued_by' => null,
             ]);
+
+            $accused->current_salary = max(0, $accused->current_salary - $penaltyAmount);
+            $accused->warnings_count = $accused->warnings_count + 1;
+            $accused->save();
         }
     }
 

@@ -20,11 +20,6 @@ class GameController extends Controller
             }
         }
 
-        $top = BowlingScore::query()
-            ->orderByDesc('score')
-            ->take(5)
-            ->get();
-
-        return view('game.game', compact('best', 'top'));
+        return view('game.game', compact('best'));
     }
 }

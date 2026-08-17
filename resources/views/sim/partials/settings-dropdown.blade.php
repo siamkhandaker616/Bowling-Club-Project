@@ -13,7 +13,7 @@
         </g>
     </svg>
     <div id="settings-dropdown" style="position:absolute;top:30px;right:0;left:auto;z-index:210;background:var(--pin-white);border:2px solid var(--navy);box-shadow:var(--shadow-md);padding:14px 18px;white-space:nowrap;font-family:var(--font-sub);font-size:0.8rem;min-width:200px;transform:translateY(-10px) scale(0.9);opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.3s cubic-bezier(0.175,0.885,0.32,1.2);border-radius:10px;">
-        <div style="font-family:var(--font-header);font-size:0.65rem;letter-spacing:2px;padding-bottom:8px;margin-bottom:10px;border-bottom:2px solid var(--fog);color:var(--navy);text-transform:uppercase;">⚙ Simulation</div>
+        <div style="font-family:var(--font-header);font-size:0.65rem;letter-spacing:2px;padding-bottom:8px;margin-bottom:10px;border-bottom:2px solid var(--fog);color:var(--navy);text-transform:uppercase;">⚙ Club Controls</div>
         <div id="settings-day-info" style="margin-bottom:10px;font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);">Loading…</div>
         <form method="POST" action="{{ route('manager.day.advance') }}" style="margin-bottom:10px;">
             @csrf

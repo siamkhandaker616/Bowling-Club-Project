@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">My Shifts</h2>
-            <span class="badge-role caretaker">Caretaker</span>
+
         </div>
     </x-slot>
 
@@ -19,7 +19,7 @@
                     <div style="padding:8px;border-radius:8px;background:var(--pin-white);border:2px solid var(--navy);">
                         <div style="font-family:var(--font-sub);font-size:0.7rem;color:var(--navy);font-weight:700;">Active Shift</div>
                         <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);margin-top:4px;">{{ $shift->date }}</div>
-                        <span class="dash-stat-num" style="font-size:0.75rem;">{{ $shift->time_slot }}</span>
+                        <span class="dash-stat-num" style="font-size:0.75rem;">{{ \App\Helpers\Label::timeSlot($shift->time_slot) }}</span>
                         @if ($shift->lane)
                             <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:4px;">Lane {{ $shift->lane->lane_number }}</div>
                         @endif
@@ -42,11 +42,11 @@
                     <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;">
                         <div style="display:flex;gap:10px;align-items:center;">
                             <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">{{ $shift->date }}</span>
-                            <span class="badge-role" style="background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ $shift->time_slot }}</span>
+                            <span class="badge-role" style="background:var(--sky);color:var(--sky-dark);border:1px solid var(--sky-dark);font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;">{{ \App\Helpers\Label::timeSlot($shift->time_slot) }}</span>
                             @if ($shift->lane)
                                 <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Lane {{ $shift->lane->lane_number }}</span>
                             @endif
-                            <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->status === 'completed' ? 'var(--sky)' : ($shift->status === 'cancelled' ? 'var(--coral-light)' : 'var(--gold-light)') }};color:var(--navy);border:1px solid var(--navy);">{{ $shift->status }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $shift->status === 'completed' ? 'var(--sky)' : ($shift->status === 'cancelled' ? 'var(--coral-light)' : 'var(--gold-light)') }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::shiftStatus($shift->status) }}</span>
                             @if ($shift->status === 'completed')
                                 <span class="pin standing" title="Completed" style="color:var(--sky-dark);font-size:0.75rem;">&#9679;</span>
                             @elseif ($shift->status === 'cancelled')
@@ -56,7 +56,7 @@
                             @endif
                         </div>
                         <div style="display:flex;gap:8px;">
-                            @if (in_array($shift->status, ['assigned', 'in_progress', 'scheduled']))
+                            @if (in_array($shift->status, ['in_progress', 'scheduled']))
                                 <form method="POST" action="{{ route('caretaker.shifts.complete', $shift) }}">
                                     @csrf
                                     <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Complete</button>
@@ -76,11 +76,14 @@
             </div>
         </div>
         <div style="background:var(--sky-light);border-left:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
-            <div class="dash-section-label">Quick Actions</div>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-                <a href="{{ route('caretaker.dashboard') }}" class="btn-lane primary" style="display:block;text-align:center;text-decoration:none;font-size:0.65rem;padding:8px 12px;">Dashboard</a>
-                <a href="{{ route('caretaker.inventory.index') }}" class="btn-lane secondary" style="display:block;text-align:center;text-decoration:none;font-size:0.65rem;padding:8px 12px;">Inventory</a>
-                <a href="{{ route('caretaker.crew.index') }}" class="btn-lane secondary" style="display:block;text-align:center;text-decoration:none;font-size:0.65rem;padding:8px 12px;">Crew</a>
+            <div class="dash-section-label">This Week</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:6px;">{{ $weekLabel }}</div>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px;">
+                <span class="dash-stat-num" style="font-size:1.4rem;">{{ $weekDone }}<span style="font-size:0.7rem;color:var(--slate);">/{{ $weekTotal }}</span></span>
+                <span class="dash-stat-label">shifts done</span>
+            </div>
+            <div style="height:8px;background:var(--fog);border-radius:4px;overflow:hidden;margin-top:8px;">
+                <div style="height:100%;width:{{ $weekTotal ? (int) round($weekDone / $weekTotal * 100) : 0 }}%;background:var(--sky-dark);border-radius:4px;"></div>
             </div>
             <div class="dash-section-label" style="margin-top:16px;">Status</div>
             <div class="dash-stat" style="margin-top:8px;">
@@ -88,7 +91,7 @@
                 <span class="dash-stat-label">Completed</span>
             </div>
             <div class="dash-stat" style="margin-top:6px;">
-                <span class="dash-stat-num" style="color:var(--gold);">{{ $shifts->where('status','assigned')->count() + $shifts->where('status','in_progress')->count() }}</span>
+                <span class="dash-stat-num" style="color:var(--gold);">{{ $shifts->whereIn('status', ['scheduled', 'in_progress'])->count() }}</span>
                 <span class="dash-stat-label">Pending</span>
             </div>
         </div>

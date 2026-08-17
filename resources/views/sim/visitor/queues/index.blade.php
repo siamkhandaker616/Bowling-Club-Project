@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Waiting Queue</h2>
-            <span class="badge-role member">Visitor</span>
+
         </div>
     </x-slot>
 
@@ -22,8 +22,8 @@
                     <div style="display:flex;gap:10px;align-items:center;">
                         <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">Pos {{ $entry->position }}</span>
                         <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);">{{ $entry->date->format('M j, Y') }}</span>
-                        <span style="font-family:var(--font-sub);font-size:0.75rem;">Lane {{ $entry->booking?->lane?->lane_number ?? '—' }} · {{ $entry->time_slot }}</span>
-                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $entry->status === 'waiting' ? 'var(--gold-light)' : 'var(--sky)' }};color:var(--navy);border:1px solid var(--navy);">{{ $entry->status }}</span>
+                        <span style="font-family:var(--font-sub);font-size:0.75rem;">Lane {{ $entry->booking?->lane?->lane_number ?? '—' }} · {{ \App\Helpers\Label::timeSlot($entry->time_slot) }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $entry->status === 'waiting' ? 'var(--gold-light)' : 'var(--sky)' }};color:var(--navy);border:1px solid var(--navy);">{{ \App\Helpers\Label::queueStatus($entry->status) }}</span>
                     </div>
                 </div>
             @empty

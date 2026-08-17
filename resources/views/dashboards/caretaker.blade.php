@@ -12,7 +12,7 @@
                         <span style="font-family:var(--font-mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;background:var(--gold);color:var(--navy);">&#9889; L{{ $lane->lane_number }} LOW OIL</span>
                     @endforeach
                 </div>
-                <span class="badge-role caretaker">Caretaker</span>
+
             </div>
         </div>
     </x-slot>
@@ -46,7 +46,7 @@
                     <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:{{ $bg }};border-radius:6px;border-left:3px solid {{ $border }};">
                         <div class="{{ $pinClass }}" style="transform:scale(0.7);margin:-8px -4px;"><div class="pin-head"></div><div class="pin-neck"></div><div class="pin-body"></div></div>
                         <div style="flex:1;">
-                            <div style="font-family:var(--font-sub);font-size:0.6rem;">{{ ucfirst($shift->time_slot) }} · Lane {{ $shift->lane?->lane_number ?? '?' }}</div>
+                            <div style="font-family:var(--font-sub);font-size:0.6rem;">{{ \App\Helpers\Label::timeSlotFull($shift->time_slot) }} · Lane {{ $shift->lane?->lane_number ?? '?' }}</div>
                             <div style="font-family:var(--font-mono);font-size:0.45rem;color:{{ $isCompleted ? 'var(--slate)' : 'var(--navy)' }};">{{ $isCompleted ? 'Done' : 'Scheduled' }}</div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                             <div>
                                 <span style="color:var(--navy);font-weight:700;">{{ $conf->reporter->user->name ?? 'Staff' }}</span>
                                 reported {{ $conf->accused->user->name ?? 'Staff' }}
-                                @if($conf->manager_verdict) — Verdict: {{ $conf->manager_verdict }} @endif
+                                @if($conf->manager_verdict) — Verdict: {{ \App\Helpers\Label::confrontationVerdict($conf->manager_verdict) }} @endif
                             </div>
                         @endforeach
                     </div>
@@ -138,13 +138,6 @@
                     </div>
                 @endforeach
             </div>
-
-            <!-- Crew Button -->
-            <a href="{{ route('caretaker.crew.index') }}" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:var(--navy);border-radius:8px;text-decoration:none;cursor:pointer;margin-top:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                <span style="font-family:var(--font-sub);font-size:0.65rem;color:var(--pin-white);">My Crew</span>
-                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--gold);">{{ $relationships->count() }} &#8594;</span>
-            </a>
 
             <!-- Profile -->
             <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--fog);text-align:center;">

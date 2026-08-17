@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Crew Social</h2>
-            <span class="badge-role caretaker">Caretaker</span>
+
         </div>
     </x-slot>
 
@@ -81,7 +81,7 @@
                                         <a href="{{ route('caretaker.crew.index', ['with' => $dm['staff']->id, 'tab' => 'dm']) }}" class="sim-crew-dmrow {{ $open->id === $dm['staff']->id ? 'on' : '' }}">
                                             <div class="sim-crew-av sm">{{ $engine->initials($dm['staff']) }}</div>
                                             <div class="sim-crew-dmmain">
-                                                <div class="sim-crew-dmname">{{ $dm['staff']->user->name ?? 'Crew' }}@if ($dm['staff']->role === 'steward') <span class="sim-crew-dmrole">steward</span>@endif</div>
+                                                <div class="sim-crew-dmname">{{ $dm['staff']->user->name ?? 'Crew' }}@if ($dm['staff']->role === 'steward') <span class="sim-crew-dmrole">{{ \App\Helpers\Label::staffRole($dm['staff']->role) }}</span>@endif</div>
                                                 <div class="sim-crew-dmpreview">{{ $dm['last'] ? (($dm['last_by'] === 'you' ? 'You: ' : '') . $dm['last']) : 'Start a chat…' }}</div>
                                             </div>
                                             @if ($dm['unread'] > 0)
@@ -145,7 +145,7 @@
                                     <a href="{{ route('caretaker.crew.index', ['with' => $dm['staff']->id, 'tab' => 'dm']) }}" class="sim-crew-dmrow">
                                         <div class="sim-crew-av sm">{{ $engine->initials($dm['staff']) }}</div>
                                         <div class="sim-crew-dmmain">
-                                            <div class="sim-crew-dmname">{{ $dm['staff']->user->name ?? 'Crew' }}@if ($dm['staff']->role === 'steward') <span class="sim-crew-dmrole">steward</span>@endif</div>
+                                            <div class="sim-crew-dmname">{{ $dm['staff']->user->name ?? 'Crew' }}@if ($dm['staff']->role === 'steward') <span class="sim-crew-dmrole">{{ \App\Helpers\Label::staffRole($dm['staff']->role) }}</span>@endif</div>
                                             <div class="sim-crew-dmpreview">{{ $dm['last'] ? (($dm['last_by'] === 'you' ? 'You: ' : '') . $dm['last']) : 'Start a chat…' }}</div>
                                         </div>
                                         @if ($dm['unread'] > 0)
@@ -164,7 +164,7 @@
                         @forelse ($accusations as $confrontation)
                             <div style="border-top:1px dashed var(--fog);padding-top:.7rem;margin-top:.2rem;">
                                 <div style="font-family:var(--font-sub);font-size:.74rem;color:var(--navy);">
-                                    <span style="color:var(--slate);">About:</span> {{ $confrontation->incident_type }}
+                                    <span style="color:var(--slate);">About:</span> {{ \App\Helpers\Label::incidentType($confrontation->incident_type) }}
                                     @if ($confrontation->incident_description)
                                         <span style="font-family:var(--font-body);font-size:.68rem;color:var(--slate);display:block;margin-top:.2rem;">{{ $confrontation->incident_description }}</span>
                                     @endif
@@ -236,9 +236,9 @@
                             @forelse ($ledger as $report)
                                 <div class="crew-row" style="padding:.5rem .2rem;">
                                     <span class="cr-name" style="min-width:0;">&#8594; {{ $report->accused->user->name ?? 'Coworker' }}</span>
-                                    <span class="badge {{ match ($report->status) { 'pending' => 'gold', 'escalated' => 'sky', 'resolved' => 'ok', default => 'coral' } }}" style="font-size:.52rem;">{{ strtoupper($report->status) }}</span>
+                                    <span class="badge {{ match ($report->status) { 'pending' => 'gold', 'escalated' => 'sky', 'resolved' => 'ok', default => 'coral' } }}" style="font-size:.52rem;">{{ \App\Helpers\Label::complaintStatus($report->status) }}</span>
                                     @if ($report->confrontation && $report->confrontation->manager_verdict)
-                                        <span style="font-family:var(--font-mono);font-size:.55rem;color:var(--gold-dust);">verdict: {{ $report->confrontation->manager_verdict }}</span>
+                                        <span style="font-family:var(--font-mono);font-size:.55rem;color:var(--gold-dust);">verdict: {{ \App\Helpers\Label::confrontationVerdict($report->confrontation->manager_verdict) }}</span>
                                     @endif
                                 </div>
                             @empty
@@ -257,8 +257,8 @@
                             @forelse ($confrontations as $confrontation)
                                 <div class="crew-row" style="padding:.5rem .2rem;">
                                     <span class="cr-name" style="min-width:0;">{{ $confrontation->reporter->user->name ?? 'Crew' }} &#8594; {{ $confrontation->accused->user->name ?? 'Crew' }}</span>
-                                    <span style="font-family:var(--font-mono);font-size:.55rem;color:var(--slate);">{{ $confrontation->created_at->format('M j') }} &middot; {{ $confrontation->incident_type }}</span>
-                                    <span class="badge {{ $confrontation->manager_verdict ? 'ok' : 'gold' }}" style="font-size:.52rem;">{{ $confrontation->manager_verdict ?? 'pending' }}</span>
+                                    <span style="font-family:var(--font-mono);font-size:.55rem;color:var(--slate);">{{ $confrontation->created_at->format('M j') }} &middot; {{ \App\Helpers\Label::incidentType($confrontation->incident_type) }}</span>
+                                    <span class="badge {{ $confrontation->manager_verdict ? 'ok' : 'gold' }}" style="font-size:.52rem;">{{ \App\Helpers\Label::confrontationVerdict($confrontation->manager_verdict ?? '') }}</span>
                                 </div>
                             @empty
                                 <div style="text-align:center;padding:.8rem;">
@@ -272,32 +272,32 @@
             </div>
 
             <aside class="sim-crew-menu card">
-                <a href="#crew" class="sim-crew-menu-item on" data-tab="crew">
+                <a href="#tab-crew" class="sim-crew-menu-item on" data-tab="crew">
                     <span>Group Chat</span>
                     <span class="sim-crew-menu-cnt badge navy">&#128172;</span>
                 </a>
-                <a href="#dm" class="sim-crew-menu-item" data-tab="dm">
+                <a href="#tab-dm" class="sim-crew-menu-item" data-tab="dm">
                     <span>Direct Messages</span>
                     @if ($dms->sum('unread') > 0)
                         <span class="sim-crew-menu-cnt badge coral">{{ $dms->sum('unread') }}</span>
                     @endif
                 </a>
-                <a href="#reported" class="sim-crew-menu-item" data-tab="reported">
+                <a href="#tab-reported" class="sim-crew-menu-item" data-tab="reported">
                     <span>You've Been Reported</span>
                     @if ($accusations->count() > 0)
                         <span class="sim-crew-menu-cnt badge coral">{{ $accusations->count() }}</span>
                     @endif
                 </a>
-                <a href="#relationships" class="sim-crew-menu-item" data-tab="relationships">
+                <a href="#tab-relationships" class="sim-crew-menu-item" data-tab="relationships">
                     <span>Relationship Meter</span>
                 </a>
-                <a href="#ledger" class="sim-crew-menu-item" data-tab="ledger">
+                <a href="#tab-ledger" class="sim-crew-menu-item" data-tab="ledger">
                     <span>Snitch Ledger</span>
                     @if ($ledger->count() > 0)
                         <span class="sim-crew-menu-cnt badge gold">{{ $ledger->count() }}</span>
                     @endif
                 </a>
-                <a href="#history" class="sim-crew-menu-item" data-tab="history">
+                <a href="#tab-history" class="sim-crew-menu-item" data-tab="history">
                     <span>Confrontation History</span>
                 </a>
             </aside>

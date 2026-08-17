@@ -11,6 +11,10 @@ class BowlingScoreSeeder extends Seeder
 {
     public function run(): void
     {
+        if (BowlingScore::exists()) {
+            return;
+        }
+
         $sampleFrames = [
             [
                 [10], [10], [10], [10], [10],

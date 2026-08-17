@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItem;
 use App\Models\FacilityZone;
 use App\Models\Lane;
 
@@ -26,6 +27,8 @@ class FacilityMapController extends Controller
             ->orderBy('lane_number')
             ->get();
 
-        return view('site.facility-map', compact('zones', 'lanes'));
+        $bagCount = (int) CartItem::where('session_id', session()->getId())->sum('quantity');
+
+        return view('site.facility-map', compact('zones', 'lanes', 'bagCount'));
     }
 }

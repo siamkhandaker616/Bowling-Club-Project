@@ -126,7 +126,13 @@ class ProShopController extends Controller
             $cartItem->delete();
         } else {
             $stock = (int) ($cartItem->product?->stock ?? 0);
-            $cartItem->update(['quantity' => min($validated['quantity'], $stock)]);
+            $newQuantity = min($validated['quantity'], $stock);
+
+            if ($newQuantity < $validated['quantity']) {
+                session()->flash('error', "Only {$stock} left in stock — your bag was adjusted to {$newQuantity}.");
+            }
+
+            $cartItem->update(['quantity' => $newQuantity]);
         }
 
         return redirect()->route('public.proshop.cart');
@@ -165,35 +171,46 @@ class ProShopController extends Controller
             return $this->checkoutError($request, 'Your bag is empty — nothing to check out yet.');
         }
 
-        foreach ($cart as $item) {
-            if (! $item->product || $item->product->stock < $item->quantity) {
-                return $this->checkoutError(
-                    $request,
-                    "{$item->product?->name} only has {$item->product?->stock} left — adjust your bag."
-                );
-            }
-        }
-
         $total = $cart->sum(fn (CartItem $item) => (float) ($item->product?->price ?? 0) * $item->quantity);
 
         if ($total <= 0) {
             return $this->checkoutError($request, 'Your bag total is zero — nothing to pay.');
         }
 
-        $order = DB::transaction(function () use ($cart, $total) {
-            $order = ProductOrder::create();
+        $result = DB::transaction(function () use ($cart) {
+            $lines = [];
 
             foreach ($cart as $item) {
+                $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+
+                if (! $product || (int) $product->stock < (int) $item->quantity) {
+                    return [
+                        'error' => ($product->name ?? 'That item').' only has '.($product->stock ?? 0).' left — adjust your bag.',
+                    ];
+                }
+
+                $lines[] = ['item' => $item, 'product' => $product];
+            }
+
+            $order = ProductOrder::create();
+
+            foreach ($lines as $line) {
                 OrderItem::create([
                     'product_order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->product->price,
+                    'product_id' => $line['item']->product_id,
+                    'quantity' => $line['item']->quantity,
+                    'unit_price' => $line['product']->price,
                 ]);
             }
 
-            return $order;
+            return ['order' => $order];
         });
+
+        if (isset($result['error'])) {
+            return $this->checkoutError($request, $result['error']);
+        }
+
+        $order = $result['order'];
 
         $payment = $order->payment()->create([
             'transaction_id' => $this->gateway->generateTransactionId(),
@@ -203,13 +220,19 @@ class ProShopController extends Controller
             'customer_name' => $data['customer_name'],
             'customer_email' => $data['customer_email'],
             'customer_phone' => $data['customer_phone'] ?? null,
+            'response' => ['session_id' => $request->session()->getId()],
         ]);
 
         if (! $this->gateway->isConfigured()) {
             $order->fulfill();
             $this->clearCart($request);
             $payment->markSuccessful($payment->transaction_id);
-            Mail::to($payment->customer_email)->send(new OrderReceipt($order));
+
+            try {
+                Mail::to($payment->customer_email)->send(new OrderReceipt($order));
+            } catch (\Throwable $e) {
+                Log::warning('Order receipt email failed: '.$e->getMessage());
+            }
 
             return $this->checkoutResponse($request, $payment);
         }
@@ -235,10 +258,10 @@ class ProShopController extends Controller
 
             $payment->update([
                 'status' => 'failed',
-                'error_message' => 'The payment gateway could not be reached. Please try again later.',
+                'error_message' => 'We couldn\'t reach the payment service. Please try again in a moment.',
             ]);
 
-            return $this->checkoutError($request, 'The payment gateway could not be reached. Please try again later.');
+            return $this->checkoutError($request, 'We couldn\'t reach the payment service. Please try again in a moment.');
         }
 
         if (($response['status'] ?? '') === 'SUCCESS') {
@@ -259,7 +282,7 @@ class ProShopController extends Controller
 
         $payment->update([
             'status' => 'failed',
-            'error_message' => $response['failedreason'] ?? 'The payment gateway rejected the request.',
+            'error_message' => $response['failedreason'] ?? 'The payment service declined the request.',
         ]);
 
         return $this->checkoutError($request, $payment->error_message);

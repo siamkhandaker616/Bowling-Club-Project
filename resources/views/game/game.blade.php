@@ -33,7 +33,7 @@
         <section class="game-board">
             <div class="game-board-frame">
                 <canvas id="game-canvas" width="500" height="650">Your browser does not support the HTML5 canvas.</canvas>
-                <div class="game-status" id="game-status">Aim &amp; throw</div>
+                <div class="game-status" id="game-status">Drag to aim &amp; release to charge</div>
             </div>
         </section>
 
@@ -75,12 +75,30 @@
             </div>
 
             <div class="game-panel">
+                <h2 class="game-panel-head">Customize</h2>
+                <div class="game-custom">
+                    <span class="game-custom-label">Ball color</span>
+                    <div class="game-swatches" id="ball-swatches" role="group" aria-label="Ball color">
+                        <button type="button" class="swatch swatch-coral" data-color="coral" title="Coral"></button>
+                        <button type="button" class="swatch swatch-gold" data-color="gold" title="Gold"></button>
+                        <button type="button" class="swatch swatch-violet" data-color="violet" title="Violet"></button>
+                        <button type="button" class="swatch swatch-teal" data-color="teal" title="Teal"></button>
+                        <button type="button" class="swatch swatch-blue" data-color="blue" title="Blue"></button>
+                        <button type="button" class="swatch swatch-emerald" data-color="emerald" title="Emerald"></button>
+                        <button type="button" class="swatch swatch-pink" data-color="pink" title="Pink"></button>
+                        <button type="button" class="swatch swatch-black" data-color="black" title="Black"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-panel">
                 <h2 class="game-panel-head">How to play</h2>
                 <ul class="game-help">
-                    <li><strong>Left-click + drag</strong> to aim &mdash; pull back like a slingshot, then <strong>release</strong> to throw. Direction sets the line, pull length sets power.</li>
-                    <li><strong>Right-click + drag</strong> to slide the ball sideways and choose your shooting position.</li>
-                    <li><strong>Swipe left/right</strong> on the release to add hook (curve).</li>
-                    <li>Or use <strong>arrow keys</strong> to aim (&#8592;/&#8594;) and set power (&#8593;/&#8595;), <strong>Space</strong> to throw.</li>
+                    <li><strong>Left-click + drag</strong> to rotate your aim across the front 60&deg; &mdash; <strong>release</strong> to lock the angle.</li>
+                    <li>The <strong>power meter</strong> pops up on the right and sweeps &mdash; <strong>left-click again</strong> to set your power. Top band is MAX (burst!); the very bottom runs out of fuel before the pins.</li>
+                    <li><strong>Right-click + drag</strong> to slide the ball sideways and choose your line.</li>
+                    <li>Keyboard: <strong>&#8592;/&#8594;</strong> to aim, <strong>Space</strong> to start / set the meter, <strong>Esc</strong> to cancel.</li>
+                    <li>Every finished frame &mdash; and every strike &mdash; freezes the lane so you can savor it; <strong>click or press any key</strong> to roll on.</li>
                     <li>Strikes and spares score bonus pins &mdash; a perfect game is <strong>300</strong>.</li>
                     <li>Scores save to the club leaderboard when you finish a game.</li>
                 </ul>
@@ -111,6 +129,31 @@
     @endphp
     <script>
         window.GAME_CONFIG = @json($gameConfig);
+    </script>
+    <script>
+        (function () {
+            var KEY = 'bowling-ball-color';
+            var box = document.getElementById('ball-swatches');
+            if (!box) return;
+            var active = 'coral';
+            try { active = localStorage.getItem(KEY) || 'coral'; } catch (e) {}
+            function paint() {
+                for (var i = 0; i < box.children.length; i++) {
+                    var b = box.children[i];
+                    b.classList.toggle('active', b.getAttribute('data-color') === active);
+                }
+            }
+            box.addEventListener('click', function (e) {
+                var b = e.target;
+                while (b && b !== box && !b.classList.contains('swatch')) b = b.parentNode;
+                if (!b || b === box) return;
+                active = b.getAttribute('data-color');
+                try { localStorage.setItem(KEY, active); } catch (err) {}
+                paint();
+                window.dispatchEvent(new CustomEvent('ballcolorchange', { detail: active }));
+            });
+            paint();
+        })();
     </script>
     <script src="{{ asset('js/bowling/game.js') }}"></script>
 </body>

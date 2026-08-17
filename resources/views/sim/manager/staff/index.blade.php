@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Staff Roster</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -51,10 +49,10 @@
                             </div>
                             <div style="flex:1;min-width:0;">
                                 <div style="font-family:var(--font-sub);font-size:0.72rem;">{{ $member->user->name }}</div>
-                                <span class="badge-role {{ $member->role === 'club_manager' ? 'manager' : ($member->role === 'steward' ? 'steward' : 'caretaker') }}" style="font-size:0.45rem;padding:1px 8px;">{{ $member->role }}</span>
+                                <span class="badge-role {{ $member->role === 'club_manager' ? 'manager' : ($member->role === 'steward' ? 'steward' : 'caretaker') }}" style="font-size:0.45rem;padding:1px 8px;">{{ \App\Helpers\Label::staffRole($member->role) }}</span>
                                 <div style="margin-top:6px;">
                                     <div class="sim-happy"><div style="width:{{ $member->happiness }}%;background:{{ $member->happiness < 50 ? 'var(--coral)' : ($member->happiness < 70 ? 'var(--gold)' : 'var(--sky-dark)') }};"></div></div>
-                                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:2px;">Happy {{ $member->happiness }} · Perf {{ $member->performance_score }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:2px;">Happiness {{ $member->happiness }} · Performance {{ $member->performance_score }}</div>
                                 </div>
                             </div>
                             <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--navy);">&#8594;</span>

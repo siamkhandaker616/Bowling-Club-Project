@@ -16,14 +16,15 @@
                 ['num' => '01', 'label' => 'Overview',       'route' => 'manager.dashboard'],
                 ['num' => '02', 'label' => 'Staff',          'route' => 'manager.staff.index'],
                 ['num' => '03', 'label' => 'Inventory',      'route' => 'manager.inventory.index'],
-                ['num' => '04', 'label' => 'Fixtures',       'route' => 'public.fixtures'],
-                ['num' => '05', 'label' => 'Bookings',       'route' => 'manager.bookings.index'],
-                ['num' => '06', 'label' => 'Announcements',  'route' => 'site.announcements.index'],
-                ['num' => '07', 'label' => 'Complaints',     'route' => 'manager.complaints.index'],
-                ['num' => '08', 'label' => 'Confrontations', 'route' => 'manager.confrontations.index'],
-                ['num' => '09', 'label' => 'Bans',           'route' => 'manager.bans.index'],
-                ['num' => '10', 'label' => 'Reviews',        'route' => 'manager.reviews.index'],
-                ['num' => '11', 'label' => 'Touring',        'route' => 'manager.touring.index'],
+                ['num' => '04', 'label' => 'Purchase Bills', 'route' => 'manager.inventory.purchases.index'],
+                ['num' => '05', 'label' => 'League',        'route' => 'manager.league.index'],
+                ['num' => '06', 'label' => 'Bookings',       'route' => 'manager.bookings.index'],
+                ['num' => '07', 'label' => 'Announcements',  'route' => 'site.announcements.index'],
+                ['num' => '08', 'label' => 'Complaints',     'route' => 'manager.complaints.index'],
+                ['num' => '09', 'label' => 'Confrontations', 'route' => 'manager.confrontations.index'],
+                ['num' => '10', 'label' => 'Bans',           'route' => 'manager.bans.index'],
+                ['num' => '11', 'label' => 'Reviews',        'route' => 'manager.reviews.index'],
+                ['num' => '12', 'label' => 'Touring',        'route' => 'manager.touring.index'],
             ],
             'actions' => null,
         ],
@@ -52,6 +53,7 @@
                 ['num' => '03', 'label' => 'Facility Map',  'route' => 'site.facility-map'],
                 ['num' => '04', 'label' => 'Crew',          'route' => 'caretaker.crew.index'],
                 ['num' => '05', 'label' => 'Inventory',     'route' => 'caretaker.inventory.index'],
+                ['num' => '06', 'label' => 'Match Prep',    'route' => 'caretaker.prep.index'],
             ],
             'actions' => null,
         ],
@@ -77,7 +79,7 @@
     $cfg = \App\Models\ClubConfig::singleton();
     $day = $role === 'admin' ? $cfg->current_day : null;
     $roleLabels = [
-        'admin' => 'MANAGER &middot; REP ' . $cfg->reputation,
+        'admin' => 'MANAGER &middot; REPUTATION ' . $cfg->reputation,
         'steward' => 'STEWARD',
         'caretaker' => 'CARETAKER &middot; LANE CREW',
         'customer' => 'CLIENT &middot; MEMBER',
@@ -103,15 +105,9 @@
     @endif
 
     @foreach ($dock['links'] as $link)
-        @if (! empty($link['off']))
-            <span class="mod-link" style="opacity:.4;cursor:not-allowed;" title="Coming soon">
-                <span class="ml-dot"></span><span class="ml-num">{{ $link['num'] }}</span>{{ $link['label'] }}
-            </span>
-        @else
             <a href="{{ route($link['route']) }}" class="mod-link {{ $on($link['route']) ? 'on' : '' }}">
                 <span class="ml-dot"></span><span class="ml-num">{{ $link['num'] }}</span>{{ $link['label'] }}
             </a>
-        @endif
     @endforeach
 
     @if (! empty($dock['actions']))

@@ -13,25 +13,12 @@
 </head>
 <body style="min-height:100vh;">
 
-    <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(245,248,250,0.95);backdrop-filter:blur(8px);border-bottom:3px solid var(--navy);padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <div class="ball-accent" style="width:32px;height:32px;"></div>
-            <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
-        </a>
-        <nav style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-            <a href="{{ route('public.events') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Events</a>
-            <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
-            <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
-            <a href="{{ route('public.touring') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Sign In</a>
-                @endauth
-            @endif
-        </nav>
-    </header>
+    @component('site.partials.core-header')
+        <a href="{{ route('public.events') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Events</a>
+        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+        <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
+        <a href="{{ route('public.touring') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
+    @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:860px;margin:0 auto;">
 
@@ -72,15 +59,15 @@
                 <div id="pub-show-bar" style="height:100%;width:{{ $event->max_capacity > 0 ? round(($event->current_rsvps / $event->max_capacity) * 100) : 0 }}%;background:{{ $event->isFull() ? 'var(--coral)' : 'var(--gold)' }};transition:width 0.5s ease;"></div>
             </div>
             <div style="margin-top:0.5rem;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);">
-                {{ $event->isFull() ? 'The board is full — spots are gone.' : ($event->remainingSpots() . ' spot(s) still on the board.') }}
+                {{ $event->isFull() ? 'The board is full — spots are gone.' : (($n = $event->remainingSpots()) === 1 ? '1 spot still on the board.' : "{$n} spots still on the board.") }}
             </div>
         </div>
 
         <div style="background:var(--pin-white);border:2px solid var(--navy);border-radius:12px;padding:2rem;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
-                <h2 style="font-family:var(--font-header);font-size:0.95rem;text-transform:uppercase;color:var(--navy);margin:0;">{{ (float) $event->price > 0 ? 'Reserve Your Spot — BDT ' . number_format((float) $event->price, 0) : 'RSVP — It\'s Free' }}</h2>
+                <h2 style="font-family:var(--font-header);font-size:0.95rem;text-transform:uppercase;color:var(--navy);margin:0;">{{ (float) $event->price > 0 ? 'Reserve Your Spot — ৳ ' . number_format((float) $event->price, 0) : 'RSVP — It\'s Free' }}</h2>
                 @if((float) $event->price > 0)
-                    <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Secure checkout via SSL Commerz</span>
+                    <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Pay securely with your card or mobile wallet</span>
                 @endif
             </div>
 
@@ -132,11 +119,7 @@
 
     </main>
 
-    <footer style="background:var(--navy);color:var(--fog);padding:3rem 2rem;text-align:center;margin-top:4rem;">
-        <div class="ball-accent" style="width:28px;height:28px;margin:0 auto 1rem;"></div>
-        <p style="font-family:var(--font-display);font-size:1.2rem;color:var(--pin-white);margin-bottom:0.5rem;">The Tenth Frame</p>
-        <p style="font-family:var(--font-sub);font-size:0.85rem;color:var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }} &bull; Strike fast, roll loud.</p>
-    </footer>
+    @include('site.partials.core-footer')
 
     <script>
     (function() {
@@ -154,7 +137,7 @@
                 message.textContent = '';
                 errors.forEach(function(el) { el.textContent = ''; });
                 submit.disabled = true;
-                submit.textContent = 'Sending...';
+                submit.textContent = 'Booking...';
 
                 fetch(form.action, {
                     method: 'POST',
@@ -184,7 +167,7 @@
                             message.textContent = result.data.error;
                         } else {
                             message.style.display = 'block';
-                            message.textContent = 'Something went wrong — try again.';
+                            message.textContent = 'The lanes hiccuped — give it another roll.';
                         }
                         return;
                     }

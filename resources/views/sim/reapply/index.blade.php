@@ -16,7 +16,7 @@
             <div class="dash-section-label" style="margin-top:16px;">Last Known As</div>
             <div class="dash-stat" style="margin-top:8px;">
                 <span class="dash-stat-num">{{ $staff->user->name }}</span>
-                <span class="dash-stat-label">{{ $staff->role }}</span>
+                <span class="dash-stat-label">{{ \App\Helpers\Label::staffRole($staff->role) }}</span>
             </div>
             <div class="dash-stat" style="margin-top:6px;">
                 <span class="dash-stat-num" style="color:var(--coral-dark);">{{ $staff->happiness }}</span>
@@ -27,19 +27,23 @@
         <div style="padding:1.25rem;overflow:hidden;">
             <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1.25rem;max-width:520px;">
                 <div class="dash-section-label">New Identity Application</div>
-                <form method="POST" action="{{ route('reapply.store') }}" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+                <form method="POST" action="{{ route('reapply.store') }}" class="gutter-form" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
                     @csrf
-                    <div>
-                        <label style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">New Name</label>
-                        <input name="name" type="text" value="{{ old('name') }}" required maxlength="255"
-                               style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
+                    <div class="gutter-field field">
+                        <label class="label">New Name <span class="req">*</span></label>
+                        <input name="name" type="text" value="{{ old('name') }}" maxlength="255" class="input">
+                        <div class="gutter-err">Name is required</div>
+                        <div class="gutter-flag">&#10003;</div>
                     </div>
-                    <div>
-                        <label style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">New Role</label>
-                        <select name="role" required class="con-input fold-select" style="width:100%;font-family:var(--font-body);font-size:0.75rem;padding:8px 10px;border:2px solid var(--navy);border-radius:8px;background:var(--pin-white);">
-                            <option value="caretaker" @selected(old('role') === 'caretaker')>Caretaker</option>
-                            <option value="steward" @selected(old('role') === 'steward')>Steward</option>
-                        </select>
+                    <div class="field">
+                        <label class="label">New Role <span class="req">*</span></label>
+                        <div class="select-wrap">
+                            <select name="role" class="input select">
+                                <option value="caretaker" @selected(old('role') === 'caretaker')>Caretaker</option>
+                                <option value="steward" @selected(old('role') === 'steward')>Steward</option>
+                            </select>
+                            <span class="select-arrow">&#9662;</span>
+                        </div>
                     </div>
                     <button type="submit" class="btn-lane primary" style="font-size:0.65rem;padding:8px 12px;">Reapply</button>
                     <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">

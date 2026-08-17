@@ -6,40 +6,26 @@
         <title>{{ config('app.name', 'The Tenth Frame Bowling') }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @endif
     </head>
     <body style="min-height: 100vh;">
 
-        <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 52; background: rgba(245, 248, 250, 0.95); backdrop-filter: blur(8px); border-bottom: 3px solid var(--navy); padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between;">
-            <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                <div class="ball-accent" style="width: 32px; height: 32px;"></div>
-                <span style="font-family: var(--font-display); font-size: 1.3rem; color: var(--navy); text-transform: uppercase;">The Tenth Frame</span>
-            </a>
-            <nav style="display: flex; align-items: center; gap: 1.5rem;">
-                @if (Route::has('login'))
-                    @auth
-                        @if(Auth::user()->role === 'admin')
-                            <a href="{{ route('site.announcements.index') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Manage Announcements</a>
-                        @endif
-                        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
-                        @if(Auth::user()->role === 'customer')
-                            @php $bagCount = (int) \App\Models\CartItem::where('session_id', session()->getId())->sum('quantity'); @endphp
-                            <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem; position: relative;">Bag
-                                @if($bagCount > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $bagCount }}</span>@endif
-                            </a>
-                        @endif
-                        <a href="{{ url('/dashboard') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Dashboard</a>
-                    @else
-                        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
-                        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
-                        <a href="{{ route('login') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Sign In</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn" style="padding: 8px 24px; font-size: 0.85rem;">Join the Club</a>
-                        @endif
-                    @endauth
-                @endif
-            </nav>
-        </header>
+        @component('site.partials.core-header')
+            @if(Auth::check() && Auth::user()->role === 'admin')
+                <a href="{{ route('site.announcements.index') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Manage Announcements</a>
+            @endif
+            <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
+            @if(Auth::check() && Auth::user()->role === 'customer')
+                <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem; position: relative;">Bag
+                    @if(($bagCount ?? 0) > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $bagCount }}</span>@endif
+                </a>
+            @endif
+            @if(!Auth::check())
+                <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Fixtures</a>
+            @endif
+        @endcomponent
 
         @php
             $tickerAnnouncements = \App\Models\Announcement::where('is_active', true)
@@ -109,7 +95,7 @@
                 <div class="pub-reveal" style="background: var(--pin-white); border: var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md);">
                     <div style="background: var(--navy); padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
                         <span style="font-family: var(--font-header); font-size: 0.8rem; color: var(--pin-white); text-transform: uppercase; letter-spacing: 1px;">Lane Status</span>
-                        <span id="pub-lane-updated" style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--fog);">Loading...</span>
+                        <span id="pub-lane-updated" style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--fog);">Checking the lanes...</span>
                     </div>
                     <div style="padding: 1.25rem;">
                         <div id="pub-lane-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
@@ -199,11 +185,7 @@
             </div>
         </section>
 
-        <footer style="background: var(--navy); color: var(--fog); padding: 3rem 2rem; text-align: center;">
-            <div class="ball-accent" style="width: 28px; height: 28px; margin: 0 auto 1rem;"></div>
-            <p style="font-family: var(--font-display); font-size: 1.2rem; color: var(--pin-white); margin-bottom: 0.5rem;">The Tenth Frame</p>
-            <p style="font-family: var(--font-sub); font-size: 0.85rem; color: var(--fog);">The Tenth Frame Bowling Club &copy; {{ date('Y') }}</p>
-        </footer>
+        @include('site.partials.core-footer', ['noMarginTop' => true])
 
         <script>
         (function() {
@@ -259,6 +241,13 @@
             setInterval(updateBar, 1000);
             @endif
 
+            var statusLabels = {
+                'open': 'Open',
+                'occupied': 'In Play',
+                'maintenance': 'Under Maintenance',
+                'reserved': 'Reserved'
+            };
+
             var statusColors = {
                 'open': { bg: 'var(--sky)', border: 'var(--sky-dark)', text: 'var(--navy)' },
                 'occupied': { bg: 'var(--gold-light)', border: 'var(--gold)', text: 'var(--navy)' },
@@ -279,7 +268,7 @@
                             div.onmouseover = function() { div.style.transform = 'scale(1.08)'; };
                             div.onmouseout = function() { div.style.transform = ''; };
                             div.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.6rem;font-weight:700;color:' + c.text + ';">L' + lane.lane_number + '</span>' +
-                                '<span style="font-family:var(--font-mono);font-size:0.45rem;text-transform:uppercase;color:' + c.text + ';opacity:0.8;margin-top:2px;">' + lane.status + '</span>';
+                                '<span style="font-family:var(--font-mono);font-size:0.45rem;text-transform:uppercase;color:' + c.text + ';opacity:0.8;margin-top:2px;">' + (statusLabels[lane.status] || lane.status) + '</span>';
                             grid.appendChild(div);
                         });
                         var now = new Date();
@@ -287,7 +276,7 @@
                     })
                     .catch(function() {
                         var grid = document.getElementById('pub-lane-grid');
-                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-family:var(--font-mono);font-size:0.62rem;color:var(--coral-dark);">Lane data unavailable &#8212; retrying&#8230;</div>';
+                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-family:var(--font-mono);font-size:0.62rem;color:var(--coral-dark);">The lane board is catching its breath &#8212; trying again&#8230;</div>';
                         document.getElementById('pub-lane-updated').textContent = 'Updated \u2014 unavailable';
                     });
             }

@@ -145,6 +145,7 @@
             chk.__oaBound = true;
             chk.addEventListener('click', function (e) {
                 if (e.target.tagName === 'INPUT') return;
+                e.preventDefault();
                 var input = el('input', chk);
                 if (input) input.checked = !input.checked;
             });
@@ -241,6 +242,7 @@
                 var plural = bads === 1 ? '' : 's';
                 setPins(stage, 10);
                 if (stage) {
+                    stage.style.display = '';
                     stage.classList.remove('roll', 'gutter-roll');
                     void stage.offsetWidth;
                     stage.classList.add(allBad ? 'gutter-roll' : 'roll');

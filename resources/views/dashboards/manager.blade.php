@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Manager Dashboard</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--navy);">Day {{ $stats['current_day'] }}{{ $stats['bad_day_mode'] ? ' · ⚠ BAD DAY' : '' }}</span>
-                <span class="badge-role manager">Manager</span>
+
             </div>
         </div>
     </x-slot>
@@ -169,7 +169,30 @@
                             <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['snitch_bonuses'] ?? 0) > 0 ? 'var(--sky-dark)' : 'var(--slate)' }};">{{ count($dayReport['snitches'] ?? []) }}</div>
                             <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">SNITCH REPORTS</div>
                         </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--sky-dark);">{{ $dayReport['matches']?->count() ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCHES</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--gold);">${{ number_format($dayReport['match_revenue'] ?? 0, 0) }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCH REVENUE</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:{{ ($dayReport['league_penalties'] ?? 0) > 0 ? 'var(--coral)' : 'var(--sky-dark)' }};">{{ $dayReport['league_penalties'] ?? 0 }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCH PREP PENALTIES</div>
+                        </div>
                     </div>
+                    @if (count($dayReport['matches'] ?? []))
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
+                            @foreach (collect($dayReport['matches'])->take(4) as $m)
+                                <div style="text-align:center;">
+                                    <div style="font-family:var(--font-mono);font-size:0.6rem;font-weight:700;color:{{ $m['status'] === 'live' ? 'var(--gold)' : 'var(--sky-dark)' }};text-transform:uppercase;">{{ $m['status'] }}</div>
+                                    <div style="font-family:var(--font-sub);font-size:0.6rem;color:var(--navy);margin-top:2px;">{{ $m['label'] }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.65rem;font-weight:700;color:var(--navy);">{{ $m['home_score'] }} — {{ $m['away_score'] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -181,7 +204,7 @@
                         @foreach($recentEvents->take(6) as $event)
                             <div>
                                 <span style="color:var(--navy);font-weight:700;">{{ $event->staff->user->name ?? 'Staff' }}</span>
-                                · {{ ucfirst(str_replace('_', ' ', $event->event_type)) }}
+                                · {{ \App\Helpers\Label::staffEventType($event->event_type) }}
                                 @if($event->description) — {{ $event->description }} @endif
                             </div>
                         @endforeach

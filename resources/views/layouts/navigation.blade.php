@@ -17,6 +17,8 @@
                 'caretaker' => 'caretaker.dashboard',
                 default => 'visitor.dashboard',
             };
+            $badgeClass = $role === 'admin' ? 'manager' : $role;
+            $badgeLabel = $role === 'admin' ? 'Manager' : ucfirst($role);
         @endphp
 
         <a href="{{ route($dashRoute) }}" class="btn btn-ghost btn-nav" title="Home">Home</a>
@@ -30,6 +32,8 @@
                 @endif
             </a>
         @endif
+
+        <span class="badge-role {{ $badgeClass }}">{{ $badgeLabel }}</span>
 
         <div class="user-pop" x-data="{ userOpen: false }">
             <button @click="userOpen = !userOpen" class="user-btn" title="{{ Auth::user()->name }}">

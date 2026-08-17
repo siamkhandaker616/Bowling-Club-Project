@@ -41,7 +41,7 @@ class DashboardController extends Controller
             ? VisitorReview::where('visitor_id', $visitor->id)->count()
             : 0;
 
-        $events = Event::where('date', '>=', now())->orderBy('date')->limit(3)->get();
+        $events = Event::where('date', '>=', Clock::date()->toDateString())->orderBy('date')->limit(3)->get();
 
         $announcements = \App\Models\Announcement::orderByDesc('created_at')->limit(3)->get();
 

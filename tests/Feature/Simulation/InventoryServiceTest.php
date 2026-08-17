@@ -38,7 +38,7 @@ class InventoryServiceTest extends TestCase
         ]);
     }
 
-    public function test_restock_refills_to_max_and_charges_expenses(): void
+    public function test_restock_refills_to_max_without_charging_expenses(): void
     {
         $this->clubConfig(['total_expenses' => 0]);
         $item = Inventory::create([
@@ -53,7 +53,7 @@ class InventoryServiceTest extends TestCase
         app(InventoryService::class)->restock($item);
 
         $this->assertSame(20, $item->fresh()->quantity);
-        $this->assertSame(56.0, (float) ClubConfig::first()->total_expenses);
+        $this->assertSame(0.0, (float) ClubConfig::first()->total_expenses);
         $this->assertDatabaseHas('inventory_events', [
             'inventory_id' => $item->id,
             'event_type' => 'restock',

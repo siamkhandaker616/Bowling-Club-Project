@@ -26,11 +26,11 @@ class ReviewController extends Controller
             ? LaneBooking::with('lane')->where('visitor_id', $visitor->id)->where('status', 'completed')->get()
             : collect();
 
-        $votedReviewIds = $visitor
-            ? ReviewVote::where('voter_id', $request->user()->id)->pluck('review_id')->all()
+        $myVotes = $visitor
+            ? ReviewVote::where('voter_id', $request->user()->id)->where('review_type', 'visitor_review')->pluck('vote', 'review_id')->all()
             : [];
 
-        return view('sim.visitor.reviews.index', compact('allReviews', 'mine', 'completedBookings', 'votedReviewIds'));
+        return view('sim.visitor.reviews.index', compact('allReviews', 'mine', 'completedBookings', 'myVotes'));
     }
 
     public function store(Request $request, LaneBooking $booking)

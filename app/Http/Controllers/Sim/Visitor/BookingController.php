@@ -139,7 +139,7 @@ class BookingController extends Controller
         $log = [];
         app(VisitorSpawner::class)->promoteForSlot(Carbon::parse($booking->date), $booking->time_slot, $log);
 
-        session()->flash('success', 'Booking cancelled.' . ($log['queues_promoted'] ?? 0 > 0 ? ' The next visitor in the queue was promoted to your lane.' : ''));
+        session()->flash('success', 'Booking cancelled.' . ((($log['queues_promoted'] ?? 0) > 0) ? ' The next visitor in the queue was promoted to your lane.' : ''));
 
         return redirect()->route('visitor.bookings.index');
     }

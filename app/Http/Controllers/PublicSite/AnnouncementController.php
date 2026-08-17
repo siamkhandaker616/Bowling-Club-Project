@@ -34,7 +34,7 @@ class AnnouncementController extends Controller
 
         Announcement::create($validated);
 
-        return redirect()->route('site.announcements.index')->with('success', 'Announcement created.');
+        return redirect()->route('site.announcements.index')->with('success', 'Announcement posted to the board.');
     }
 
     public function edit(Announcement $announcement)
@@ -63,6 +63,6 @@ class AnnouncementController extends Controller
     {
         $announcement->delete();
 
-        return redirect()->route('site.announcements.index')->with('success', 'Announcement deleted.');
+        return redirect()->route('site.announcements.index')->with('success', 'Announcement taken off the board.');
     }
 }

@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Steward Dashboard</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--pin-white);">{{ $stats['checked_in'] }} checked in</span>
-                <span class="badge-role steward">Steward</span>
+
             </div>
         </div>
     </x-slot>
@@ -25,7 +25,7 @@
         @include('sim.partials.steward-sidebar')
 
         <!-- LEFT: Today's Schedule -->
-        <div style="display:grid;grid-template-columns:220px 1fr 180px;gap:0;">
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:0;">
         <div style="background:var(--sky-light);border-right:3px solid var(--navy);padding:1rem;display:flex;flex-direction:column;">
             <div class="dash-section-label" style="margin-bottom:8px;">Today's Schedule</div>
             <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
@@ -47,7 +47,7 @@
                                 @php $b = $slotBookings->first(); @endphp
                                 <div style="flex:1;padding:6px 8px;background:var(--sky);border-radius:6px;border-left:3px solid var(--sky-dark);">
                                     <div style="font-family:var(--font-sub);font-size:0.65rem;">Lane {{ $b->lane?->lane_number ?? '?' }} · {{ $b->visitor->name ?? 'Guest' }}</div>
-                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ $b->status }}</div>
+                                    <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ ucfirst($slot) }} · {{ \App\Helpers\Label::bookingStatus($b->status) }}</div>
                                 </div>
                             @else
                                 @php $s = $slotShifts->first(); @endphp
@@ -96,7 +96,7 @@
                         <div style="display:grid;grid-template-columns:40px 1fr 90px 80px 70px;padding:8px 12px;{{ !$loop->last ? 'border-bottom:1px solid var(--fog);' : '' }}gap:8px;align-items:center;">
                             <div class="ball-avatar ball-sm {{ $ballColor }}"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">{{ $initials }}</span></div>
                             <div><div style="font-family:var(--font-sub);font-size:0.7rem;">{{ $v->name }}</div><div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">{{ $v->email ?? '' }}</div></div>
-                            <span class="badge-role {{ $v->tier === 'premium' ? 'member' : 'steward' }}" style="font-size:0.5rem;width:fit-content;">{{ ucfirst($v->tier) }}</span>
+                            <span class="badge-role {{ $v->tier === 'premium' ? 'member' : 'steward' }}" style="font-size:0.5rem;width:fit-content;">{{ \App\Helpers\Label::tier($v->tier) }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.6rem;">{{ $v->bookings_count ?? 0 }}</span>
                             <span style="font-family:var(--font-mono);font-size:0.55rem;color:{{ $v->is_banned ? 'var(--coral-dark)' : 'var(--sky-dark)' }};">{{ $v->is_banned ? '&#10008; Banned' : '&#9679; Active' }}</span>
                         </div>
@@ -106,19 +106,8 @@
 
         </div>
 
-        <!-- RIGHT: Quick Actions -->
-        <div style="background:var(--sky-light);border-left:3px solid var(--navy);padding:0.75rem;display:flex;flex-direction:column;gap:6px;align-items:center;">
-            <div class="dash-section-label" style="margin-bottom:2px;width:100%;">Quick Actions</div>
-            <a href="{{ route('steward.schedule.index') }}" class="shoe-tag" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128197;</div><h4 style="font-size:0.6rem;">Schedule</h4></div></a>
-            <a href="{{ route('steward.bans.index') }}" class="shoe-tag white" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128683;</div><h4 style="font-size:0.6rem;">Ban Request</h4></div></a>
-            <a href="{{ route('steward.complaints.index') }}" class="shoe-tag coral" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#9878;</div><h4 style="font-size:0.6rem;">Complaints</h4></div></a>
-            <a href="{{ route('steward.visitors.index') }}" class="shoe-tag" style="width:70%;"><div class="st-shape" style="padding:0.5rem 0.5rem 1rem;"><div class="st-icon" style="font-size:1.2rem;margin:0.4rem 0 0.2rem;">&#128100;</div><h4 style="font-size:0.6rem;">Visitors</h4></div></a>
-            <div style="margin-top:auto;padding-top:8px;border-top:2px solid var(--fog);text-align:center;">
-                <div class="ball-avatar ball-sm ball-sky" style="margin:0 auto;"><div class="ball-holes"><span></span><span></span><span></span></div><span class="ball-initials">MR</span></div>
-                <div style="font-family:var(--font-sub);font-size:0.6rem;margin-top:4px;">{{ ucfirst($user->name) }}</div>
-                <span class="badge-role steward" style="font-size:0.45rem;padding:2px 6px;">Steward</span>
-            </div>
-        </div>
+        <!-- RIGHT rail removed: those links already live in the dock above -->
+
         </div>
 
     </div>

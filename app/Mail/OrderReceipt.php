@@ -20,7 +20,7 @@ class OrderReceipt extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Pro Shop order #'.$this->order->id.' is paid',
+            subject: 'Your Pro Shop receipt — order #'.$this->order->id,
         );
     }
 

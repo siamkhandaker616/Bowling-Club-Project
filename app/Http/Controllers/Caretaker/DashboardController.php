@@ -7,7 +7,6 @@ use App\Models\Confrontation;
 use App\Models\Inventory;
 use App\Models\Lane;
 use App\Models\Shift;
-use App\Models\StaffRelationship;
 use App\Services\Simulation\Clock;
 use Illuminate\Http\Request;
 
@@ -29,13 +28,6 @@ class DashboardController extends Controller
 
         $stock = Inventory::orderBy('category')->orderBy('name')->get();
 
-        $relationships = $staff
-            ? StaffRelationship::with('staffA.user', 'staffB.user')
-                ->where('staff_a_id', $staff->id)
-                ->orWhere('staff_b_id', $staff->id)
-                ->get()
-            : collect();
-
         $confrontations = $staff
             ? Confrontation::with('reporter.user', 'accused.user')
                 ->where('reporter_staff_id', $staff->id)
@@ -54,6 +46,6 @@ class DashboardController extends Controller
             'low_stock_items' => $stock->filter(fn ($i) => $i->isLowStock())->count(),
         ];
 
-        return view('dashboards.caretaker', compact('user', 'staff', 'personalities', 'stats', 'date', 'myShifts', 'lanes', 'stock', 'relationships', 'confrontations'));
+        return view('dashboards.caretaker', compact('user', 'staff', 'personalities', 'stats', 'date', 'myShifts', 'lanes', 'stock', 'confrontations'));
     }
 }

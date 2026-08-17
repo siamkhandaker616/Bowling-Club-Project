@@ -2,7 +2,6 @@
 
 namespace App\Services\Simulation;
 
-use App\Models\ClubConfig;
 use App\Models\Inventory;
 use App\Models\InventoryEvent;
 use App\Models\Lane;
@@ -24,14 +23,17 @@ class InventoryService
 
     public function adjust(Inventory $inventory, int $change, string $eventType, string $reason, ?int $staffId = null): Inventory
     {
-        $inventory->quantity = max(0, min($inventory->max_quantity, $inventory->quantity + $change));
+        $before = $inventory->quantity;
+        $quantity = max(0, min($inventory->max_quantity, $before + $change));
+        $applied = $quantity - $before;
+        $inventory->quantity = $quantity;
         $inventory->save();
 
         InventoryEvent::create([
             'inventory_id' => $inventory->id,
             'staff_id' => $staffId,
             'event_type' => $eventType,
-            'quantity_change' => $change,
+            'quantity_change' => $applied,
             'description' => $reason,
             'date' => Clock::date(),
         ]);
@@ -46,15 +48,9 @@ class InventoryService
             return $inventory;
         }
 
-        $cost = $qty * (float) $inventory->cost_per_unit;
-
         $this->adjust($inventory, $qty, 'restock', 'Full restock to max capacity', $staffId);
         $inventory->last_restocked_at = now();
         $inventory->save();
-
-        $cfg = ClubConfig::singleton();
-        $cfg->total_expenses = $cfg->total_expenses + $cost;
-        $cfg->save();
 
         return $inventory;
     }

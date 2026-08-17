@@ -44,11 +44,11 @@ class SslCommerzGateway
             'product_category' => 'general',
             'product_profile' => 'general',
             'ship_name' => $params['cus_name'] ?? '',
-            'ship_add1' => 'Dhaka',
-            'ship_city' => 'Dhaka',
-            'ship_state' => 'Dhaka',
-            'ship_postcode' => '1000',
-            'ship_country' => 'Bangladesh',
+            'ship_add1' => config('services.sslcommerz.shipping_address', 'Dhaka'),
+            'ship_city' => config('services.sslcommerz.shipping_city', 'Dhaka'),
+            'ship_state' => config('services.sslcommerz.shipping_state', 'Dhaka'),
+            'ship_postcode' => config('services.sslcommerz.shipping_postcode', '1000'),
+            'ship_country' => config('services.sslcommerz.shipping_country', 'Bangladesh'),
         ], $params);
 
         $response = Http::asForm()

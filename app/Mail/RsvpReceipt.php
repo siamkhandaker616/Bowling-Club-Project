@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Club;
 use App\Models\Rsvp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -13,8 +14,9 @@ class RsvpReceipt extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Rsvp $rsvp)
+    public function __construct(public Rsvp $rsvp, public ?string $contactEmail = null)
     {
+        $this->contactEmail ??= Club::first()?->email;
     }
 
     public function envelope(): Envelope

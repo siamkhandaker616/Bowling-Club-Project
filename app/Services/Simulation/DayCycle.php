@@ -22,6 +22,7 @@ class DayCycle
         private InventoryService $inventory,
         private VisitorSpawner $spawner,
         private SocialEngine $social,
+        private MatchService $matches,
     ) {
     }
 
@@ -49,6 +50,10 @@ class DayCycle
             'snitches' => [],
             'snitch_bonuses' => 0,
             'turnaways' => 0,
+            'refunds' => 0,
+            'matches' => collect(),
+            'match_revenue' => 0,
+            'league_penalties' => 0,
         ];
 
         $this->spawner->promoteQueues($today, $log);
@@ -64,10 +69,15 @@ class DayCycle
         $this->inventory->dailyDecay($log);
         $this->autoComplaints($today, $log);
 
+        $this->matches->resolveDueMatches($today, $log);
+        $this->matches->resolveCompletedMatches($today, $log);
+        $this->matches->generateNextRound($today);
+
         $this->finance($today, $log);
         $this->updateReputation($log);
 
         $cfg->current_day = $cfg->current_day + 1;
+        $cfg->last_advanced_at = now();
         $cfg->save();
 
         $this->ensureSchedule(Clock::date());
@@ -98,9 +108,17 @@ class DayCycle
             $booking->save();
 
             $price = ($booking->visitor->tier ?? 'regular') === 'premium' ? 25.0 : 15.0;
-            if (! $booking->compensation_claimed) {
+
+            if ($booking->compensation_type === 'discount') {
+                $log['revenue'] += round($price * 0.5, 2);
+            } elseif ($booking->compensation_type === 'free_game') {
+                $log['revenue'] += 0;
+            } elseif ($booking->compensation_type === 'refund') {
+                $log['refunds'] += $price;
+            } else {
                 $log['revenue'] += $price;
             }
+
             $log['bookings_served']++;
         }
     }
@@ -234,7 +252,7 @@ class DayCycle
 
         $accidentCost = collect($log['accidents'])->sum(fn ($a) => $a['cost']);
 
-        $expenses = $salaries + $accidentCost;
+        $expenses = $salaries + $accidentCost + ($log['refunds'] ?? 0);
 
         $cfg->total_revenue = $cfg->total_revenue + $log['revenue'];
         $cfg->total_expenses = $cfg->total_expenses + $expenses;
@@ -256,6 +274,8 @@ class DayCycle
 
         $openComplaints = Complaint::where('status', 'open')->count();
         $delta -= $openComplaints;
+
+        $delta -= $log['league_penalties'] ?? 0;
 
         $delta -= ($log['quits'] ?? 0) * 2;
 

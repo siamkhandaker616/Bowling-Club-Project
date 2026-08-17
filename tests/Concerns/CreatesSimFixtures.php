@@ -172,6 +172,10 @@ trait CreatesSimFixtures
             'snitches' => [],
             'snitch_bonuses' => 0,
             'turnaways' => 0,
+            'refunds' => 0,
+            'matches' => collect(),
+            'match_revenue' => 0,
+            'league_penalties' => 0,
         ], $overrides);
     }
 }

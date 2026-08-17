@@ -3,9 +3,7 @@
     <x-slot name="header">
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Bookings & Queue</h2>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <span class="badge-role manager">Manager</span>
-            </div>
+
         </div>
     </x-slot>
 
@@ -57,8 +55,8 @@
                         <span style="font-family:var(--font-mono);font-size:0.6rem;">{{ $booking->date->format('M j') }}</span>
                         <span style="font-family:var(--font-sub);font-size:0.7rem;">{{ $booking->visitor?->name }}</span>
                         <span style="font-family:var(--font-mono);font-size:0.6rem;">L{{ $booking->lane?->lane_number ?? '—' }}</span>
-                        <span style="font-family:var(--font-mono);font-size:0.6rem;">{{ $booking->time_slot }}</span>
-                        <span class="bk-badge" style="{{ collect($badge)->map(fn ($v, $k) => "$k:$v")->implode(';') }};">{{ $booking->status }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.6rem;">{{ \App\Helpers\Label::timeSlot($booking->time_slot) }}</span>
+                        <span class="bk-badge" style="{{ collect($badge)->map(fn ($v, $k) => "$k:$v")->implode(';') }};">{{ \App\Helpers\Label::bookingStatus($booking->status) }}</span>
                         <span>
                             @if (in_array($booking->status, ['pending', 'confirmed']))
                                 <form method="POST" action="{{ route('manager.bookings.cancel', $booking) }}">

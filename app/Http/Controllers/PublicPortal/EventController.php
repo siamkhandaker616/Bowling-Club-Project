@@ -111,7 +111,12 @@ class EventController extends Controller
 
         if (! $paid) {
             $this->notifySecretary($rsvp);
-            Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
+
+            try {
+                Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
+            } catch (\Throwable $e) {
+                Log::warning('RSVP receipt email failed: '.$e->getMessage());
+            }
 
             return $this->rsvpResponse($request, $rsvp, null, "You're on the list! See you on the lanes.");
         }
@@ -126,7 +131,12 @@ class EventController extends Controller
             });
             $payment->markSuccessful($payment->transaction_id);
             $this->notifySecretary($rsvp);
-            Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
+
+            try {
+                Mail::to($rsvp->visitor_email)->send(new RsvpReceipt($rsvp));
+            } catch (\Throwable $e) {
+                Log::warning('RSVP receipt email failed: '.$e->getMessage());
+            }
 
             return $this->rsvpResponse($request, $rsvp, $payment, 'Payment received — you\'re confirmed!');
         }
@@ -152,14 +162,14 @@ class EventController extends Controller
 
             $payment->update([
                 'status' => 'failed',
-                'error_message' => 'The payment gateway could not be reached. Please try again later.',
+                'error_message' => 'We couldn\'t reach the payment service. Please try again in a moment.',
             ]);
 
             if (! $rsvp->isConfirmed()) {
                 $rsvp->update(['status' => 'cancelled']);
             }
 
-            return $this->rsvpError($request, $event, 'The payment gateway could not be reached. Please try again later.');
+            return $this->rsvpError($request, $event, 'We couldn\'t reach the payment service. Please try again in a moment.');
         }
 
         if (($response['status'] ?? '') === 'SUCCESS') {
@@ -180,7 +190,7 @@ class EventController extends Controller
 
         $payment->update([
             'status' => 'failed',
-            'error_message' => $response['failedreason'] ?? 'The payment gateway rejected the request.',
+            'error_message' => $response['failedreason'] ?? 'The payment service declined the request.',
         ]);
 
         return $this->rsvpError($request, $event, $payment->error_message);
@@ -222,7 +232,11 @@ class EventController extends Controller
         $club = Club::first();
 
         if ($club && $club->email) {
-            Mail::to($club->email)->send(new RsvpConfirmation($rsvp));
+            try {
+                Mail::to($club->email)->send(new RsvpConfirmation($rsvp));
+            } catch (\Throwable $e) {
+                Log::warning('Secretary notification email failed: '.$e->getMessage());
+            }
         }
     }
 }
