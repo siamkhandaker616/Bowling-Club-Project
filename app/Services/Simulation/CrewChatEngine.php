@@ -12,6 +12,8 @@ use App\Models\StaffEvent;
 use App\Models\StaffMessage;
 use App\Models\StaffRelationship;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class CrewChatEngine
 {
@@ -67,6 +69,329 @@ class CrewChatEngine
         'Okay, that is fair.',
         'I heard something similar.',
         'Let us just get through today.',
+        'No way. That is wild.',
+        'Yeah, things have been crazy around here.',
+        'Tell me more about that.',
+        'I was thinking the same thing.',
+        'About time someone said it.',
+        'Right? I was just saying that.',
+        'That tracks, honestly.',
+        'Hmm, interesting.',
+        'Not surprised, to be honest.',
+        'Same energy, honestly.',
+    ];
+
+    private const PERSONALITY_BANKS = [
+        'question' => [
+            'base' => [
+                'I honestly do not know.',
+                'Good question — no idea though.',
+                'Beats me. I just clock in and do the work.',
+                'That is above my pay grade.',
+                'I wish I had an answer for you.',
+                'Hmm, I would not know where to start.',
+                'You would have to dig into that yourself.',
+                'I have been wondering the same thing, honestly.',
+                'No clue. Try asking someone who has been here longer.',
+                'I stay out of that kind of stuff.',
+            ],
+            'honest' => [
+                'I will be straight — I have no clue.',
+                'I do not know, but I am not going to pretend I do.',
+                'Honestly? I have been asking myself the same thing.',
+            ],
+            'stoner' => [
+                'Dunno, man. That is way above my pay grade.',
+                'Who knows? I am just here for the vibes.',
+                'Not a clue, but it is all good.',
+            ],
+            'overtly_friendly' => [
+                'Oh gosh, I wish I knew! That sounds important!',
+                'I am not sure, but I can ask around for you!',
+                'Hmm, I do not know — but let me find out!',
+            ],
+            'creepy' => [
+                'I have my theories... but you did not hear that from me.',
+                'Why do you want to know? ...Just curious.',
+                'I know more than you think. But that is a story for later.',
+            ],
+            'nerd' => [
+                'That is actually a fascinating question — I would check the shift log.',
+                'Statistically speaking, the answer is probably in the records.',
+                'I have read about something similar — let me think.',
+            ],
+            'rude' => [
+                'How should I know? I just work here.',
+                'Not my problem. Ask someone who cares.',
+                'Seriously? You are asking me?',
+            ],
+            'cliquey' => [
+                'Not my problem. Talk to someone else.',
+                'I stay out of that stuff. You should too.',
+                'I do not know, and honestly I do not want to.',
+            ],
+            'opportunistic' => [
+                'I might know something... but information is not free.',
+                'I have heard some things. What is it worth to you?',
+                'Maybe. Why, what have you heard?',
+            ],
+        ],
+        'oil' => [
+            'base' => [
+                'We need to get that sorted before the rush.',
+                'I heard the stockroom is running thin on that.',
+                'Put a request in — management needs to know.',
+                'We cannot run lanes without supplies.',
+                'Yeah, that has been a problem for a while now.',
+                'Someone needs to handle that before it gets worse.',
+                'The last order came in short, I think.',
+                'Check with the manager — they should know.',
+            ],
+            'honest' => [
+                'I will be honest — we are running low and nobody is doing anything about it.',
+                'The stock situation is not great. I would put a request in.',
+            ],
+            'stoner' => [
+                'Dunno, man. I just use whatever is there.',
+                'The stockroom is looking pretty empty, not gonna lie.',
+            ],
+            'overtly_friendly' => [
+                'Oh no, is it running low? I can help check!',
+                'We should totally get that restocked — I will help!',
+            ],
+            'creepy' => [
+                'I know where the extra stock is hidden... interesting.',
+                'The stockroom is running dry. Do not tell anyone I said that.',
+            ],
+            'nerd' => [
+                'According to my tracking, we are at 30% capacity on oil.',
+                'The inventory numbers are not looking good.',
+            ],
+            'rude' => [
+                'Not my job to restock. Figure it out.',
+                'That is management\'s problem, not mine.',
+            ],
+            'cliquey' => [
+                'I am not touching that. Someone else can deal with it.',
+                'The stock situation is someone else\'s mess.',
+            ],
+            'opportunistic' => [
+                'I could handle the restock... for the right incentive.',
+                'Stock is low. Good leverage if you need it.',
+            ],
+        ],
+        'schedule' => [
+            'base' => [
+                'The schedule has been all over the place lately.',
+                'I would check the board before signing up for extra.',
+                'They keep changing it last minute, it is frustrating.',
+                'Shift swaps are fine just talk to the steward first.',
+                'I heard they are rotating the evening slots next week.',
+                'The morning crew always gets the better shifts.',
+                'I would not volunteer for overtime unless you need the money.',
+                'Check the board — they updated it this morning.',
+            ],
+            'honest' => [
+                'I will be straight — the schedule is a mess right now.',
+                'They changed it again yesterday. I would double check.',
+            ],
+            'stoner' => [
+                'Dunno, man. I just show up when they tell me.',
+                'The schedule is whatever. I just roll with it.',
+            ],
+            'overtly_friendly' => [
+                'Oh, the schedule? I can help you figure it out!',
+                'Let me know if you need a swap — I am flexible!',
+            ],
+            'creepy' => [
+                'I know who is pulling the strings on the schedule... but that is a secret.',
+                'The schedule changes are not random. There is a pattern.',
+            ],
+            'nerd' => [
+                'The scheduling algorithm seems suboptimal, honestly.',
+                'I have been tracking the shift patterns — there is a trend.',
+            ],
+            'rude' => [
+                'The schedule sucks. Always has, always will.',
+                'Not my problem. I work what they give me.',
+            ],
+            'cliquey' => [
+                'I got my shifts sorted. You should too.',
+                'Not my problem. Talk to the steward.',
+            ],
+            'opportunistic' => [
+                'I could swap with you... for the right favor.',
+                'The schedule is flexible if you know the right people.',
+            ],
+        ],
+        'apologize' => [
+            'base' => [
+                'It happens. Just try to be more careful.',
+                'We all make mistakes. Learn from it.',
+                'That is the second time this week though.',
+                'Appreciate you owning up to it.',
+                'Just do not let it become a habit.',
+                'Thanks for saying something.',
+            ],
+            'honest' => [
+                'I appreciate the honesty. That takes guts.',
+                'We all mess up. What matters is you owned it.',
+            ],
+            'stoner' => [
+                'No worries, man. It happens.',
+                'All good. Just chill and be more careful.',
+            ],
+            'overtly_friendly' => [
+                'Aww, do not worry about it! We all slip up!',
+                'It is okay! Just be more careful next time!',
+            ],
+            'creepy' => [
+                'Interesting... you are very forthcoming about your mistakes.',
+                'I will remember that you admitted to that.',
+            ],
+            'nerd' => [
+                'Statistically, accidents happen most in the first hour.',
+                'I would review the safety protocols if I were you.',
+            ],
+            'rude' => [
+                'Yeah, yeah. Just fix it.',
+                'About time you said something.',
+            ],
+            'cliquey' => [
+                'Whatever. Just do not mess up my shift.',
+                'I do not care. Just fix it.',
+            ],
+            'opportunistic' => [
+                'Noted. I might need a favor from you later.',
+                'Interesting. Good to know you are the type to own up.',
+            ],
+        ],
+        'pinsetter' => [
+            'base' => [
+                'Lane maintenance is behind schedule as it is.',
+                'I heard the pinsetter on lane 5 has been acting up.',
+                'We need to stay on top of that before tonight.',
+                'The oil machine needs a proper look, not a quick patch.',
+                'That has been an issue all week.',
+                'Someone should log a ticket for that.',
+            ],
+            'honest' => [
+                'I will be straight — that lane needs attention before the rush.',
+                'The maintenance log is backed up. We need to prioritize.',
+            ],
+            'stoner' => [
+                'Dunno, man. The machines are vibes right now.',
+                'The pinsetter is being weird. Just roll with it.',
+            ],
+            'overtly_friendly' => [
+                'Oh no, is the lane acting up? I can take a look!',
+                'We should get that fixed — I will help!',
+            ],
+            'creepy' => [
+                'I know a thing or two about machines... if you ask nicely.',
+                'The pinsetter has been making noises. Interesting.',
+            ],
+            'nerd' => [
+                'The pinsetter\'s cycle timing is off by about 200ms.',
+                'I ran diagnostics — the oil distribution is uneven.',
+            ],
+            'rude' => [
+                'Not my lane, not my problem.',
+                'Figure it out. I am busy.',
+            ],
+            'cliquey' => [
+                'I am not touching that machine. Someone else can.',
+                'That is not my section. Ask someone else.',
+            ],
+            'opportunistic' => [
+                'I could fix it... for the right consideration.',
+                'Maintenance work is above my pay grade. Unless there is a bonus.',
+            ],
+        ],
+        'steward' => [
+            'base' => [
+                'Careful what you say — walls have ears around here.',
+                'Management does not exactly keep us in the loop.',
+                'I would keep that between us.',
+                'They are watching the overtime logs closely.',
+                'I heard they are cutting costs again.',
+                'Best not to rock the boat on that one.',
+            ],
+            'honest' => [
+                'I will be honest — I do not trust management right now.',
+                'They are not being straight with us. I would keep your head down.',
+            ],
+            'stoner' => [
+                'Dunno, man. I do not pay attention to that stuff.',
+                'Management is whatever. I just do my thing.',
+            ],
+            'overtly_friendly' => [
+                'Oh gosh, do not say that too loud!',
+                'I am sure they mean well... right?',
+            ],
+            'creepy' => [
+                'I hear things. More than you think.',
+                'Management is hiding something. I can feel it.',
+            ],
+            'nerd' => [
+                'The organizational hierarchy is not exactly transparent.',
+                'I have been documenting the policy changes. It is not pretty.',
+            ],
+            'rude' => [
+                'Management does not care about us. Period.',
+                'They are all the same. Do not expect anything.',
+            ],
+            'cliquey' => [
+                'I stay out of management\'s way. You should too.',
+                'Not my problem. I just work here.',
+            ],
+            'opportunistic' => [
+                'I have some connections in management. Might be useful.',
+                'Information about management is worth its weight in gold.',
+            ],
+        ],
+        'tired' => [
+            'base' => [
+                'The break room fridge has some leftover pizza if you want.',
+                'Hang in there — shift is almost over.',
+                'I hear you. These double shifts are rough.',
+                'Take five when you can. Nobody will notice.',
+                'The break room coffee is fresh, if that helps.',
+                'I am right there with you. Long day.',
+            ],
+            'honest' => [
+                'I will be honest — I am wiped too. This week has been brutal.',
+                'We all need a break. Take one when you can.',
+            ],
+            'stoner' => [
+                'Dunno, man. The break room has some snacks though.',
+                'I hear you. Just ride it out.',
+            ],
+            'overtly_friendly' => [
+                'Oh no, are you tired? I can cover for a bit!',
+                'Let me grab you some coffee! Hang in there!',
+            ],
+            'creepy' => [
+                'I know a quiet spot where nobody will find you... for a break.',
+                'Tired? ...I know the feeling.',
+            ],
+            'nerd' => [
+                'According to labor studies, a 5-minute break increases productivity by 15%.',
+                'I would take a break if I were you. The data supports it.',
+            ],
+            'rude' => [
+                'Yeah, yeah. We are all tired. Get over it.',
+                'Take a break or do not. I do not care.',
+            ],
+            'cliquey' => [
+                'I am taking my break. You are on your own.',
+                'Not my problem. Figure it out.',
+            ],
+            'opportunistic' => [
+                'I could cover for you... for a favor.',
+                'Take a break. I will remember this.',
+            ],
+        ],
     ];
 
     public function crewToday(Staff $player): Collection
@@ -135,7 +460,13 @@ class CrewChatEngine
                     $accuser,
                     'speech',
                     'accusation',
-                    $this->groqLine("You left the $thing running again — that's the second time this week.")
+                    $this->groqLine(
+                        "You left the $thing running again — that's the second time this week.",
+                        $accuser->user->name ?? 'A coworker',
+                        "You left the $thing running again",
+                        $accuser,
+                        0.6
+                    )
                 );
 
                 $this->write($player, 'thought', 'thought', 'They are counting. I should smooth this over.');
@@ -233,16 +564,20 @@ class CrewChatEngine
         $body = trim($body);
 
         if ($body === '') {
-            return ['sent' => false, 'reply' => null];
+            return ['sent' => false, 'reply' => null, 'replies' => collect()];
         }
 
         $this->write($player, 'speech', 'reply', $body, $to);
 
         if ($to) {
-            return ['sent' => true, 'reply' => $this->dmReply($player, $to, $body)];
+            $reply = $this->dmReply($player, $to, $body);
+
+            return ['sent' => true, 'reply' => $reply, 'replies' => $reply ? collect([$reply]) : collect()];
         }
 
-        return ['sent' => true, 'reply' => $this->groupReaction($player, $body)];
+        $replies = $this->groupReaction($player, $body);
+
+        return ['sent' => true, 'reply' => $replies->first(), 'replies' => $replies];
     }
 
     public function dmReply(Staff $player, Staff $other, string $playerBody): ?StaffMessage
@@ -253,45 +588,88 @@ class CrewChatEngine
             $rel->level = $this->levelFor($rel->score);
             $rel->save();
 
-            return $this->write($other, 'speech', 'chat', $this->pick([
-                'Apology accepted. Do not let it happen again.',
-                'It is okay. I was more annoyed than mad.',
-                'Fine. I am keeping an eye on you, though.',
-            ]), $player);
+            return $this->write($other, 'speech', 'chat', $this->groqLine(
+                $this->pick([
+                    'Apology accepted. Do not let it happen again.',
+                    'It is okay. I was more annoyed than mad.',
+                    'Fine. I am keeping an eye on you, though.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            ), $player);
         }
 
         if (preg_match('/\?|who|what|when|where|why|how/i', $playerBody)) {
-            return $this->write($other, 'speech', 'chat', $this->pick([
-                'Honestly? I am still figuring that out myself.',
-                'Not sure, but I would ask the steward before the shift.',
-                'Good question. I will check the log later.',
-            ]), $player);
+            return $this->write($other, 'speech', 'chat', $this->groqLine(
+                $this->pick([
+                    'Honestly? I am still figuring that out myself.',
+                    'Not sure, but I would ask the steward before the shift.',
+                    'Good question. I will check the log later.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            ), $player);
         }
 
         $tone = $this->levelFor($this->relationship($player, $other)->score);
 
         if (($other->happiness <= 50 || $tone === 'hostile') && mt_rand(1, 100) <= 30) {
-            return $this->write($other, 'speech', 'chat', $this->pick([
-                'Between us, payroll has been short the last two weeks and management will not explain.',
-                'Do not say it loudly, but I saw the steward trimming the overtime log.',
-                'Keep this between us — they are watching who clocks out early.',
-            ]), $player);
+            return $this->write($other, 'speech', 'chat', $this->groqLine(
+                $this->pick([
+                    'Between us, payroll has been short the last two weeks and management will not explain.',
+                    'Do not say it loudly, but I saw the steward trimming the overtime log.',
+                    'Keep this between us — they are watching who clocks out early.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            ), $player);
         }
 
         $bank = self::DM_REPLIES[$tone] ?? self::DM_REPLIES['neutral'];
 
-        return $this->write($other, 'speech', 'chat', $this->pick($bank), $player);
+        return $this->write($other, 'speech', 'chat', $this->groqLine(
+            $this->pick($bank),
+            $other->user->name ?? 'Coworker',
+            $playerBody,
+            $other,
+            1.0
+        ), $player);
     }
 
-    public function groupReaction(Staff $player, string $body): ?StaffMessage
+    /** @return Collection<int, StaffMessage> */
+    public function groupReaction(Staff $player, string $body): Collection
     {
         $crew = $this->crewToday($player)->filter(fn (Staff $s) => $s->role === 'caretaker' && $s->id !== $player->id)->values();
 
-        if ($crew->isEmpty() || mt_rand(1, 100) > 55) {
-            return null;
+        $replies = collect();
+        $used = [];
+
+        foreach ($crew as $npc) {
+            if (mt_rand(1, 100) <= 55) {
+                $fallback = $this->pick(self::GROUP_REACTIONS, $used);
+                $line = $this->groqLine(
+                    $fallback,
+                    $player->user->name ?? 'a coworker',
+                    $body,
+                    $npc,
+                    0.6,
+                    $used
+                );
+                $used[] = $line;
+                $msg = $this->write($npc, 'speech', 'chatter', $line);
+                if ($msg) {
+                    $replies->push($msg);
+                }
+            }
         }
 
-        return $this->write($crew->random(), 'speech', 'chatter', $this->pick(self::GROUP_REACTIONS));
+        return $replies;
     }
 
     public function vibeChips(Staff $player): array
@@ -311,29 +689,105 @@ class CrewChatEngine
             ];
         }
 
-        $text = $recent->pluck('body')->implode(' ');
-
-        if (preg_match('/steward|overtime|payroll|watching|log/i', $text)) {
-            return [
-                ['label' => 'Thanks for the heads up.', 'action' => 'send'],
-                ['label' => 'Noted. Staying careful.', 'action' => 'send'],
-                ['label' => 'Who told you that?', 'action' => 'send'],
-            ];
-        }
+        $last = $recent->first();
+        $text = strtolower($last?->body ?? '');
+        $mood = $this->crewVibe($player);
 
         if (preg_match('/oil|stock|restock|running low|out of/i', $text)) {
-            return [
-                ['label' => 'Let us check the stock room.', 'action' => 'send'],
-                ['label' => 'We can manage until the order lands.', 'action' => 'send'],
-                ['label' => 'Put a restock request in.', 'action' => 'send'],
-            ];
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'I will check the stock room.', 'action' => 'send'],
+                    ['label' => 'We can manage until the order lands.', 'action' => 'send'],
+                    ['label' => 'I will put a restock request in.', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'Somebody needs to order more.', 'action' => 'send'],
+                    ['label' => 'That is not my department.', 'action' => 'send'],
+                    ['label' => 'Tell the manager.', 'action' => 'send'],
+                ],
+            };
         }
 
-        return match ($this->crewVibe($player)) {
+        if (preg_match('/schedule|shift|roster|cover|overtime/i', $text)) {
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'I can swap if you need.', 'action' => 'send'],
+                    ['label' => 'Check the board — they might have updated it.', 'action' => 'send'],
+                    ['label' => 'I heard they are rotating evening slots.', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'The schedule has been rough lately.', 'action' => 'send'],
+                    ['label' => 'Talk to the steward about swaps.', 'action' => 'send'],
+                    ['label' => 'I would not volunteer for extra unless you need it.', 'action' => 'send'],
+                ],
+            };
+        }
+
+        if (preg_match('/pinsetter|jam|lane\s*\d|maintenance|oil machine/i', $text)) {
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'I can take a look at it.', 'action' => 'send'],
+                    ['label' => 'We should log a ticket before the rush.', 'action' => 'send'],
+                    ['label' => 'Has anyone reported it yet?', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'Lane maintenance is behind again.', 'action' => 'send'],
+                    ['label' => 'That has been an issue all week.', 'action' => 'send'],
+                    ['label' => 'Someone needs to handle that.', 'action' => 'send'],
+                ],
+            };
+        }
+
+        if (preg_match('/tired|break|food|hungry|exhausted|long day/i', $text)) {
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'Hang in there — shift is almost over.', 'action' => 'send'],
+                    ['label' => 'The break room has leftover pizza.', 'action' => 'send'],
+                    ['label' => 'Take five when you can.', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'I hear you. These double shifts are rough.', 'action' => 'send'],
+                    ['label' => 'The break room coffee is fresh.', 'action' => 'send'],
+                    ['label' => 'We are all tired. Hang in there.', 'action' => 'send'],
+                ],
+            };
+        }
+
+        if (preg_match('/steward|manager|boss|management|payroll|log|overtime/i', $text)) {
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'Careful what you say around here.', 'action' => 'send'],
+                    ['label' => 'I heard the same thing.', 'action' => 'send'],
+                    ['label' => 'Walls have ears, you know.', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'They do not exactly keep us in the loop.', 'action' => 'send'],
+                    ['label' => 'I would keep that between us.', 'action' => 'send'],
+                    ['label' => 'Best not to rock the boat.', 'action' => 'send'],
+                ],
+            };
+        }
+
+        if (preg_match('/\?|who|what|when|where|why|how/i', $text)) {
+            return match ($mood) {
+                'friendly', 'trusted' => [
+                    ['label' => 'I was wondering the same thing.', 'action' => 'send'],
+                    ['label' => 'Good question — let me know what you find out.', 'action' => 'send'],
+                    ['label' => 'I have been asking myself that.', 'action' => 'send'],
+                ],
+                default => [
+                    ['label' => 'No clue. I just work here.', 'action' => 'send'],
+                    ['label' => 'Beats me.', 'action' => 'send'],
+                    ['label' => 'You would have to ask someone else.', 'action' => 'send'],
+                ],
+            };
+        }
+
+        return match ($mood) {
             'friendly', 'trusted' => [
                 ['label' => 'Ha, true.', 'action' => 'send'],
                 ['label' => 'Same honestly.', 'action' => 'send'],
-                ['label' => 'Sounds like a plan.', 'action' => 'send'],
+                ['label' => 'Tell me about it.', 'action' => 'send'],
             ],
             'hostile' => [
                 ['label' => 'Easy there.', 'action' => 'send'],
@@ -342,7 +796,7 @@ class CrewChatEngine
             ],
             default => [
                 ['label' => 'Yeah, busy day.', 'action' => 'send'],
-                ['label' => 'Tell me about it.', 'action' => 'send'],
+                ['label' => 'Right?', 'action' => 'send'],
                 ['label' => 'We will manage.', 'action' => 'send'],
             ],
         };
@@ -358,11 +812,49 @@ class CrewChatEngine
 
         $tone = $this->levelFor($this->relationship($player, $other)->score);
 
+        if ($lastIncoming) {
+            $body = strtolower($lastIncoming->body);
+
+            if (preg_match('/oil|stock|restock|supplies|running low/i', $body)) {
+                $chips[] = ['label' => 'I will check the stock room.', 'action' => 'send'];
+                $chips[] = ['label' => 'We should put a request in.', 'action' => 'send'];
+                $chips[] = ['label' => 'That has been a problem for a while.', 'action' => 'send'];
+            } elseif (preg_match('/schedule|shift|roster|cover|overtime/i', $body)) {
+                $chips[] = ['label' => 'I can swap if you need.', 'action' => 'send'];
+                $chips[] = ['label' => 'The schedule has been rough.', 'action' => 'send'];
+                $chips[] = ['label' => 'Check the board — they updated it.', 'action' => 'send'];
+            } elseif (preg_match('/accident|mistake|broke|jammed|my fault/i', $body)) {
+                $chips[] = ['label' => 'It happens to everyone.', 'action' => 'send'];
+                $chips[] = ['label' => 'Just be more careful next time.', 'action' => 'send'];
+                $chips[] = ['label' => 'We all mess up sometimes.', 'action' => 'send'];
+            } elseif (preg_match('/tired|break|food|long day|exhausted/i', $body)) {
+                $chips[] = ['label' => 'Hang in there — shift is almost over.', 'action' => 'send'];
+                $chips[] = ['label' => 'The break room has food.', 'action' => 'send'];
+                $chips[] = ['label' => 'Take five when you can.', 'action' => 'send'];
+            } elseif (preg_match('/steward|manager|boss|management|payroll/i', $body)) {
+                $chips[] = ['label' => 'Careful what you say around here.', 'action' => 'send'];
+                $chips[] = ['label' => 'I heard the same thing.', 'action' => 'send'];
+                $chips[] = ['label' => 'Walls have ears, you know.', 'action' => 'send'];
+            } elseif (preg_match('/\?|who|what|when|where|why|how/i', $body)) {
+                $chips[] = ['label' => 'I was wondering the same thing.', 'action' => 'send'];
+                $chips[] = ['label' => 'No clue. I just work here.', 'action' => 'send'];
+                $chips[] = ['label' => 'You would have to ask someone else.', 'action' => 'send'];
+            } elseif (preg_match('/complaint|frustrated|annoyed|upset|angry/i', $body)) {
+                $chips[] = ['label' => 'I get how you feel.', 'action' => 'send'];
+                $chips[] = ['label' => 'Maybe talk to the manager about it.', 'action' => 'send'];
+                $chips[] = ['label' => 'That sounds rough.', 'action' => 'send'];
+            } elseif (preg_match('/pinsetter|lane|maintenance|clean|oil/i', $body)) {
+                $chips[] = ['label' => 'Lane maintenance is behind again.', 'action' => 'send'];
+                $chips[] = ['label' => 'Has anyone logged a ticket?', 'action' => 'send'];
+                $chips[] = ['label' => 'That has been an issue all week.', 'action' => 'send'];
+            }
+        }
+
         $rest = match ($tone) {
             'friendly', 'trusted' => [
                 ['label' => 'I hear you.', 'action' => 'send'],
                 ['label' => 'Tell me more.', 'action' => 'send'],
-                ['label' => 'Haha, exactly.', 'action' => 'send'],
+                ['label' => 'Same honestly.', 'action' => 'send'],
             ],
             'hostile' => [
                 ['label' => 'Okay, okay.', 'action' => 'send'],
@@ -372,7 +864,7 @@ class CrewChatEngine
             default => [
                 ['label' => 'Got it.', 'action' => 'send'],
                 ['label' => 'Noted.', 'action' => 'send'],
-                ['label' => 'I will see you at the shift.', 'action' => 'send'],
+                ['label' => 'Right?', 'action' => 'send'],
             ],
         };
 
@@ -645,17 +1137,126 @@ class CrewChatEngine
         return $this->pick($bank);
     }
 
-    private function pick(array $lines): string
+    private function pick(array $lines, ?array $used = null): string
     {
+        if ($used !== null) {
+            $available = array_values(array_diff($lines, $used));
+            if ($available !== []) {
+                $lines = $available;
+            }
+        }
+
         return $lines[array_rand($lines)];
     }
 
-    private function groqLine(string $fallback): string
+    private function personalityBank(string $topic, ?Staff $speaker, ?array $used = null): string
+    {
+        $bank = self::PERSONALITY_BANKS[$topic] ?? [];
+        $base = $bank['base'] ?? [];
+
+        $personality = $speaker?->personalities?->first()?->name ?? null;
+        $extras = $bank[$personality] ?? [];
+
+        return $this->pick(array_merge($base, $extras), $used);
+    }
+
+    private function groqLine(string $fallback, string $speakerName, string $playerMessage, ?Staff $speaker = null, float $probability = 0.6, ?array $used = null): string
     {
         if (! config('services.groq.enabled', false)) {
-            return $fallback;
+            return $this->ruleBasedFallback($fallback, $playerMessage, $used, $speaker);
+        }
+
+        if (mt_rand(1, 100) > ($probability * 100)) {
+            return $this->ruleBasedFallback($fallback, $playerMessage, $used, $speaker);
+        }
+
+        $tone = 'neutral';
+        $personality = 'standard';
+        if ($speaker) {
+            $tone = $this->crewVibe($speaker);
+            $personality = $speaker->personalities->pluck('name')->implode(', ') ?: 'standard';
+        }
+
+        $systemPrompt = "You are {$speakerName}, a bowling alley " . ($speaker->role ?? 'staff member') . ". "
+            . "Your personality: {$personality}. Your mood: {$tone}. "
+            . "You speak in short, casual sentences that match your personality. "
+            . "Never break character. Never mention being an AI. "
+            . "Stay in 1-2 sentences max. Respond naturally to what was said.";
+
+        $result = $this->groqChat($systemPrompt, $playerMessage);
+
+        return $result ?? $this->ruleBasedFallback($fallback, $playerMessage, $used, $speaker);
+    }
+
+    private function ruleBasedFallback(string $fallback, string $playerMessage, ?array $used = null, ?Staff $speaker = null): string
+    {
+        $lower = strtolower($playerMessage);
+
+        if (preg_match('/oil|stock|restock|supplies|running low/i', $lower)) {
+            return $this->personalityBank('oil', $speaker, $used);
+        }
+
+        if (preg_match('/schedule|shift|roster|cover|overtime/i', $lower)) {
+            return $this->personalityBank('schedule', $speaker, $used);
+        }
+
+        if (preg_match('/sorry|apolog|my fault|won.t happen|slipped|accident/i', $lower)) {
+            return $this->personalityBank('apologize', $speaker, $used);
+        }
+
+        if (preg_match('/pinsetter|jam|lane\s*\d|maintenance|oil machine/i', $lower)) {
+            return $this->personalityBank('pinsetter', $speaker, $used);
+        }
+
+        if (preg_match('/steward|manager|boss|management|payroll|log/i', $lower)) {
+            return $this->personalityBank('steward', $speaker, $used);
+        }
+
+        if (preg_match('/tired|break|food|hungry|exhausted|long day/i', $lower)) {
+            return $this->personalityBank('tired', $speaker, $used);
+        }
+
+        if (preg_match('/\?|who|what|when|where|why|how/i', $lower)) {
+            return $this->personalityBank('question', $speaker, $used);
         }
 
         return $fallback;
+    }
+
+    private function groqChat(string $systemPrompt, string $userMessage): ?string
+    {
+        try {
+            $apiKey = config('services.groq.api_key');
+
+            if (empty($apiKey)) {
+                return null;
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(5)->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model' => 'groq/compound-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+                'max_tokens' => 80,
+                'temperature' => 0.8,
+            ]);
+
+            if ($response->successful()) {
+                $body = $response->json('choices.0.message.content', '');
+                $body = trim($body);
+
+                if ($body !== '' && Str::length($body) <= 200) {
+                    return $body;
+                }
+            }
+        } catch (\Throwable) {
+            // Silently fall back
+        }
+
+        return null;
     }
 }

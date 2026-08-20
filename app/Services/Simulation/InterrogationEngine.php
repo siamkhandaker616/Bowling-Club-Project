@@ -6,6 +6,8 @@ use App\Models\Confrontation;
 use App\Models\Staff;
 use App\Models\StaffMessage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class InterrogationEngine
 {
@@ -102,14 +104,15 @@ class InterrogationEngine
         if ($key === 'witness') {
             $reply = $this->witness($confrontation);
         } else {
-            $answerKey = $confrontation->db_verified ? 'verified' : 'unverified';
+            $transcript = $this->transcript($confrontation)->pluck('body')->implode(' | ');
             $tier = $this->tier($confrontation->accused);
+            $replyBody = $this->groqInterrogationLine($confrontation, $key, $transcript, $tier);
 
             $reply = $this->write(
                 $confrontation->accused,
                 $this->bubbleFor($key),
                 'interrogation',
-                $this->pick(self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral']),
+                $replyBody,
                 $confrontation
             );
         }
@@ -170,15 +173,62 @@ class InterrogationEngine
             ->get();
     }
 
-    public function chips(): array
+    /** @return array<int, array{action: string, key?: string, label: string}> */
+    public function chips(Confrontation $confrontation): array
     {
-        return [
-            ['action' => 'ask', 'key' => 'where', 'label' => 'Where were you on that shift?'],
-            ['action' => 'ask', 'key' => 'log', 'label' => 'The records place you at the lane.'],
-            ['action' => 'ask', 'key' => 'witness', 'label' => 'Anybody see you?'],
-            ['action' => 'ask', 'key' => 'reporter', 'label' => 'Why would the reporter name you?'],
-            ['action' => 'witness', 'label' => 'Question a coworker.'],
-        ];
+        $transcript = $this->transcript($confrontation);
+        $msgCount = $transcript->filter(fn (StaffMessage $m) => $m->kind === 'interrogation' && $m->staff_id !== auth()->user()?->staff?->id)->count();
+
+        $lastAccused = $transcript->where('staff_id', $confrontation->accused_staff_id)->last();
+        $lastBody = strtolower($lastAccused?->body ?? '');
+
+        $chips = [];
+
+        if ($msgCount >= 3) {
+            $chips[] = ['action' => 'conclude', 'label' => 'Conclude investigation'];
+        }
+
+        if ($msgCount === 0) {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'Where were you on that shift?'];
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'The records place you at the lane.'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'Why would the reporter name you?'];
+            $chips[] = ['action' => 'witness', 'label' => 'Question a coworker.'];
+
+            return $chips;
+        }
+
+        if (preg_match('/deny|nothing|not me|wasn.t|no idea|joke|wrong/i', $lastBody)) {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'Where exactly were you?'];
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'The records say otherwise.'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'Why would they name you specifically?'];
+        } elseif (preg_match('/lane|shift|room|desk|front|back|break/i', $lastBody)) {
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'The timestamps do not match your story.'];
+            $chips[] = ['action' => 'ask', 'key' => 'witness', 'label' => 'Let us hear what a coworker saw.'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'What is your relationship with the reporter?'];
+        } elseif (preg_match('/log|record|timestamp|paper|document/i', $lastBody)) {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'So where does the record go wrong?'];
+            $chips[] = ['action' => 'ask', 'key' => 'witness', 'label' => 'A coworker might clarify this.'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'Do you think the reporter forged it?'];
+        } elseif (preg_match('/witness|saw|saw me|vouch|anyone/i', $lastBody)) {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'Let us go back — where were you?'];
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'I have the log right here. Explain this.'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'Is this personal between you two?'];
+        } elseif (preg_match('/reporter|grudge|personal|target|cover/i', $lastBody)) {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'Regardless — where were you?'];
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'The records still place you there.'];
+            $chips[] = ['action' => 'witness', 'label' => 'Let me ask someone else.'];
+        } else {
+            $chips[] = ['action' => 'ask', 'key' => 'where', 'label' => 'Tell me exactly where you were.'];
+            $chips[] = ['action' => 'ask', 'key' => 'log', 'label' => 'What does the log show?'];
+            $chips[] = ['action' => 'ask', 'key' => 'witness', 'label' => 'Can anyone back that up?'];
+            $chips[] = ['action' => 'ask', 'key' => 'reporter', 'label' => 'Why do you think you were reported?'];
+        }
+
+        if ($msgCount >= 2 && ! in_array('witness', array_column($chips, 'key'), true)) {
+            $chips[] = ['action' => 'witness', 'label' => 'Question a coworker.'];
+        }
+
+        return array_slice($chips, 0, 5);
     }
 
     public function initials(Staff $staff): string
@@ -250,5 +300,78 @@ class InterrogationEngine
     private function pick(array $lines): string
     {
         return $lines[array_rand($lines)];
+    }
+
+    private function groqInterrogationLine(Confrontation $confrontation, string $key, string $transcript, string $tier): string
+    {
+        $answerKey = $confrontation->db_verified ? 'verified' : 'unverified';
+        $fallback = $this->pick(self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral']);
+
+        if (! config('services.groq.enabled', false)) {
+            return $fallback;
+        }
+
+        if (mt_rand(1, 100) > 80) {
+            return $fallback;
+        }
+
+        $accused = $confrontation->accused;
+        $personality = $accused->personalities->pluck('name')->implode(', ') ?: 'ordinary';
+        $role = $accused->role;
+
+        $systemPrompt = "You are being interrogated at a bowling alley. You are a {$role} with a {$personality} personality. "
+            . "Your honesty level is: {$tier}. "
+            . ($tier === 'liar' ? "You are guilty and will deflect, deny, and make excuses. Never confess fully." : '')
+            . ($tier === 'honest' ? "You are mostly honest. If the evidence is strong, you bend toward the truth." : '')
+            . ($tier === 'neutral' ? "You are evasive. You give partial answers and avoid committing." : '')
+            . " Keep responses to 1-2 sentences. Stay in character. Never break the fourth wall.";
+
+        $questionContext = match ($key) {
+            'where' => 'The manager asked: Where exactly were you on that shift?',
+            'log' => 'The manager confronted you with log/timestamp evidence.',
+            'reporter' => 'The manager asked why the reporter named you.',
+            default => 'The manager is questioning you about an incident.',
+        };
+
+        $result = $this->groqChat($systemPrompt, $questionContext . ($transcript !== '' ? "\n\nSo far in the conversation: " . Str::limit($transcript, 300) : ''));
+
+        return $result ?? $fallback;
+    }
+
+    private function groqChat(string $systemPrompt, string $userMessage): ?string
+    {
+        try {
+            $apiKey = config('services.groq.api_key');
+
+            if (empty($apiKey)) {
+                return null;
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(5)->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model' => 'groq/compound-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+                'max_tokens' => 80,
+                'temperature' => 0.85,
+            ]);
+
+            if ($response->successful()) {
+                $body = $response->json('choices.0.message.content', '');
+                $body = trim($body);
+
+                if ($body !== '' && Str::length($body) <= 200) {
+                    return $body;
+                }
+            }
+        } catch (\Throwable) {
+            // Silently fall back
+        }
+
+        return null;
     }
 }

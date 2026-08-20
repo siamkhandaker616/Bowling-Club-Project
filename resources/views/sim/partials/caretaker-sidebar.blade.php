@@ -7,6 +7,7 @@
         ['route' => 'site.facility-map',        'label' => 'Facility Map', 'num' => '03'],
         ['route' => 'caretaker.crew.index',     'label' => 'Crew',      'num' => '04'],
         ['route' => 'caretaker.inventory.index','label' => 'Inventory', 'num' => '05'],
+        ['route' => 'caretaker.prep.index',     'label' => 'Match Prep','num' => '06'],
     ];
     $active = fn($route) => request()->routeIs(str_replace('.index','.*',$route));
 @endphp

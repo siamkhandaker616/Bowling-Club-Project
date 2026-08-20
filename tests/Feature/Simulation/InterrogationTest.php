@@ -45,10 +45,9 @@ class InterrogationTest extends TestCase
             ->assertOk()
             ->assertJsonStructure([
                 'messages' => [['id', 'name', 'initials', 'bubble_type', 'body']],
-                'chips' => [['action', 'key', 'label']],
+                'chips' => [['action', 'label']],
                 'accused' => ['id', 'name', 'initials'],
             ])
-            ->assertJsonCount(5, 'chips')
             ->assertJsonPath('accused.name', 'Accused NPC');
 
         $this->assertDatabaseHas('staff_messages', [

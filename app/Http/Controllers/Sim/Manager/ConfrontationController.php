@@ -74,7 +74,7 @@ class ConfrontationController extends Controller
 
         return response()->json([
             'messages' => $engine->transcript($confrontation)->map(fn (StaffMessage $m) => $this->payload($m))->values(),
-            'chips' => $engine->chips(),
+            'chips' => $engine->chips($confrontation),
             'accused' => [
                 'id' => $accused->id,
                 'name' => $accused->user->name ?? 'The accused',
@@ -93,7 +93,7 @@ class ConfrontationController extends Controller
 
         $engine = app(InterrogationEngine::class);
 
-        $chips = $engine->chips();
+        $chips = $engine->chips($confrontation);
         $chipLabel = collect($chips)->first(fn ($c) => ($c['key'] ?? $c['action'] ?? null) === $key)['label'] ?? null;
 
         $result = $engine->ask($confrontation, $key, $chipLabel);

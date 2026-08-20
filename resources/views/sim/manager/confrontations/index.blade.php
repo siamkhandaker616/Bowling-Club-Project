@@ -185,7 +185,6 @@
         var concludeForm = document.getElementById('intConcludeForm');
         var csrf = @json(csrf_token());
         var active = 0;
-        var asked = {};
         var urls = {
             interview: @json(route('manager.confrontations.interview', ['confrontation' => '__ID__'])),
             interrogate: @json(route('manager.confrontations.interrogate', ['confrontation' => '__ID__'])),
@@ -219,20 +218,24 @@
         function renderChips(list) {
             chips.innerHTML = '';
             list.forEach(function (c) {
-                var key = c.key || c.action;
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'int-chip';
-                btn.textContent = c.label;
-                if (asked[key]) btn.disabled = true;
-                btn.addEventListener('click', function () { ask(key); });
+
+                if (c.action === 'conclude') {
+                    btn.textContent = c.label;
+                    btn.addEventListener('click', function () { concludeForm.submit(); });
+                } else {
+                    var key = c.key || c.action;
+                    btn.textContent = c.label;
+                    btn.addEventListener('click', function () { ask(key); });
+                }
+
                 chips.appendChild(btn);
             });
         }
 
         function ask(key) {
-            if (asked[key]) return;
-            asked[key] = true;
             fetch(urlFor('interrogate'), {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
@@ -244,12 +247,11 @@
                     appendMessage(data.reply);
                     renderChips(data.chips);
                 })
-                .catch(function () { asked[key] = false; });
+                .catch(function () {});
         }
 
         function openInterview(id, name) {
             active = id;
-            asked = {};
             who.textContent = name;
             room.innerHTML = '';
             chips.innerHTML = '';
