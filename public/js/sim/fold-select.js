@@ -117,6 +117,24 @@
         selectEl.style.overflow = 'hidden';
         selectEl.tabIndex = -1;
 
+        function positionDropdown() {
+            var rect = trigger.getBoundingClientRect();
+            var ddW = rect.width;
+            var ddH = dropdown.offsetHeight;
+            var top = rect.bottom + 4;
+            var left = rect.left;
+            if (top + ddH > window.innerHeight) {
+                top = rect.top - ddH - 4;
+            }
+            if (left + ddW > window.innerWidth) {
+                left = window.innerWidth - ddW - 8;
+            }
+            if (left < 8) left = 8;
+            dropdown.style.top = top + 'px';
+            dropdown.style.left = left + 'px';
+            dropdown.style.width = ddW + 'px';
+        }
+
         var selectedIdx = selectEl.selectedIndex;
         if (selectedIdx < 0) selectedIdx = 0;
         textSpan.textContent = opts[selectedIdx] ? opts[selectedIdx].text : '';
@@ -171,6 +189,7 @@
 
             trigger.classList.add('open');
             dropdown.classList.add('open');
+            positionDropdown();
             dropdown.style.clipPath = 'inset(0 0 100% 0)';
 
             var panels = dropdown.querySelectorAll('.fold-panel');
@@ -363,6 +382,26 @@
             }
         }
     });
+
+    document.addEventListener('scroll', function () {
+        var open = document.querySelectorAll('.custom-select-dropdown.open');
+        for (var i = 0; i < open.length; i++) {
+            var wrap = open[i].closest('.custom-select-wrap');
+            if (!wrap) continue;
+            var trig = wrap.querySelector('.custom-select-trigger');
+            if (!trig) continue;
+            var rect = trig.getBoundingClientRect();
+            var ddW = rect.width;
+            var ddH = open[i].offsetHeight;
+            var top = rect.bottom + 4;
+            var left = rect.left;
+            if (top + ddH > window.innerHeight) top = rect.top - ddH - 4;
+            if (left + ddW > window.innerWidth) left = window.innerWidth - ddW - 8;
+            if (left < 8) left = 8;
+            open[i].style.top = top + 'px';
+            open[i].style.left = left + 'px';
+        }
+    }, true);
 
     window.initFoldSelects = init;
 })();

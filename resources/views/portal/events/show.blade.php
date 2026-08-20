@@ -78,7 +78,7 @@
             @elseif($event->isFull())
                 <div style="font-family:var(--font-sub);font-size:0.9rem;color:var(--slate);">At full capacity. Follow the board — cancellations free up spots.</div>
             @else
-                <form id="pub-rsvp-form" method="POST" action="{{ route('public.events.rsvp', $event) }}" style="display:flex;flex-direction:column;gap:1rem;">
+                <form id="pub-rsvp-form" method="POST" action="{{ route('public.events.rsvp', $event) }}" novalidate style="display:flex;flex-direction:column;gap:1rem;">
                     @csrf
                     <div>
                         <label for="visitor_name" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Your Name *</label>

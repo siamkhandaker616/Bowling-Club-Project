@@ -34,12 +34,12 @@ class InventoryCategoriesSeeder extends Seeder
         }
 
         $extra = [
-            ['name' => 'Bowling Balls', 'category' => 'balls', 'quantity' => 24, 'max_quantity' => 30, 'reorder_threshold' => 4, 'cost_per_unit' => 60],
-            ['name' => 'Score Sheets', 'category' => 'lane_equipment', 'quantity' => 100, 'max_quantity' => 200, 'reorder_threshold' => 40, 'cost_per_unit' => 1],
-            ['name' => 'Chips & Soda', 'category' => 'food_drinks', 'quantity' => 40, 'max_quantity' => 80, 'reorder_threshold' => 15, 'cost_per_unit' => 3],
-            ['name' => 'Ball Return Cushions', 'category' => 'lane_equipment', 'quantity' => 12, 'max_quantity' => 16, 'reorder_threshold' => 4, 'cost_per_unit' => 45],
-            ['name' => 'Pinsetter Belts', 'category' => 'spare_parts', 'quantity' => 8, 'max_quantity' => 12, 'reorder_threshold' => 3, 'cost_per_unit' => 80],
-            ['name' => 'Tool Kit', 'category' => 'spare_parts', 'quantity' => 4, 'max_quantity' => 6, 'reorder_threshold' => 1, 'cost_per_unit' => 120],
+            ['name' => 'Bowling Balls', 'category' => 'balls', 'quantity' => 24, 'max_quantity' => 30, 'reorder_threshold' => 4, 'cost_per_unit' => 900],
+            ['name' => 'Score Sheets', 'category' => 'lane_equipment', 'quantity' => 100, 'max_quantity' => 200, 'reorder_threshold' => 40, 'cost_per_unit' => 15],
+            ['name' => 'Chips & Soda', 'category' => 'food_drinks', 'quantity' => 40, 'max_quantity' => 80, 'reorder_threshold' => 15, 'cost_per_unit' => 45],
+            ['name' => 'Ball Return Cushions', 'category' => 'lane_equipment', 'quantity' => 12, 'max_quantity' => 16, 'reorder_threshold' => 4, 'cost_per_unit' => 675],
+            ['name' => 'Pinsetter Belts', 'category' => 'spare_parts', 'quantity' => 8, 'max_quantity' => 12, 'reorder_threshold' => 3, 'cost_per_unit' => 1200],
+            ['name' => 'Tool Kit', 'category' => 'spare_parts', 'quantity' => 4, 'max_quantity' => 6, 'reorder_threshold' => 1, 'cost_per_unit' => 1800],
         ];
 
         foreach ($extra as $item) {

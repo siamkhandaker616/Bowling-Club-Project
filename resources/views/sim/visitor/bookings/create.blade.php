@@ -31,17 +31,7 @@
                     @csrf
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">DATE</label>
-                        <div class="lc" data-year="{{ $date->year }}">
-                            <div class="lc-head">
-                                <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
-                                <div class="lc-mo"></div>
-                                <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
-                            </div>
-                            <div class="lc-frame"><div class="lc-grid"></div></div>
-                            <div class="lc-read"><span class="lc-key">Date</span><span class="lc-picked" data-kept="1">{{ $date->format('F j, Y') }}</span></div>
-                            <input type="hidden" name="date" class="lc-input" value="{{ $date->toDateString() }}">
-                            <input type="hidden" class="lc-m" value="{{ $date->month - 1 }}">
-                        </div>
+                        <input type="date" name="date" data-datepicker value="{{ $date->toDateString() }}">
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">LANE</label>
@@ -60,7 +50,7 @@
                     </div>
                     <div>
                         <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">TIME SLOT</label>
-                        <select name="time_slot" class="input select" style="width:100%;">
+                        <select name="time_slot" class="fold-select" style="width:100%;">
                             @foreach ($slots as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach

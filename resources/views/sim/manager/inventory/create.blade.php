@@ -47,7 +47,7 @@
                         <div class="gutter-flag">&#10003;</div>
                     </div>
                     <div class="gutter-field field">
-                        <label class="label" for="cost_per_unit">Cost / Unit ($) <span class="req">*</span></label>
+                        <label class="label" for="cost_per_unit">Cost / Unit (৳) <span class="req">*</span></label>
                         <input id="cost_per_unit" name="cost_per_unit" class="input" type="number" step="0.01" min="0" data-stepper="edit" value="{{ old('cost_per_unit', 10) }}">
                         <div class="gutter-err">Min 0 required</div>
                         <div class="gutter-flag">&#10003;</div>

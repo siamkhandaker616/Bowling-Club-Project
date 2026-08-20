@@ -584,25 +584,6 @@ nav .btn-coral:hover{color:var(--navy)}
 .br-lane.on{background:var(--gold);color:var(--navy);box-shadow:var(--hard);transform:translateY(-2px)}
 .br-lane.off{opacity:.45;cursor:not-allowed}
 
-/* 2 -- League Calendar Datepicker */
-.lc-head{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,var(--gold-light),var(--gold));color:var(--navy);border:2px solid var(--navy);border-radius:8px 8px 0 0;padding:.5rem .7rem;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
-.lc-head .lc-mo{letter-spacing:1px;text-transform:uppercase;font-size:.62rem;font-weight:700}
-.lc-nav{width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--rubber);color:var(--gold-light);cursor:pointer;font-family:var(--font-mono);line-height:1;transition:all .12s ease}
-.lc-nav:hover{background:var(--coral);color:#fff;transform:scale(1.12)}
-.lc-frame{border:2px solid var(--navy);border-top:none;border-radius:0 0 8px 8px;background:var(--cloud);padding:.5rem;box-shadow:var(--shadow-md)}
-.lc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.15rem}
-.lc-dow{font-size:.5rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate);text-align:center;padding:.15rem 0}
-.lc-dow.weekend{color:var(--coral-dark)}
-.lc-day{display:flex;align-items:center;justify-content:center;border:2px solid transparent;border-radius:7px;cursor:pointer;background:var(--pin-white);color:var(--navy);font-weight:700;transition:all .15s ease;position:relative;font-size:.66rem;height:1.9rem}
-.lc-day:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:var(--hard)}
-.lc-day.dim{color:var(--fog);background:transparent;font-weight:400}
-.lc-day.dim:hover{border-color:var(--fog);transform:none;box-shadow:none}
-.lc-day.on{background:linear-gradient(135deg,var(--coral-light),var(--coral));border-color:var(--navy);color:#fff;box-shadow:var(--hard);transform:translateY(-1px);animation:dayPop .25s ease}
-@keyframes dayPop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
-.lc-read{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem;background:var(--navy);color:var(--gold-light);border-radius:6px;padding:.35rem .6rem}
-.lc-read span{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lc-read .lc-key{color:#fff;font-weight:700}
-
 /* 3 -- Pin Checkbox */
 .pin-check{display:inline-flex;align-items:center;gap:.6rem;cursor:pointer;font-family:var(--font-sub);font-size:.82rem;color:var(--navy)}
 .pin-check input{position:absolute;opacity:0;width:0;height:0}

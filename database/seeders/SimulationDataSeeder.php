@@ -73,27 +73,26 @@ class SimulationDataSeeder extends Seeder
 
     private function seedInventory(): void
     {
-        if (Inventory::exists()) {
-            return;
-        }
-
         $items = [
-            ['name' => 'Bowling Shoes', 'category' => 'rental_shoes', 'quantity' => 42, 'max_quantity' => 50, 'reorder_threshold' => 10, 'cost_per_unit' => 25],
-            ['name' => 'Lane Oil', 'category' => 'oil_supplies', 'quantity' => 6, 'max_quantity' => 30, 'reorder_threshold' => 8, 'cost_per_unit' => 40],
-            ['name' => 'Ball Polish', 'category' => 'oil_supplies', 'quantity' => 14, 'max_quantity' => 24, 'reorder_threshold' => 6, 'cost_per_unit' => 12],
-            ['name' => 'Spare Pins', 'category' => 'pins', 'quantity' => 30, 'max_quantity' => 60, 'reorder_threshold' => 12, 'cost_per_unit' => 15],
-            ['name' => 'Bowling Balls', 'category' => 'balls', 'quantity' => 24, 'max_quantity' => 30, 'reorder_threshold' => 4, 'cost_per_unit' => 60],
-            ['name' => 'Cleaning Wipes', 'category' => 'cleaning_supplies', 'quantity' => 20, 'max_quantity' => 40, 'reorder_threshold' => 8, 'cost_per_unit' => 5],
-            ['name' => 'Bar Napkins', 'category' => 'food_drinks', 'quantity' => 60, 'max_quantity' => 100, 'reorder_threshold' => 20, 'cost_per_unit' => 2],
-            ['name' => 'Chips & Soda', 'category' => 'food_drinks', 'quantity' => 40, 'max_quantity' => 80, 'reorder_threshold' => 15, 'cost_per_unit' => 3],
-            ['name' => 'Score Sheets', 'category' => 'lane_equipment', 'quantity' => 100, 'max_quantity' => 200, 'reorder_threshold' => 40, 'cost_per_unit' => 1],
-            ['name' => 'Ball Return Cushions', 'category' => 'lane_equipment', 'quantity' => 12, 'max_quantity' => 16, 'reorder_threshold' => 4, 'cost_per_unit' => 45],
-            ['name' => 'Pinsetter Belts', 'category' => 'spare_parts', 'quantity' => 8, 'max_quantity' => 12, 'reorder_threshold' => 3, 'cost_per_unit' => 80],
-            ['name' => 'Tool Kit', 'category' => 'spare_parts', 'quantity' => 4, 'max_quantity' => 6, 'reorder_threshold' => 1, 'cost_per_unit' => 120],
+            ['name' => 'Bowling Shoes', 'category' => 'rental_shoes', 'quantity' => 42, 'max_quantity' => 50, 'reorder_threshold' => 10, 'cost_per_unit' => 375],
+            ['name' => 'Lane Oil', 'category' => 'oil_supplies', 'quantity' => 6, 'max_quantity' => 30, 'reorder_threshold' => 8, 'cost_per_unit' => 600],
+            ['name' => 'Ball Polish', 'category' => 'oil_supplies', 'quantity' => 14, 'max_quantity' => 24, 'reorder_threshold' => 6, 'cost_per_unit' => 180],
+            ['name' => 'Spare Pins', 'category' => 'pins', 'quantity' => 30, 'max_quantity' => 60, 'reorder_threshold' => 12, 'cost_per_unit' => 225],
+            ['name' => 'Bowling Balls', 'category' => 'balls', 'quantity' => 24, 'max_quantity' => 30, 'reorder_threshold' => 4, 'cost_per_unit' => 900],
+            ['name' => 'Cleaning Wipes', 'category' => 'cleaning_supplies', 'quantity' => 20, 'max_quantity' => 40, 'reorder_threshold' => 8, 'cost_per_unit' => 75],
+            ['name' => 'Bar Napkins', 'category' => 'food_drinks', 'quantity' => 60, 'max_quantity' => 100, 'reorder_threshold' => 20, 'cost_per_unit' => 30],
+            ['name' => 'Chips & Soda', 'category' => 'food_drinks', 'quantity' => 40, 'max_quantity' => 80, 'reorder_threshold' => 15, 'cost_per_unit' => 45],
+            ['name' => 'Score Sheets', 'category' => 'lane_equipment', 'quantity' => 100, 'max_quantity' => 200, 'reorder_threshold' => 40, 'cost_per_unit' => 15],
+            ['name' => 'Ball Return Cushions', 'category' => 'lane_equipment', 'quantity' => 12, 'max_quantity' => 16, 'reorder_threshold' => 4, 'cost_per_unit' => 675],
+            ['name' => 'Pinsetter Belts', 'category' => 'spare_parts', 'quantity' => 8, 'max_quantity' => 12, 'reorder_threshold' => 3, 'cost_per_unit' => 1200],
+            ['name' => 'Tool Kit', 'category' => 'spare_parts', 'quantity' => 4, 'max_quantity' => 6, 'reorder_threshold' => 1, 'cost_per_unit' => 1800],
         ];
 
         foreach ($items as $item) {
-            Inventory::create(array_merge($item, ['condition' => 'good']));
+            Inventory::updateOrCreate(
+                ['name' => $item['name']],
+                array_merge($item, ['condition' => 'good'])
+            );
         }
     }
 

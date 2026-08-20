@@ -79,13 +79,14 @@
 
 .custom-select-wrap {
     position: relative;
-    width: 100%;
+    width: auto;
     vertical-align: middle;
+    flex: 0 0 auto;
 }
 
 .custom-select-trigger {
     position: relative;
-    width: 100%;
+    width: auto;
     box-sizing: border-box;
     font-family: var(--font-body);
     font-size: 0.78rem;
@@ -149,21 +150,20 @@
 }
 
 .custom-select-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    z-index: 300;
+    position: fixed;
+    z-index: 9999;
     background: var(--pin-white);
     border: 2px solid var(--navy);
     border-radius: 8px;
     max-height: 260px;
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 6px 6px 0 var(--navy);
+    display: none;
 }
 
 .custom-select-dropdown.open {
     display: block;
+    overflow-y: auto;
 }
 
 .fold-panel {

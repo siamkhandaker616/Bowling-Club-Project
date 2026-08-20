@@ -6,7 +6,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" style="margin-top:1.25rem;">
+    <form method="post" action="{{ route('password.update') }}" novalidate style="margin-top:1.25rem;">
         @csrf
         @method('put')
 

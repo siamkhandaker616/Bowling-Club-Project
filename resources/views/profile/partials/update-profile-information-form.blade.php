@@ -10,7 +10,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" style="margin-top:1.25rem;">
+    <form method="post" action="{{ route('profile.update') }}" novalidate style="margin-top:1.25rem;">
         @csrf
         @method('patch')
 

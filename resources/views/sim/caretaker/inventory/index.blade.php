@@ -64,9 +64,7 @@
                             <form method="POST" action="{{ route('caretaker.inventory.adjust', $item) }}" class="gutter-form" style="display:flex;align-items:center;gap:6px;">
                                 @csrf
                                 <div class="stepper">
-                                    <button type="button" data-stepper="edit" data-dir="-1">-</button>
                                     <input name="change" type="number" step="1" value="0" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" data-stepper="edit" class="input" style="width:64px;text-align:center;">
-                                    <button type="button" data-stepper="edit" data-dir="1">+</button>
                                 </div>
                                 <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;" title="Log usage or restock">Adjust</button>
                             </form>

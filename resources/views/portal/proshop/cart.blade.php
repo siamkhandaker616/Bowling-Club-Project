@@ -15,7 +15,9 @@
     @component('site.partials.core-header')
         <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
         <a href="{{ route('public.proshop.index') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Pro Shop</a>
-        <a href="{{ route('public.proshop.cart') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Bag</a>
+        <a href="{{ route('public.proshop.cart') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;position:relative;">Bag
+            @if(($cartCount ?? 0) > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $cartCount }}</span>@endif
+        </a>
     @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:860px;margin:0 auto;">
@@ -72,22 +74,29 @@
                     <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">Pay securely with your card or mobile wallet</span>
                 </div>
 
-                <form method="POST" action="{{ route('public.proshop.checkout') }}" style="display:flex;flex-direction:column;gap:1rem;">
+                <form method="POST" action="{{ route('public.proshop.checkout') }}" novalidate class="gutter-form" data-checkout-form style="display:flex;flex-direction:column;gap:1rem;">
                     @csrf
-                    <div>
-                        <label for="customer_name" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Your Name *</label>
-                        <input id="customer_name" name="customer_name" type="text" value="{{ old('customer_name') }}" required maxlength="120" placeholder="e.g. Samina Chowdhury"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
+                    <div class="gutter-field">
+                        <label class="label" for="customer_name">Your Name <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input class="input" id="customer_name" name="customer_name" type="text" value="{{ old('customer_name') }}" required maxlength="120" placeholder="e.g. Samina Chowdhury">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err">Name is required</div>
                     </div>
-                    <div>
-                        <label for="customer_email" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Email *</label>
-                        <input id="customer_email" name="customer_email" type="email" value="{{ old('customer_email') }}" required maxlength="255" placeholder="you@example.com"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
+                    <div class="gutter-field">
+                        <label class="label" for="customer_email">Email <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input class="input" id="customer_email" name="customer_email" type="email" value="{{ old('customer_email') }}" required maxlength="255" placeholder="you@example.com">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err">Valid email is required</div>
                     </div>
-                    <div>
-                        <label for="customer_phone" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Phone (optional)</label>
-                        <input id="customer_phone" name="customer_phone" type="text" value="{{ old('customer_phone') }}" maxlength="30" placeholder="01XXXXXXXXX"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;background:var(--cloud);color:var(--navy);outline:none;">
+                    <div class="gutter-field">
+                        <label class="label" for="customer_phone">Phone (optional)</label>
+                        <div class="inp-wrap">
+                            <input class="input" id="customer_phone" name="customer_phone" type="text" value="{{ old('customer_phone') }}" maxlength="30" placeholder="01XXXXXXXXX">
+                        </div>
                     </div>
 
                     @if($errors->any())
@@ -96,7 +105,18 @@
                         </div>
                     @endif
 
-                    <button type="submit" class="btn btn-gold" style="align-self:flex-start;">Proceed to Payment</button>
+                    <div class="lane-stage">
+                        <div class="pin-rack">
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span></div>
+                        </div>
+                        <span class="ball-dot"></span>
+                    </div>
+
+                    <button type="submit" class="submit">Proceed to Payment &rarr;</button>
                 </form>
             </div>
         @endif
@@ -106,6 +126,78 @@
     @include('site.partials.core-footer')
 
     <x-toast />
+
+    <script>
+    (function() {
+        var form = document.querySelector('[data-checkout-form]');
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = form.querySelector('button[type="submit"]');
+            var originalText = btn.textContent;
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                if (!result.ok) {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    if (result.data && result.data.error) {
+                        var el = document.createElement('div');
+                        el.style.cssText = 'position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;padding:10px 20px;background:var(--coral);color:#fff;border-radius:8px;font-family:var(--font-sub);font-size:0.85rem;';
+                        el.textContent = result.data.error;
+                        document.body.appendChild(el);
+                        setTimeout(function() { el.remove(); }, 4000);
+                    }
+                    return;
+                }
+
+                var d = result.data;
+                if (d.gateway_url) {
+                    window.open(d.gateway_url, '_blank');
+                    btn.textContent = 'Waiting for payment...';
+                    var poll = setInterval(function() {
+                        fetch('{{ route("public.pay.status", "__ID__") }}'.replace('__ID__', d.payment_id))
+                            .then(function(r) { return r.json(); })
+                            .then(function(s) {
+                                if (s.successful) {
+                                    clearInterval(poll);
+                                    window.location = '{{ route("public.pay.success", "__ID__") }}'.replace('__ID__', d.payment_id);
+                                } else if (s.status === 'failed' || s.status === 'cancelled') {
+                                    clearInterval(poll);
+                                    btn.textContent = originalText;
+                                    btn.disabled = false;
+                                    var el = document.createElement('div');
+                                    el.style.cssText = 'position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;padding:10px 20px;background:var(--coral);color:#fff;border-radius:8px;font-family:var(--font-sub);font-size:0.85rem;';
+                                    el.textContent = 'Payment ' + s.status + ' — try again.';
+                                    document.body.appendChild(el);
+                                    setTimeout(function() { el.remove(); }, 4000);
+                                }
+                            }).catch(function() {});
+                    }, 2000);
+                } else if (d.redirect_url) {
+                    window.location = d.redirect_url;
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch(function() {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        });
+    })();
+    </script>
 
     @include('sim.partials.fold-controls')
 </body>

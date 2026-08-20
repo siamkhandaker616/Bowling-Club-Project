@@ -65,10 +65,7 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
     Route::get('/inventory/purchases', [InventoryPurchaseController::class, 'index'])->name('inventory.purchases.index');
     Route::post('/inventory/purchases/{purchase}/accept', [InventoryPurchaseController::class, 'accept'])->name('inventory.purchases.accept');
     Route::post('/inventory/purchases/{purchase}/reject', [InventoryPurchaseController::class, 'reject'])->name('inventory.purchases.reject');
-    Route::get('/inventory/purchases/{payment}/success', [InventoryPurchaseController::class, 'success'])->name('inventory.purchases.success');
-    Route::get('/inventory/purchases/{payment}/fail', [InventoryPurchaseController::class, 'fail'])->name('inventory.purchases.fail');
-    Route::get('/inventory/purchases/{payment}/cancel', [InventoryPurchaseController::class, 'cancel'])->name('inventory.purchases.cancel');
-
+    Route::get('/inventory/purchases/{payment}/status', [InventoryPurchaseController::class, 'status'])->name('inventory.purchases.status');
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
@@ -97,6 +94,16 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
     Route::get('/league', [LeagueController::class, 'index'])->name('league.index');
     Route::post('/league/{fixture}/welcome', [LeagueController::class, 'welcome'])->name('league.welcome');
 });
+
+Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/success', [InventoryPurchaseController::class, 'success'])
+    ->name('manager.inventory.purchases.success')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/fail', [InventoryPurchaseController::class, 'fail'])
+    ->name('manager.inventory.purchases.fail')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/cancel', [InventoryPurchaseController::class, 'cancel'])
+    ->name('manager.inventory.purchases.cancel')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 
 Route::middleware(['auth', 'verified', 'role:steward', \App\Http\Middleware\CatchUpSim::class])->prefix('steward')->name('steward.')->group(function () {
     Route::get('/schedule', [StewardScheduleController::class, 'index'])->name('schedule.index');

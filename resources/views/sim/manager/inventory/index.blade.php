@@ -40,7 +40,7 @@
                     <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;">
                         <div style="flex:1;min-width:180px;">
                             <div style="font-family:var(--font-sub);font-size:0.75rem;">{{ $item->name }}</div>
-                            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ ucfirst($item->category) }} · ${{ $item->cost_per_unit }}/unit · {{ \App\Helpers\Label::inventoryCondition($item->condition) }}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">{{ ucfirst($item->category) }} · ৳{{ $item->cost_per_unit }}/unit · {{ \App\Helpers\Label::inventoryCondition($item->condition) }}</div>
                         </div>
                         <div style="flex:1;">
                             <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.6rem;margin-bottom:4px;">
@@ -53,9 +53,7 @@
                             <form method="POST" action="{{ route('manager.inventory.adjust', $item) }}" class="gutter-form">
                                 @csrf
                                 <div class="stepper">
-                                    <button type="button" data-stepper="edit" data-dir="-1">-</button>
                                     <input name="change" type="number" placeholder="±qty" data-stepper="edit" min="{{ 0 - $item->quantity }}" max="{{ $item->max_quantity - $item->quantity }}" class="input" style="width:70px;text-align:center;">
-                                    <button type="button" data-stepper="edit" data-dir="1">+</button>
                                 </div>
                                 <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Apply</button>
                             </form>

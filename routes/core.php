@@ -82,12 +82,19 @@ Route::get('/events', [EventController::class, 'index'])->name('public.events');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('public.events.show');
 Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('public.events.rsvp');
 
-Route::get('/pay/{payment}/success', [PaymentController::class, 'success'])->name('public.pay.success');
-Route::get('/pay/{payment}/fail', [PaymentController::class, 'fail'])->name('public.pay.fail');
-Route::get('/pay/{payment}/cancel', [PaymentController::class, 'cancel'])->name('public.pay.cancel');
+Route::match(['get', 'post'], '/pay/{payment}/success', [PaymentController::class, 'success'])
+    ->name('public.pay.success')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::match(['get', 'post'], '/pay/{payment}/fail', [PaymentController::class, 'fail'])
+    ->name('public.pay.fail')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::match(['get', 'post'], '/pay/{payment}/cancel', [PaymentController::class, 'cancel'])
+    ->name('public.pay.cancel')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 Route::post('/pay/ipn', [PaymentController::class, 'ipn'])
     ->name('public.pay.ipn')
     ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::get('/pay/{payment}/status', [PaymentController::class, 'status'])->name('public.pay.status');
 
 Route::get('/pro-shop', [ProShopController::class, 'index'])->name('public.proshop.index');
 Route::get('/pro-shop/cart', [ProShopController::class, 'cart'])->name('public.proshop.cart');
