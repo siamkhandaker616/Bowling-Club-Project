@@ -1,5 +1,5 @@
 <header class="header" x-data="{ menuOpen: false }">
-    <a class="brand" href="{{ route('dashboard') }}">
+    <a class="brand" href="{{ route('home') }}">
         <span class="brand-ball"></span>
         <span class="brand-name">The Tenth Frame</span>
     </a>
@@ -7,33 +7,39 @@
     @php
         $role = Auth::user()->role;
         $navBagCount = $role === 'customer' ? (int) \App\Models\CartItem::where('session_id', session()->getId())->sum('quantity') : 0;
+
+        $dashRoute = match($role) {
+            'admin' => 'manager.dashboard',
+            'steward' => 'steward.dashboard',
+            'caretaker' => 'caretaker.dashboard',
+            default => 'visitor.dashboard',
+        };
+        $isDashboard = request()->routeIs($dashRoute);
+        $badgeClass = $role === 'admin' ? 'manager' : $role;
+        $badgeLabel = $role === 'admin' ? 'Manager' : ucfirst($role);
     @endphp
 
     <div class="nav-right">
-        @php
-            $dashRoute = match($role) {
-                'admin' => 'manager.dashboard',
-                'steward' => 'steward.dashboard',
-                'caretaker' => 'caretaker.dashboard',
-                default => 'visitor.dashboard',
-            };
-            $badgeClass = $role === 'admin' ? 'manager' : $role;
-            $badgeLabel = $role === 'admin' ? 'Manager' : ucfirst($role);
-        @endphp
+        @if($isDashboard)
+            <a href="{{ route('home') }}" class="btn btn-ghost btn-nav">Home</a>
+        @else
+            <a href="{{ route($dashRoute) }}" class="btn btn-ghost btn-nav">Dashboard</a>
+        @endif
 
-        <a href="{{ route($dashRoute) }}" class="btn btn-ghost btn-nav" title="Home">Home</a>
-        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost btn-nav" title="Facility Map">Facility Map</a>
+        <a href="{{ route('site.facility-map') }}" class="btn btn-ghost btn-nav">Facility Map</a>
+
+        @if(Route::has('public.fixtures'))
+            <a href="{{ route('public.fixtures') }}" class="btn btn-ghost btn-nav">Fixtures</a>
+        @endif
 
         @if($role === 'customer')
             <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost btn-nav" title="Your Bag" style="position:relative;">
                 Bag
                 @if($navBagCount > 0)
-                    <span style="position:absolute;top:-6px;right:-10px;min-width:18px;height:18px;border-radius:50%;background:var(--coral);color:var(--pin-white);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;border:2px solid var(--navy);">{{ $navBagCount }}</span>
+                    <span style="position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;border-radius:50%;background:var(--rubber);color:var(--pin-white);font-family:var(--font-mono);font-size:0.65rem;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:700;">{{ $navBagCount }}</span>
                 @endif
             </a>
         @endif
-
-        <span class="badge-role {{ $badgeClass }}">{{ $badgeLabel }}</span>
 
         <div class="user-pop" x-data="{ userOpen: false }">
             <button @click="userOpen = !userOpen" class="user-btn" title="{{ Auth::user()->name }}">
@@ -49,6 +55,8 @@
                 </form>
             </div>
         </div>
+
+        <span class="badge-role {{ $badgeClass }}">{{ $badgeLabel }}</span>
 
         @if($role === 'admin')
             @include('sim.partials.settings-dropdown')

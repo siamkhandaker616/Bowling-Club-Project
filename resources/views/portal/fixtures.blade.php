@@ -12,9 +12,7 @@
 </head>
 <body style="min-height:100vh;">
 
-    @component('site.partials.core-header')
-        <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
-        <a href="{{ route('public.fixtures') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
+    @component('site.partials.core-header', ['activeRoute' => 'public.fixtures'])
     @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:1100px;margin:0 auto;">
@@ -48,57 +46,36 @@
         </div>
         @endif
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div class="pub-filter-bar" style="display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-bottom:1.5rem;overflow-x:auto;">
             @php $activeStatus = request('status', 'all'); @endphp
-            <div id="pub-filter-tabs" style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="pub-tab {{ $activeStatus === 'all' ? 'active' : '' }}" data-filter="all" onclick="pubFilterFixtures('all', this)">All Fixtures</button>
+            <div id="pub-filter-tabs" style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button class="pub-tab {{ $activeStatus === 'all' ? 'active' : '' }}" data-filter="all" onclick="pubFilterFixtures('all', this)">All</button>
                 <button class="pub-tab {{ $activeStatus === 'upcoming' ? 'active' : '' }}" data-filter="upcoming" onclick="pubFilterFixtures('upcoming', this)">Upcoming</button>
                 <button class="pub-tab {{ $activeStatus === 'live' ? 'active' : '' }}" data-filter="live" onclick="pubFilterFixtures('live', this)">Live</button>
                 <button class="pub-tab {{ $activeStatus === 'completed' ? 'active' : '' }}" data-filter="completed" onclick="pubFilterFixtures('completed', this)">Completed</button>
             </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                @php
-                    $fromRaw = request('date_from');
-                    $toRaw = request('date_to');
-                    try { $fromDate = $fromRaw ? \Carbon\Carbon::parse($fromRaw) : now(); } catch (\Throwable $e) { $fromRaw = null; $fromDate = now(); }
-                    try { $toDate = $toRaw ? \Carbon\Carbon::parse($toRaw) : now(); } catch (\Throwable $e) { $toRaw = null; $toDate = now(); }
-                @endphp
-                <select id="pub-league-filter" class="fold-select" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
-                    <option value="" {{ request('league_id') === null ? 'selected' : '' }}>All Leagues</option>
-                    @foreach($leagues as $league)
-                        <option value="{{ $league->id }}" {{ (string) request('league_id') === (string) $league->id ? 'selected' : '' }}>{{ $league->name }}</option>
-                    @endforeach
-                </select>
-                <select id="pub-team-filter" class="fold-select" onchange="pubApplyFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">
-                    <option value="" {{ request('team_id') === null ? 'selected' : '' }}>All Teams</option>
-                    @foreach($teams as $team)
-                        <option value="{{ $team->id }}" {{ (string) request('team_id') === (string) $team->id ? 'selected' : '' }}>{{ $team->name }}</option>
-                    @endforeach
-                </select>
-                <div class="lc" id="pub-date-from-lc" data-year="{{ $fromDate->year }}" title="From date" style="border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);">
-                    <div class="lc-head">
-                        <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
-                        <div class="lc-mo"></div>
-                        <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
-                    </div>
-                    <div class="lc-frame"><div class="lc-grid"></div></div>
-                    <div class="lc-read"><span class="lc-key">From</span><span class="lc-picked" data-kept="1">{{ $fromRaw ? $fromDate->format('M j, Y') : 'Any' }}</span></div>
-                    <input type="hidden" id="pub-date-from" class="lc-input" value="{{ $fromRaw }}">
-                    <input type="hidden" class="lc-m" value="{{ $fromDate->month - 1 }}">
-                </div>
-                <div class="lc" id="pub-date-to-lc" data-year="{{ $toDate->year }}" title="To date" style="border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);">
-                    <div class="lc-head">
-                        <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
-                        <div class="lc-mo"></div>
-                        <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
-                    </div>
-                    <div class="lc-frame"><div class="lc-grid"></div></div>
-                    <div class="lc-read"><span class="lc-key">To</span><span class="lc-picked" data-kept="1">{{ $toRaw ? $toDate->format('M j, Y') : 'Any' }}</span></div>
-                    <input type="hidden" id="pub-date-to" class="lc-input" value="{{ $toRaw }}">
-                    <input type="hidden" class="lc-m" value="{{ $toDate->month - 1 }}">
-                </div>
-                <button onclick="pubResetFilters()" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 12px;border:2px solid var(--navy);border-radius:50px;background:var(--pin-white);color:var(--navy);cursor:pointer;">Reset</button>
-            </div>
+            <span style="width:1px;height:20px;background:var(--navy);opacity:.25;flex-shrink:0;"></span>
+            @php
+                $fromRaw = request('date_from');
+                $toRaw = request('date_to');
+                try { $fromDate = $fromRaw ? \Carbon\Carbon::parse($fromRaw) : now(); } catch (\Throwable $e) { $fromRaw = null; $fromDate = now(); }
+                try { $toDate = $toRaw ? \Carbon\Carbon::parse($toRaw) : now(); } catch (\Throwable $e) { $toRaw = null; $toDate = now(); }
+            @endphp
+            <select id="pub-league-filter" class="fold-select" onchange="pubApplyFilters()">
+                <option value="" {{ request('league_id') === null ? 'selected' : '' }}>All Leagues</option>
+                @foreach($leagues as $league)
+                    <option value="{{ $league->id }}" {{ (string) request('league_id') === (string) $league->id ? 'selected' : '' }}>{{ $league->name }}</option>
+                @endforeach
+            </select>
+            <select id="pub-team-filter" class="fold-select" onchange="pubApplyFilters()">
+                <option value="" {{ request('team_id') === null ? 'selected' : '' }}>All Teams</option>
+                @foreach($teams as $team)
+                    <option value="{{ $team->id }}" {{ (string) request('team_id') === (string) $team->id ? 'selected' : '' }}>{{ $team->name }}</option>
+                @endforeach
+            </select>
+            <input type="date" id="pub-date-from" class="pub-pill" data-datepicker placeholder="From" value="{{ $fromRaw }}" onchange="pubApplyFilters()">
+            <input type="date" id="pub-date-to" class="pub-pill" data-datepicker placeholder="To" value="{{ $toRaw }}" onchange="pubApplyFilters()">
+            <button onclick="pubResetFilters()" class="pub-pill" style="cursor:pointer;">Reset</button>
         </div>
 
         <div id="pub-fixtures-list" style="display:flex;flex-direction:column;gap:1rem;">
@@ -232,6 +209,7 @@
 
     @include('site.partials.core-footer')
 
+    <script src="/js/datepicker.js"></script>
     <script>
     (function() {
         @if($nextMatch)
@@ -308,18 +286,12 @@
             if (allTab) allTab.classList.add('active');
             document.getElementById('pub-league-filter').value = '';
             document.getElementById('pub-team-filter').value = '';
-            document.getElementById('pub-date-from').value = '';
-            document.getElementById('pub-date-to').value = '';
-            var fromLbl = document.querySelector('#pub-date-from-lc .lc-picked');
-            if (fromLbl) fromLbl.textContent = 'Any';
-            var toLbl = document.querySelector('#pub-date-to-lc .lc-picked');
-            if (toLbl) toLbl.textContent = 'Any';
+            var fromPicker = typeof DatePicker !== 'undefined' && DatePicker.getInstance ? DatePicker.getInstance('pub-date-from') : null;
+            var toPicker = typeof DatePicker !== 'undefined' && DatePicker.getInstance ? DatePicker.getInstance('pub-date-to') : null;
+            if (fromPicker) { fromPicker.clear(); } else { var f = document.getElementById('pub-date-from'); if (f) f.value = ''; }
+            if (toPicker) { toPicker.clear(); } else { var t = document.getElementById('pub-date-to'); if (t) t.value = ''; }
             pubApplyFilters();
         };
-
-        document.querySelectorAll('.lc-grid').forEach(function(grid) {
-            grid.addEventListener('click', function() { pubApplyFilters(); });
-        });
 
         var reveals = document.querySelectorAll('.pub-fixture-reveal');
         if (reveals.length && 'IntersectionObserver' in window) {
@@ -345,8 +317,8 @@
     <style>
     .pub-tab {
         font-family: var(--font-mono);
-        font-size: 0.75rem;
-        padding: 6px 16px;
+        font-size: 0.65rem;
+        padding: 5px 12px;
         border: 2px solid var(--navy);
         border-radius: 50px;
         background: var(--pin-white);
@@ -355,9 +327,32 @@
         transition: background 0.15s, color 0.15s, transform 0.15s;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        white-space: nowrap;
     }
     .pub-tab:hover { background: var(--mist); transform: translateY(-1px); }
-    .pub-tab.active { background: var(--navy); color: var(--pin-white); }
+    .pub-tab.active { background: var(--navy); color: var(--gold-light); }
+    .pub-filter-bar { gap: 6px; }
+    .pub-filter-bar .custom-select-trigger { border-radius: 50px; min-height: 0; padding: 0; }
+    .pub-filter-bar .custom-select-trigger-inner { padding: 5px 10px; min-height: 0; gap: 6px; }
+    .pub-filter-bar .custom-select-trigger-inner .label { font-family: var(--font-mono); font-size: 0.65rem; white-space: nowrap; }
+    .pub-filter-bar .custom-select-trigger-inner .arrow { border-left-width: 4px; border-right-width: 4px; border-top-width: 5px; }
+    .pub-filter-bar .custom-select-dropdown { min-width: 140px; }
+    .pub-pill {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        padding: 5px 12px;
+        border: 2px solid var(--navy);
+        border-radius: 50px;
+        background: var(--pin-white);
+        color: var(--navy);
+        cursor: pointer;
+        white-space: nowrap;
+        outline: none;
+    }
+    .pub-pill:focus { border-color: var(--gold); }
+    #pub-date-from + .dpicker-display,
+    #pub-date-to + .dpicker-display { width: auto; min-width: 0; }
+    .pub-filter-bar .dpicker-wrap { width: auto; flex: 0 0 auto; }
     @keyframes pub-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     @media (max-width: 768px) {
         .pub-fixture-card { grid-template-columns: 1fr !important; text-align: center !important; }

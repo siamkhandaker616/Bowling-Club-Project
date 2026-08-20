@@ -69,14 +69,14 @@
                                 @csrf
                                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                     <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Rating
-                                        <select name="rating" class="input select" style="margin-left:4px;">
+                                        <select name="rating" class="fold-select" style="margin-left:4px;">
                                             @foreach ([1,2,3,4,5] as $r)
                                                 <option value="{{ $r }}">{{ $r }}</option>
                                             @endforeach
                                         </select>
                                     </label>
                                     <label style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">Booking
-                                        <select name="booking_id" class="input select" style="margin-left:4px;">
+                                        <select name="booking_id" class="fold-select" style="margin-left:4px;">
                                             @foreach ($completed as $b)
                                                 <option value="{{ $b->id }}">{{ $b->date }} · {{ \App\Helpers\Label::timeSlot($b->time_slot) }} · L{{ $b->lane?->lane_number ?? '—' }}</option>
                                             @endforeach

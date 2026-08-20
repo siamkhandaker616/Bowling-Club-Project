@@ -8,6 +8,8 @@ use App\Models\InventoryPurchase;
 use App\Models\Payment;
 use App\Services\Payments\SslCommerzGateway;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PurchaseBillService
 {
@@ -44,35 +46,17 @@ class PurchaseBillService
         $unitCost = (float) $inventory->cost_per_unit;
         $total = round($quantity * $unitCost, 2);
 
-        return DB::transaction(function () use ($inventory, $quantity, $unitCost, $total, $approverId) {
-            $bill = InventoryPurchase::create([
-                'inventory_id' => $inventory->id,
-                'item_name' => $inventory->name,
-                'quantity' => $quantity,
-                'unit_cost' => $unitCost,
-                'total' => $total,
-                'status' => 'approved',
-                'auto_approved' => true,
-                'reviewed_by' => $approverId,
-                'reviewed_at' => now(),
-            ]);
-
-            $this->chargeExpenses($total);
-
-            $payment = Payment::create([
-                'payable_type' => InventoryPurchase::class,
-                'payable_id' => $bill->id,
-                'transaction_id' => $this->gateway->generateTransactionId(),
-                'amount' => $total,
-                'currency' => 'BDT',
-                'status' => 'success',
-                'paid_at' => now(),
-            ]);
-
-            $bill->update(['payment_id' => $payment->id]);
-
-            return $bill;
-        });
+        return InventoryPurchase::create([
+            'inventory_id' => $inventory->id,
+            'item_name' => $inventory->name,
+            'quantity' => $quantity,
+            'unit_cost' => $unitCost,
+            'total' => $total,
+            'status' => 'approved',
+            'auto_approved' => true,
+            'reviewed_by' => $approverId,
+            'reviewed_at' => now(),
+        ]);
     }
 
     public function reject(InventoryPurchase $bill, int $managerId): array
@@ -110,7 +94,7 @@ class PurchaseBillService
 
     public function settlePayment(Payment $payment, array $response = [], ?int $reviewerId = null): bool
     {
-        return DB::transaction(function () use ($payment, $response, $reviewerId) {
+        $settled = DB::transaction(function () use ($payment, $response, $reviewerId) {
             $locked = Payment::whereKey($payment->id)->lockForUpdate()->first();
 
             if (! $locked || $locked->status !== 'processing') {
@@ -119,7 +103,7 @@ class PurchaseBillService
 
             $bill = InventoryPurchase::whereKey($locked->payable_id)->lockForUpdate()->first();
 
-            if (! $bill || $bill->status !== 'pending') {
+            if (! $bill || ! in_array($bill->status, ['pending', 'approved'], true)) {
                 return false;
             }
 
@@ -136,6 +120,24 @@ class PurchaseBillService
 
             return true;
         });
+
+        if ($settled) {
+            $bill = $payment->payable;
+            if ($bill instanceof InventoryPurchase) {
+                $bill->load(['payment', 'reviewedBy.user']);
+            }
+
+            $to = $payment->customer_email;
+            if ($to && $bill instanceof InventoryPurchase) {
+                try {
+                    Mail::to($to)->send(new \App\Mail\InventoryPaymentReceipt($bill));
+                } catch (\Throwable $e) {
+                    Log::warning('Inventory payment receipt email failed: '.$e->getMessage());
+                }
+            }
+        }
+
+        return $settled;
     }
 
     public function chargeExpenses(float $amount): void

@@ -92,11 +92,16 @@ class ConfrontationController extends Controller
         $key = (string) $request->validate(['key' => ['required', 'in:where,log,witness,reporter']])['key'];
 
         $engine = app(InterrogationEngine::class);
-        $reply = $engine->ask($confrontation, $key);
+
+        $chips = $engine->chips();
+        $chipLabel = collect($chips)->first(fn ($c) => ($c['key'] ?? $c['action'] ?? null) === $key)['label'] ?? null;
+
+        $result = $engine->ask($confrontation, $key, $chipLabel);
 
         return response()->json([
-            'reply' => $this->payload($reply),
-            'chips' => $engine->chips(),
+            'userMessage' => $result['userMessage'] ? $this->payload($result['userMessage']) : null,
+            'reply' => $this->payload($result['reply']),
+            'chips' => $chips,
         ]);
     }
 

@@ -489,11 +489,21 @@
                 });
             }
 
+            function disableForm(form) {
+                if (!form) return;
+                var btn = form.querySelector('button[type="submit"]');
+                var inp = form.querySelector('input[name="body"]');
+                if (btn) btn.disabled = true;
+                if (inp) inp.readOnly = true;
+                form.setAttribute('data-sent', '1');
+            }
+
             function sendFromChip(btn) {
                 var input = btn.getAttribute('data-to') ? dmInput : groupInput;
                 var form = btn.getAttribute('data-to') ? dmForm : groupForm;
-                if (!input || !form) return;
+                if (!input || !form || form.getAttribute('data-sent')) return;
                 input.value = btn.getAttribute('data-body');
+                disableForm(form);
                 form.submit();
             }
 
@@ -505,6 +515,14 @@
                     if (c.tagName === 'BUTTON') c.addEventListener('click', function () { sendFromChip(c); });
                 });
             }
+
+            [groupForm, dmForm].forEach(function (f) {
+                if (!f) return;
+                f.addEventListener('submit', function () {
+                    if (f.getAttribute('data-sent')) { f.preventDefault(); return; }
+                    disableForm(f);
+                });
+            });
 
             setInterval(function () {
                 fetch(groupPollUrl + '?after=' + lastGroup, { headers: { 'Accept': 'application/json' } })

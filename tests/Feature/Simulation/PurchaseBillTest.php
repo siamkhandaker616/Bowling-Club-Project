@@ -77,7 +77,7 @@ class PurchaseBillTest extends TestCase
         $this->assertSame(0.0, (float) ClubConfig::first()->total_expenses);
     }
 
-    public function test_manager_restock_auto_approves_and_charges_immediately(): void
+    public function test_manager_restock_auto_approves_without_charging(): void
     {
         $item = $this->makeInventory(['quantity' => 4, 'max_quantity' => 20, 'cost_per_unit' => 2.5]);
         $manager = $this->manager();
@@ -87,7 +87,7 @@ class PurchaseBillTest extends TestCase
             ->assertRedirect(route('manager.inventory.index'));
 
         $this->assertSame(20, $item->fresh()->quantity);
-        $this->assertSame(40.0, (float) ClubConfig::first()->total_expenses);
+        $this->assertSame(0.0, (float) ClubConfig::first()->total_expenses);
         $this->assertDatabaseHas('inventory_purchases', [
             'inventory_id' => $item->id,
             'quantity' => 16,
@@ -96,11 +96,10 @@ class PurchaseBillTest extends TestCase
             'auto_approved' => true,
             'reviewed_by' => $manager->staff->id,
         ]);
-        $this->assertSame(1, Payment::where('payable_type', InventoryPurchase::class)->count());
-        $this->assertSame(1, Payment::where('status', 'success')->count());
+        $this->assertSame(0, Payment::where('payable_type', InventoryPurchase::class)->count());
     }
 
-    public function test_manager_positive_adjust_auto_approves_and_charges(): void
+    public function test_manager_positive_adjust_auto_approves_without_charging(): void
     {
         $item = $this->makeInventory(['quantity' => 10, 'max_quantity' => 20, 'cost_per_unit' => 2.5]);
 
@@ -109,13 +108,14 @@ class PurchaseBillTest extends TestCase
             ->assertRedirect(route('manager.inventory.index'));
 
         $this->assertSame(13, $item->fresh()->quantity);
-        $this->assertSame(7.5, (float) ClubConfig::first()->total_expenses);
+        $this->assertSame(0.0, (float) ClubConfig::first()->total_expenses);
         $this->assertDatabaseHas('inventory_purchases', [
             'inventory_id' => $item->id,
             'quantity' => 3,
             'status' => 'approved',
             'auto_approved' => true,
         ]);
+        $this->assertSame(0, Payment::where('payable_type', InventoryPurchase::class)->count());
     }
 
     public function test_manager_accept_pending_bill_simulates_payment_and_charges(): void

@@ -5,7 +5,7 @@
             <h2 style="font-family:var(--font-header);font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:0;">Purchase Bills</h2>
             <div style="display:flex;align-items:center;gap:1rem;">
                 @if ($pendingBills->count())
-                    <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--gold);">${{ number_format($pendingTotal, 2) }} awaiting approval</span>
+                    <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--gold);">৳{{ number_format($pendingTotal, 2) }} awaiting approval</span>
                 @endif
 
             </div>
@@ -41,7 +41,7 @@
                                 @endif
                             </div>
                             <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);margin-top:3px;">
-                                {{ $bill->quantity }} × ${{ $bill->unit_cost }} = ${{ number_format((float) $bill->total, 2) }}
+                                {{ $bill->quantity }} × ৳{{ $bill->unit_cost }} = ৳{{ number_format((float) $bill->total, 2) }}
                                 @if ($bill->requestedBy)
                                     · requested by {{ $bill->requestedBy->user->name }}
                                 @endif
@@ -49,7 +49,7 @@
                             </div>
                             @if ($bill->status === 'rejected' && $bill->fine_amount > 0)
                                 @php $consumedUnits = round((float) $bill->fine_amount / max(0.01, (float) $bill->unit_cost)); @endphp
-                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--coral);margin-top:2px;">fine: ${{ number_format((float) $bill->fine_amount, 2) }} — {{ $consumedUnits }} units were already used when you rejected</div>
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--coral);margin-top:2px;">fine: ৳{{ number_format((float) $bill->fine_amount, 2) }} — {{ $consumedUnits }} units were already used when you rejected</div>
                             @endif
                             @if ($bill->reviewedBy)
                                 <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);margin-top:2px;">
@@ -62,13 +62,19 @@
                         </div>
                         <div style="display:flex;gap:6px;align-items:center;">
                             @if ($bill->isPending())
-                                <form method="POST" action="{{ route('manager.inventory.purchases.accept', $bill) }}">
+                                <form class="gutter-form" data-accept-form data-accept-url="{{ route('manager.inventory.purchases.accept', $bill) }}" data-payment-url="{{ route('manager.inventory.purchases.status', '__ID__') }}" data-index-url="{{ route('manager.inventory.purchases.index') }}">
                                     @csrf
+                                    <input type="hidden" name="purchase_id" value="{{ $bill->id }}">
                                     <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Accept & Pay</button>
                                 </form>
                                 <form method="POST" action="{{ route('manager.inventory.purchases.reject', $bill) }}" onsubmit="return confirm('Reject this bill? Added stock will be returned; used stock is fined.');">
                                     @csrf
                                     <button type="submit" class="btn-lane danger" style="font-size:0.55rem;padding:4px 10px;">Reject</button>
+                                </form>
+                            @elseif ($bill->status === 'approved' && (! $bill->payment || ! $bill->payment->isSuccessful()))
+                                <form class="gutter-form" data-accept-form data-accept-url="{{ route('manager.inventory.purchases.pay', $bill) }}" data-payment-url="{{ route('manager.inventory.purchases.status', '__ID__') }}" data-index-url="{{ route('manager.inventory.purchases.index') }}">
+                                    @csrf
+                                    <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Pay</button>
                                 </form>
                             @endif
                         </div>
@@ -84,6 +90,64 @@
     </div>
 
     <x-toast />
+
+    <script>
+    document.querySelectorAll('[data-accept-form]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = form.querySelector('button[type="submit"]');
+            var originalText = btn.textContent;
+            btn.textContent = 'Starting...';
+            btn.disabled = true;
+
+            fetch(form.dataset.acceptUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.gateway_url) {
+                    window.open(data.gateway_url, '_blank');
+                    btn.textContent = 'Waiting for payment...';
+                    var statusUrl = form.dataset.paymentUrl.replace('__ID__', data.payment_id);
+                    var poll = setInterval(function() {
+                        fetch(statusUrl).then(function(r) { return r.json(); }).then(function(s) {
+                            if (s.successful) {
+                                clearInterval(poll);
+                                window.location.reload();
+                            } else if (s.status === 'failed' || s.status === 'cancelled') {
+                                clearInterval(poll);
+                                btn.textContent = originalText;
+                                btn.disabled = false;
+                                showToast('Payment ' + s.status + ' — try again.', 'error');
+                            }
+                        }).catch(function() {});
+                    }, 2000);
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch(function() {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                showToast('Could not start payment — try again.', 'error');
+            });
+        });
+    });
+
+    function showToast(msg, type) {
+        var el = document.createElement('div');
+        el.className = 'toast ' + (type === 'error' ? 'err' : '');
+        el.style.cssText = 'position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;';
+        el.innerHTML = '<span class="t-ball"></span><span>' + msg + '</span>';
+        document.body.appendChild(el);
+        requestAnimationFrame(function() { el.classList.add('show'); });
+        setTimeout(function() { el.classList.remove('show'); setTimeout(function() { el.remove(); }, 400); }, 4000);
+    }
+    </script>
 
     @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')

@@ -13,16 +13,6 @@
     <body style="min-height: 100vh;">
 
         @component('site.partials.core-header')
-            <a href="/" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Home</a>
-            <a href="{{ route('site.facility-map') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Facility Map</a>
-            @if(Auth::check() && Auth::user()->role === 'admin')
-                <a href="{{ route('site.announcements.index') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem;">Manage Announcements</a>
-            @endif
-            @if(Auth::check() && Auth::user()->role === 'customer')
-                <a href="{{ route('public.proshop.cart') }}" class="btn btn-ghost" style="padding: 8px 20px; font-size: 0.8rem; position: relative;">Bag
-                    @if(($bagCount ?? 0) > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $bagCount }}</span>@endif
-                </a>
-            @endif
         @endcomponent
 
         <section style="padding: 8rem 2rem 3rem; text-align: center; position: relative; overflow: hidden;">

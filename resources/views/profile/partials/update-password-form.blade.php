@@ -6,30 +6,49 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" style="margin-top:1.25rem;">
+    <form method="post" action="{{ route('password.update') }}" novalidate class="gutter-form" style="margin-top:1.25rem;display:flex;flex-direction:column;gap:1rem;">
         @csrf
         @method('put')
 
-        <div style="margin-bottom:1rem;">
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+        <div class="gutter-field field">
+            <label class="label" for="update_password_current_password">Current Password <span class="req">*</span></label>
+            <div class="inp-wrap">
+                <input id="update_password_current_password" name="current_password" type="password" class="input{{ $errors->updatePassword->has('current_password') ? ' bad' : '' }}" autocomplete="current-password">
+                <span class="gutter-flag">&#10003;</span>
+            </div>
+            <div class="gutter-err">@error('updatePassword.current_password'){{ $message }}@else Enter your current password @enderror</div>
         </div>
 
-        <div style="margin-bottom:1rem;">
-            <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input id="update_password_password" name="password" type="password" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+        <div class="gutter-field field">
+            <label class="label" for="update_password_password">New Password <span class="req">*</span></label>
+            <div class="inp-wrap">
+                <input id="update_password_password" name="password" type="password" class="input{{ $errors->updatePassword->has('password') ? ' bad' : '' }}" autocomplete="new-password">
+                <span class="gutter-flag">&#100003;</span>
+            </div>
+            <div class="gutter-err">@error('updatePassword.password'){{ $message }}@else Choose a strong password @enderror</div>
         </div>
 
-        <div style="margin-bottom:1rem;">
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+        <div class="gutter-field field">
+            <label class="label" for="update_password_password_confirmation">Confirm Password <span class="req">*</span></label>
+            <div class="inp-wrap">
+                <input id="update_password_password_confirmation" name="password_confirmation" type="password" class="input{{ $errors->updatePassword->has('password_confirmation') ? ' bad' : '' }}" autocomplete="new-password">
+                <span class="gutter-flag">&#10003;</span>
+            </div>
+            <div class="gutter-err">@error('updatePassword.password_confirmation'){{ $message }}@else Must match new password @enderror</div>
+        </div>
+
+        <div class="lane-stage">
+            <div class="pin-rack">
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span></div>
+            </div>
+            <span class="ball-dot"></span>
         </div>
 
         <div style="display:flex;align-items:center;gap:1rem;">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <button type="submit" class="btn-lane primary" style="font-size:0.65rem;padding:7px 18px;">Save</button>
 
             @if (session('status') === 'password-updated')
                 <p

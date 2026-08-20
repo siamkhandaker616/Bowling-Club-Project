@@ -2,12 +2,14 @@
 
 namespace App\Services\Payments;
 
+use App\Mail\BookingConfirmation;
 use App\Mail\OrderReceipt;
 use App\Mail\RsvpConfirmation;
 use App\Mail\RsvpReceipt;
 use App\Models\CartItem;
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\LaneBooking;
 use App\Models\Payment;
 use App\Models\ProductOrder;
 use App\Models\Rsvp;
@@ -55,6 +57,8 @@ class PaymentSettler
 
             if ($payable instanceof ProductOrder) {
                 $payable->fulfill();
+            } elseif ($payable instanceof LaneBooking) {
+                $payable->update(['status' => 'confirmed']);
             } else {
                 $event = Event::whereKey($payable?->event_id)->lockForUpdate()->first();
 
@@ -95,6 +99,18 @@ class PaymentSettler
             }
 
             $this->clearCartFor($payment, null);
+        } elseif ($payable instanceof LaneBooking) {
+            $payable->load(['lane', 'visitor', 'payment']);
+
+            $email = $payment->customer_email ?? $payable->visitor?->email;
+
+            if ($email) {
+                try {
+                    Mail::to($email)->send(new BookingConfirmation($payable));
+                } catch (\Throwable $e) {
+                    Log::warning('Booking confirmation email failed: '.$e->getMessage());
+                }
+            }
         }
 
         return true;

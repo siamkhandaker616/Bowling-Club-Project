@@ -13,20 +13,7 @@
 </head>
 <body style="min-height:100vh;">
 
-    @component('site.partials.core-header')
-        <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
-        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
-        <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
-        <a href="{{ route('public.touring') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
-        <a href="{{ route('public.proshop.index') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Pro Shop</a>
-        <a href="{{ route('public.proshop.cart') }}" class="btn" style="padding:8px 20px;font-size:0.8rem;position:relative;">
-            Bag
-            @if($cartCount > 0)
-                <span id="pub-bag-count" style="position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;border-radius:50%;background:var(--rubber);color:var(--pin-white);font-family:var(--font-mono);font-size:0.65rem;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:700;">{{ $cartCount }}</span>
-            @else
-                <span id="pub-bag-count" style="display:none;"></span>
-            @endif
-        </a>
+    @component('site.partials.core-header', ['activeRoute' => 'public.proshop.index'])
     @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:1100px;margin:0 auto;">
@@ -161,8 +148,10 @@
                         return;
                     }
                     var badge = document.getElementById('pub-bag-count');
-                    badge.textContent = result.data.cart_count;
-                    badge.style.display = 'inline-flex';
+                    if (badge) {
+                        badge.textContent = result.data.cart_count;
+                        badge.style.display = 'inline-flex';
+                    }
                     pubFireToast('ok', result.data.message || 'Added to your bag!');
                 })
                 .catch(function() {

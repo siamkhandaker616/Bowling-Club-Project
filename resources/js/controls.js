@@ -223,6 +223,7 @@
             var stage = el('.lane-stage', form);
             var dot = stage ? el('.ball-dot', stage) : null;
             var inputs = els('.input', form);
+            var hiddenInputs = els('input[type="hidden"][data-validate]', form);
             inputs.forEach(function (i) {
                 i.addEventListener('input', function () {
                     var good = !!i.value.trim();
@@ -237,6 +238,9 @@
                     i.classList.toggle('bad', !good);
                     i.classList.toggle('good', good);
                     if (!good) bads++;
+                });
+                hiddenInputs.forEach(function (i) {
+                    if (!i.value.trim()) bads++;
                 });
                 var allBad = bads > 0 && bads === inputs.length;
                 var plural = bads === 1 ? '' : 's';

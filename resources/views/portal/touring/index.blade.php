@@ -12,12 +12,7 @@
 </head>
 <body style="min-height:100vh;">
 
-    @component('site.partials.core-header')
-        <a href="/" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
-        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
-        <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
-        <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
-        <a href="{{ route('public.touring') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
+    @component('site.partials.core-header', ['activeRoute' => 'public.touring'])
     @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:1100px;margin:0 auto;">
@@ -38,33 +33,37 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('public.touring.store') }}" style="display:flex;flex-direction:column;gap:1.1rem;">
+                <form method="POST" action="{{ route('public.touring.store') }}" novalidate class="gutter-form" style="display:flex;flex-direction:column;gap:1.1rem;">
                     @csrf
 
-                    <div>
-                        <label for="team_name" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Team Name *</label>
-                        <input id="team_name" name="team_name" type="text" value="{{ old('team_name') }}" required maxlength="120" placeholder="e.g. Thunder Rollers"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
-                        @error('team_name')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    <div class="gutter-field">
+                        <label class="label" for="team_name">Team Name <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input class="input" id="team_name" name="team_name" type="text" value="{{ old('team_name') }}" required maxlength="120" placeholder="e.g. Thunder Rollers">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err">Team name is required</div>
                     </div>
 
-                    <div>
-                        <label for="home_club" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Home Club</label>
-                        <input id="home_club" name="home_club" type="text" value="{{ old('home_club') }}" maxlength="120" placeholder="e.g. Harbor Lanes"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
-                        @error('home_club')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    <div class="gutter-field">
+                        <label class="label" for="home_club">Home Club</label>
+                        <div class="inp-wrap">
+                            <input class="input" id="home_club" name="home_club" type="text" value="{{ old('home_club') }}" maxlength="120" placeholder="e.g. Harbor Lanes">
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="contact_email" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Team Contact Email *</label>
-                        <input id="contact_email" name="contact_email" type="email" value="{{ old('contact_email') }}" required maxlength="190" placeholder="e.g. captain@thunderrollers.com"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
-                        @error('contact_email')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    <div class="gutter-field">
+                        <label class="label" for="contact_email">Team Contact Email <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input class="input" id="contact_email" name="contact_email" type="email" value="{{ old('contact_email') }}" required maxlength="190" placeholder="e.g. captain@thunderrollers.com">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err">Valid email is required</div>
                     </div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                    <div>
-                        <label for="arrival_date" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Arrival Date *</label>
+                    <div class="gutter-field">
+                        <label class="label" for="arrival_date">Arrival Date <span class="req">*</span></label>
                         @php
                             $touringDate = now();
 
@@ -76,35 +75,39 @@
                                 }
                             }
                         @endphp
-                        <div class="lc" data-year="{{ $touringDate->year }}">
-                            <div class="lc-head">
-                                <button type="button" class="lc-nav" aria-label="Previous month">&laquo;</button>
-                                <div class="lc-mo"></div>
-                                <button type="button" class="lc-nav" aria-label="Next month">&raquo;</button>
+                        <div class="inp-wrap">
+                            <input class="input" type="date" name="arrival_date" data-datepicker value="{{ $touringDate->toDateString() }}" required>
+                        </div>
+                        <div class="gutter-err">Arrival date is required</div>
+                    </div>
+                        <div class="gutter-field">
+                            <label class="label" for="player_count">Player Count <span class="req">*</span></label>
+                            <div class="inp-wrap">
+                                <input class="input" id="player_count" name="player_count" type="number" min="1" max="24" value="{{ old('player_count', 5) }}" required data-stepper="edit">
+                                <span class="gutter-flag">&#10003;</span>
                             </div>
-                            <div class="lc-frame"><div class="lc-grid"></div></div>
-                            <div class="lc-read"><span class="lc-key">Date</span><span class="lc-picked" data-kept="1">{{ $touringDate->format('F j, Y') }}</span></div>
-                            <input type="hidden" name="arrival_date" class="lc-input" value="{{ $touringDate->toDateString() }}">
-                            <input type="hidden" class="lc-m" value="{{ $touringDate->month - 1 }}">
-                        </div>
-                        @error('arrival_date')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
-                    </div>
-                        <div>
-                            <label for="player_count" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Player Count *</label>
-                            <input id="player_count" name="player_count" type="number" min="1" max="24" value="{{ old('player_count', 5) }}" required data-stepper="edit"
-                                   style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;background:var(--cloud);color:var(--navy);outline:none;">
-                            @error('player_count')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                            <div class="gutter-err">Player count is required</div>
                         </div>
                     </div>
 
-                    <div>
-                        <label for="message" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Message to the Club Secretary</label>
-                        <textarea id="message" name="message" rows="4" maxlength="2000" placeholder="Anything we should know? Gear needs, practice preferences, arrival time..."
-                                  style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;resize:vertical;">{{ old('message') }}</textarea>
-                        @error('message')<span style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;">{{ $message }}</span>@enderror
+                    <div class="gutter-field">
+                        <label class="label" for="message">Message to the Club Secretary</label>
+                        <div class="inp-wrap">
+                            <textarea class="input" id="message" name="message" rows="4" maxlength="2000" placeholder="Anything we should know? Gear needs, practice preferences, arrival time...">{{ old('message') }}</textarea>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-gold" style="align-self:flex-start;">Send Request</button>
+                    <div class="lane-stage">
+                        <div class="pin-rack">
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span></div>
+                        </div>
+                        <span class="ball-dot"></span>
+                    </div>
+
+                    <button type="submit" class="submit">Send Request &rarr;</button>
                 </form>
             </div>
 
@@ -157,5 +160,7 @@
     <x-toast />
 
     @include('sim.partials.fold-controls')
+
+    <script src="/js/datepicker.js"></script>
 </body>
 </html>

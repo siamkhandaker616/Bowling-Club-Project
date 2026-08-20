@@ -12,12 +12,7 @@
 </head>
 <body style="min-height:100vh;">
 
-    @component('site.partials.core-header')
-        <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
-        <a href="{{ route('public.fixtures') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Fixtures</a>
-        <a href="{{ route('public.stats') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Stats</a>
-        <a href="{{ route('public.touring') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Touring</a>
-        <a href="{{ route('public.proshop.index') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;">Pro Shop</a>
+    @component('site.partials.core-header', ['activeRoute' => 'public.proshop.index'])
     @endcomponent
 
     <main style="padding:8rem 2rem 4rem;max-width:640px;margin:0 auto;text-align:center;">

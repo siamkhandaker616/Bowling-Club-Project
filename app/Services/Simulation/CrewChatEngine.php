@@ -163,6 +163,7 @@ class CrewChatEngine
             ->whereNull('recipient_staff_id')
             ->whereDate('date', Clock::date())
             ->orderBy('created_at')
+            ->orderBy('id')
             ->get();
     }
 
@@ -173,6 +174,7 @@ class CrewChatEngine
             ->where('id', '>', $afterId)
             ->whereDate('date', Clock::date())
             ->orderBy('created_at')
+            ->orderBy('id')
             ->get();
     }
 
@@ -213,6 +215,7 @@ class CrewChatEngine
                     ->orWhere('staff_id', $other->id)->where('recipient_staff_id', $player->id);
             })
             ->orderBy('created_at')
+            ->orderBy('id')
             ->get();
     }
 

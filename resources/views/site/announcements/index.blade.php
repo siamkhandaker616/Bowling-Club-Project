@@ -1,33 +1,7 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Manage Announcements - The Tenth Frame</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
-<body style="min-height:100vh;">
+<x-app-layout>
     @php $rp = 'site.announcements.'; @endphp
-    <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(245,248,250,0.95);backdrop-filter:blur(8px);border-bottom:3px solid var(--navy);padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <div class="ball-accent" style="width:32px;height:32px;"></div>
-            <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
-        </a>
-        <nav style="display:flex;align-items:center;gap:1.5rem;">
-            <a href="{{ url('/') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Home</a>
-            @auth
-                <a href="{{ url('/dashboard') }}" class="btn" style="padding:8px 24px;font-size:0.85rem;">Dashboard</a>
-            @else
-                <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Sign In</a>
-            @endauth
-        </nav>
-    </header>
 
-    <main style="max-width:1100px;margin:0 auto;padding:6rem 2rem 4rem;">
+    <div style="max-width:1100px;margin:0 auto;padding:2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
             <h1 style="font-family:var(--font-header);font-size:1.8rem;text-transform:uppercase;">Manage Announcements</h1>
             <a href="{{ route($rp.'create') }}" class="btn btn-gold" style="padding:10px 24px;font-size:0.8rem;">+ New Announcement</a>
@@ -71,8 +45,5 @@
                 </div>
             @endforelse
         </div>
-    </main>
-
-    <x-toast />
-</body>
-</html>
+    </div>
+</x-app-layout>

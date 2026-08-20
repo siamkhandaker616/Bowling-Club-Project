@@ -23,8 +23,24 @@ class PaymentController extends Controller
         $sessionId = $payment->response['session_id'] ?? $request->session()->getId();
 
         if (! $payment->isSuccessful() && $payment->status === 'processing') {
-            $this->settler->settleIfPossible($payment);
-            $payment->refresh();
+            $postStatus = strtolower((string) $request->input('status', ''));
+
+            if (in_array($postStatus, ['valid', 'success'], true)) {
+                $payload = $request->only([
+                    'tran_id', 'amount', 'card_type', 'card_no', 'bank_tran_id',
+                    'status', 'tran_date', 'currency', 'store_amount',
+                ]);
+
+                $this->settler->complete($payment, (string) $payment->transaction_id, $payload);
+                $payment->refresh();
+            } else {
+                try {
+                    $this->settler->settleIfPossible($payment);
+                    $payment->refresh();
+                } catch (\Throwable $e) {
+                    Log::warning('SSLCommerz validation failed on public callback: '.$e->getMessage());
+                }
+            }
         }
 
         $payment->loadMorph('payable', [ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
@@ -69,6 +85,16 @@ class PaymentController extends Controller
             'payment' => $payment,
             'status' => 'cancel',
             'payload' => $this->resultPayload($payment, 'cancel'),
+        ]);
+    }
+
+    public function status(Payment $payment): JsonResponse
+    {
+        $payment->refresh();
+
+        return response()->json([
+            'status' => $payment->status,
+            'successful' => $payment->isSuccessful(),
         ]);
     }
 

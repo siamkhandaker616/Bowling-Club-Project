@@ -18,7 +18,7 @@
 
         @include('sim.partials.visitor-sidebar')
 
-        <div style="padding:0 1rem;max-width:900px;min-width:0;">
+        <div style="padding:0 1rem;max-width:900px;min-width:0;margin:0 auto;">
 
         @if (! $visitor)
             <div class="sim-card" style="text-align:center;">

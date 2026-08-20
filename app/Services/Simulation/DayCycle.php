@@ -198,7 +198,7 @@ class DayCycle
         $member->is_active = false;
         $member->save();
 
-        if ($member->user) {
+        if ($member->user && $member->user->is_npc) {
             $member->user->is_active = false;
             $member->user->save();
         }

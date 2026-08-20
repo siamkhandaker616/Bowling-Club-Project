@@ -54,6 +54,7 @@ class ProShopController extends Controller
         return view('portal.proshop.cart', [
             'cart' => $cart,
             'total' => $cart->sum(fn (CartItem $item) => (float) ($item->product?->price ?? 0) * $item->quantity),
+            'cartCount' => $this->cartCount($request),
         ]);
     }
 
@@ -273,7 +274,8 @@ class ProShopController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'redirect_url' => $response['GatewayPageURL'],
+                    'gateway_url' => $response['GatewayPageURL'],
+                    'payment_id' => $payment->id,
                 ]);
             }
 

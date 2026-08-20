@@ -28,5 +28,6 @@
                 {{ $slot }}
             </main>
         </div>
+        <script src="/js/datepicker.js"></script>
     </body>
 </html>

@@ -424,7 +424,7 @@
         var i, j;
         for (i = 0; i < pins.length; i++) {
             var p = pins[i];
-            if (p.dead) continue;
+            if (p.dead || p.down) continue;
             var dxb = ball.x - p.x;
             var dyb = ball.y - p.y;
             var dist = Math.sqrt(dxb * dxb + dyb * dyb);
@@ -470,12 +470,16 @@
 
     function stepPins(dt) {
         var i;
+        var damp = Math.max(0, 1 - 2.5 * dt);
         for (i = 0; i < pins.length; i++) {
             var p = pins[i];
-            if (p.down) continue;
+            if (p.down) {
+                p.vx *= damp;
+                p.vy *= damp;
+                continue;
+            }
             p.x += p.vx * dt;
             p.y += p.vy * dt;
-            var damp = Math.max(0, 1 - 2.5 * dt);
             p.vx *= damp;
             p.vy *= damp;
             var dx = p.x - p.baseX, dy = p.y - p.baseY;
@@ -535,6 +539,8 @@
                 ball.x += ball.vx * sdt;
                 ball.y += ball.vy * sdt;
                 ball.age += sdt;
+                var swayPhase = lastLaunchAngle * 0.5;
+                ball.x += Math.sin(ball.age * 5 + swayPhase) * 100 * sdt;
 
                 if (ball.inGutter) ball.vy *= Math.max(0, 1 - 1.2 * sdt);
 

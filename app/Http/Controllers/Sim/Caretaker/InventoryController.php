@@ -63,7 +63,7 @@ class InventoryController extends Controller
         if ($added > 0) {
             $bill = $this->billService->createPending($inventory, $added, $staff->id);
 
-            session()->flash('success', $inventory->name . ' adjusted by ' . $data['change'] . '. Now at ' . $inventory->quantity . '. Purchase bill (' . $bill->quantity . ' units, $' . number_format((float) $bill->total, 2) . ') sent to the manager for approval.');
+            session()->flash('success', $inventory->name . ' adjusted by ' . $data['change'] . '. Now at ' . $inventory->quantity . '. Purchase bill (' . $bill->quantity . ' units, ৳' . number_format((float) $bill->total, 2) . ') sent to the manager for approval.');
 
             return redirect()->route('caretaker.inventory.index');
         }
@@ -89,7 +89,7 @@ class InventoryController extends Controller
         if ($added > 0) {
             $bill = $this->billService->createPending($inventory, $added, $staff->id);
 
-            session()->flash('success', $inventory->name . ' restocked to max (' . $before . ' -> ' . $inventory->quantity . '). Bill ($' . number_format((float) $bill->total, 2) . ') is pending manager approval.');
+            session()->flash('success', $inventory->name . ' restocked to max (' . $before . ' -> ' . $inventory->quantity . '). Bill (৳' . number_format((float) $bill->total, 2) . ') is pending manager approval.');
 
             return redirect()->route('caretaker.inventory.index');
         }

@@ -12,19 +12,10 @@
 </head>
 <body style="min-height:100vh;">
 
-    <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(245,248,250,0.95);backdrop-filter:blur(8px);border-bottom:3px solid var(--navy);padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <div class="ball-accent" style="width:32px;height:32px;"></div>
-            <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
-        </a>
-        <nav style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-            <a href="{{ route('public.touring') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Back to Touring</a>
-            <a href="{{ route('public.fixtures') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Fixtures</a>
-            <button onclick="window.print()" class="btn btn-gold" style="padding:8px 24px;font-size:0.85rem;">Print / Save PDF</button>
-        </nav>
-    </header>
+    @component('site.partials.core-header', ['activeRoute' => 'public.touring'])
+@endcomponent
 
-    <main style="padding:6rem 2rem 4rem;max-width:820px;margin:0 auto;">
+<main style="padding:6rem 2rem 4rem;max-width:820px;margin:0 auto;">
 
         <div style="text-align:center;margin-bottom:2.5rem;">
             <h1 style="font-family:var(--font-display);font-size:2rem;text-transform:uppercase;color:var(--navy);margin-bottom:0.25rem;">Welcome to The Tenth Frame</h1>

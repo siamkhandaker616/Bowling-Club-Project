@@ -10,20 +10,26 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" style="margin-top:1.25rem;">
+    <form method="post" action="{{ route('profile.update') }}" novalidate class="gutter-form" style="margin-top:1.25rem;display:flex;flex-direction:column;gap:1rem;">
         @csrf
         @method('patch')
 
-        <div style="margin-bottom:1rem;">
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <div class="gutter-field field">
+            <label class="label" for="name">Name <span class="req">*</span></label>
+            <div class="inp-wrap">
+                <input id="name" name="name" type="text" class="input{{ $errors->has('name') ? ' bad' : '' }}" value="{{ old('name', $user->name)}}" required autofocus autocomplete="name">
+                <span class="gutter-flag">&#10003;</span>
+            </div>
+            <div class="gutter-err">@error('name'){{ $message }}@else Name is required @enderror</div>
         </div>
 
-        <div style="margin-bottom:1rem;">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <div class="gutter-field field">
+            <label class="label" for="email">Email <span class="req">*</span></label>
+            <div class="inp-wrap">
+                <input id="email" name="email" type="email" class="input{{ $errors->has('email') ? ' bad' : '' }}" value="{{ old('email', $user->email)}}" required autocomplete="username">
+                <span class="gutter-flag">&#10003;</span>
+            </div>
+            <div class="gutter-err">@error('email'){{ $message }}@else Email is required @enderror</div>
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div style="margin-top:0.5rem;">
@@ -43,8 +49,18 @@
             @endif
         </div>
 
+        <div class="lane-stage">
+            <div class="pin-rack">
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                <div class="pin-row"><span class="pin"></span></div>
+            </div>
+            <span class="ball-dot"></span>
+        </div>
+
         <div style="display:flex;align-items:center;gap:1rem;">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <button type="submit" class="btn-lane primary" style="font-size:0.65rem;padding:7px 18px;">Save</button>
 
             @if (session('status') === 'profile-updated')
                 <p
