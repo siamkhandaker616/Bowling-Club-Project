@@ -37,28 +37,33 @@ class DatabaseSeeder extends Seeder
 
     private function seedClub(): void
     {
-        Club::create([
-            'name' => 'Cloud Nine Bowling',
-            'slug' => 'cloud-nine-bowling',
-            'description' => 'A premier ten-pin bowling club. Where every frame counts.',
-            'total_lanes' => 12,
-            'pro_shop_open' => true,
-            'arcade_open' => true,
-            'bar_open_hours' => '10:00:00',
-            'bar_close_hours' => '23:00:00',
-            'address' => '10 Pin Lane, Bowling District',
-            'phone' => '+1 (555) 910-1010',
-            'email' => 'info@cloudninebowling.com',
-            'website' => 'http://localhost:8020',
-        ]);
+        Club::updateOrCreate(
+            ['slug' => 'cloud-nine-bowling'],
+            [
+                'name' => 'Cloud Nine Bowling',
+                'description' => 'A premier ten-pin bowling club. Where every frame counts.',
+                'total_lanes' => 12,
+                'pro_shop_open' => true,
+                'arcade_open' => true,
+                'bar_open_hours' => '10:00:00',
+                'bar_close_hours' => '23:00:00',
+                'address' => '10 Pin Lane, Bowling District',
+                'phone' => '+1 (555) 910-1010',
+                'email' => 'info@cloudninebowling.com',
+                'website' => 'http://localhost:8020',
+            ]
+        );
 
-        ClubConfig::create([
-            'bad_day_mode' => false,
-            'current_day' => 1,
-            'reputation' => 75,
-            'total_revenue' => 0,
-            'total_expenses' => 0,
-        ]);
+        ClubConfig::firstOrCreate(
+            ['id' => 1],
+            [
+                'bad_day_mode' => false,
+                'current_day' => 1,
+                'reputation' => 75,
+                'total_revenue' => 0,
+                'total_expenses' => 0,
+            ]
+        );
     }
 
     private function seedPersonalities(): void
