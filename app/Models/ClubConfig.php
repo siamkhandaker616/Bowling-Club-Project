@@ -8,7 +8,7 @@ class ClubConfig extends Model
 {
     protected $fillable = [
         'bad_day_mode', 'current_day', 'reputation',
-        'total_revenue', 'total_expenses', 'last_advanced_at',
+        'total_revenue', 'total_expenses', 'lane_booking_price', 'last_advanced_at',
     ];
 
     protected function casts(): array
@@ -19,6 +19,7 @@ class ClubConfig extends Model
             'reputation' => 'integer',
             'total_revenue' => 'decimal:2',
             'total_expenses' => 'decimal:2',
+            'lane_booking_price' => 'decimal:2',
             'last_advanced_at' => 'datetime',
         ];
     }

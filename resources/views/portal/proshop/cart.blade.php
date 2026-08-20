@@ -99,12 +99,6 @@
                         </div>
                     </div>
 
-                    @if($errors->any())
-                        <div style="background:var(--coral-light);border:2px solid var(--coral);border-radius:8px;padding:1rem 1.5rem;font-family:var(--font-sub);font-size:0.85rem;color:var(--coral-dark);">
-                            {{ $errors->first() }}
-                        </div>
-                    @endif
-
                     <div class="lane-stage">
                         <div class="pin-rack">
                             <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>

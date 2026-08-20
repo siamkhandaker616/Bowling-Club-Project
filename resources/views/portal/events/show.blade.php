@@ -78,24 +78,31 @@
             @elseif($event->isFull())
                 <div style="font-family:var(--font-sub);font-size:0.9rem;color:var(--slate);">At full capacity. Follow the board — cancellations free up spots.</div>
             @else
-                <form id="pub-rsvp-form" method="POST" action="{{ route('public.events.rsvp', $event) }}" novalidate style="display:flex;flex-direction:column;gap:1rem;">
+                <form id="pub-rsvp-form" method="POST" action="{{ route('public.events.rsvp', $event) }}" novalidate class="gutter-form" style="display:flex;flex-direction:column;gap:1rem;">
                     @csrf
-                    <div>
-                        <label for="visitor_name" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Your Name *</label>
-                        <input id="visitor_name" name="visitor_name" type="text" value="{{ old('visitor_name') }}" required maxlength="120" placeholder="e.g. Samina Chowdhury"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
-                        <span class="pub-field-error" data-for="visitor_name" style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;"></span>
+                    <div class="gutter-field field">
+                        <label class="label" for="visitor_name">Your Name <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input id="visitor_name" name="visitor_name" type="text" class="input" value="{{ old('visitor_name') }}" required maxlength="120" placeholder="e.g. Samina Chowdhury">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err" data-for="visitor_name">@error('visitor_name'){{ $message }}@else Name is required @enderror</div>
                     </div>
-                    <div>
-                        <label for="visitor_email" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Email *</label>
-                        <input id="visitor_email" name="visitor_email" type="email" value="{{ old('visitor_email') }}" required maxlength="255" placeholder="you@example.com"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;background:var(--cloud);color:var(--navy);outline:none;">
-                        <span class="pub-field-error" data-for="visitor_email" style="font-size:0.75rem;color:var(--coral);margin-top:4px;display:block;"></span>
+                    <div class="gutter-field field">
+                        <label class="label" for="visitor_email">Email <span class="req">*</span></label>
+                        <div class="inp-wrap">
+                            <input id="visitor_email" name="visitor_email" type="email" class="input" value="{{ old('visitor_email') }}" required maxlength="255" placeholder="you@example.com">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err" data-for="visitor_email">@error('visitor_email'){{ $message }}@else Email is required @enderror</div>
                     </div>
-                    <div>
-                        <label for="visitor_phone" style="display:block;font-family:var(--font-sub);font-size:0.8rem;color:var(--slate);margin-bottom:5px;">Phone (optional)</label>
-                        <input id="visitor_phone" name="visitor_phone" type="text" value="{{ old('visitor_phone') }}" maxlength="30" placeholder="01XXXXXXXXX"
-                               style="width:100%;padding:10px 14px;border:2px solid var(--fog);border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;background:var(--cloud);color:var(--navy);outline:none;">
+                    <div class="gutter-field field">
+                        <label class="label" for="visitor_phone">Phone (optional)</label>
+                        <div class="inp-wrap">
+                            <input id="visitor_phone" name="visitor_phone" type="text" class="input" value="{{ old('visitor_phone') }}" maxlength="30" placeholder="01XXXXXXXXX">
+                            <span class="gutter-flag">&#10003;</span>
+                        </div>
+                        <div class="gutter-err">&nbsp;</div>
                     </div>
 
                     @if($errors->any())
@@ -104,7 +111,17 @@
                         </div>
                     @endif
 
-                    <button id="pub-rsvp-submit" type="submit" class="btn btn-gold" style="align-self:flex-start;">{{ (float) $event->price > 0 ? 'Proceed to Payment' : 'Confirm RSVP' }}</button>
+                    <div class="lane-stage">
+                        <div class="pin-rack">
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
+                            <div class="pin-row"><span class="pin"></span></div>
+                        </div>
+                        <span class="ball-dot"></span>
+                    </div>
+
+                    <button id="pub-rsvp-submit" type="submit" class="btn-lane primary" style="font-size:0.65rem;padding:7px 18px;align-self:flex-start;">{{ (float) $event->price > 0 ? 'Proceed to Payment' : 'Confirm RSVP' }}</button>
                 </form>
 
                 <div id="pub-rsvp-done" style="display:none;align-items:center;gap:12px;">
@@ -131,11 +148,11 @@
 
                 var message = document.getElementById('pub-rsvp-message');
                 var submit = document.getElementById('pub-rsvp-submit');
-                var errors = document.querySelectorAll('.pub-field-error');
+                var errors = document.querySelectorAll('.gutter-err[data-for]');
 
                 message.style.display = 'none';
                 message.textContent = '';
-                errors.forEach(function(el) { el.textContent = ''; });
+                errors.forEach(function(el) { el.textContent = ''; el.innerHTML = '&nbsp;'; });
                 submit.disabled = true;
                 submit.textContent = 'Booking...';
 
@@ -159,8 +176,8 @@
                         if (result.data && result.data.errors) {
                             var keys = Object.keys(result.data.errors);
                             keys.forEach(function(key) {
-                                var el = document.querySelector('.pub-field-error[data-for="' + key + '"]');
-                                if (el) el.textContent = result.data.errors[key][0];
+                                var el = document.querySelector('.gutter-err[data-for="' + key + '"]');
+                                if (el) { el.textContent = result.data.errors[key][0]; el.style.color = 'var(--coral)'; }
                             });
                         } else if (result.data && result.data.error) {
                             message.style.display = 'block';

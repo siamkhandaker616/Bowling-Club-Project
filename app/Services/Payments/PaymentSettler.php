@@ -8,6 +8,7 @@ use App\Mail\RsvpReceipt;
 use App\Models\CartItem;
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\LaneBooking;
 use App\Models\Payment;
 use App\Models\ProductOrder;
 use App\Models\Rsvp;
@@ -55,6 +56,8 @@ class PaymentSettler
 
             if ($payable instanceof ProductOrder) {
                 $payable->fulfill();
+            } elseif ($payable instanceof LaneBooking) {
+                $payable->update(['status' => 'confirmed']);
             } else {
                 $event = Event::whereKey($payable?->event_id)->lockForUpdate()->first();
 

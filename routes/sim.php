@@ -155,6 +155,7 @@ Route::middleware(['auth', 'verified', 'role:customer', \App\Http\Middleware\Cat
     Route::post('/bookings', [VisitorBookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings', [VisitorBookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings/{booking}/cancel', [VisitorBookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('/bookings/payment/{payment}/status', [VisitorBookingController::class, 'status'])->name('bookings.payment.status');
 
     Route::get('/queue', [QueueController::class, 'index'])->name('queues.index');
 
