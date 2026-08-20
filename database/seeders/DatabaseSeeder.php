@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($personalities as $p) {
-            Personality::create($p);
+            Personality::updateOrCreate(['name' => $p['name']], $p);
         }
     }
 
@@ -148,32 +148,34 @@ class DatabaseSeeder extends Seeder
         $happinessLevels = [65, 80, 90, 75, 45, 50, 55, 40, 85, 70, 35, 82, 30, 88, 42, 78];
 
         foreach ($caretakers as $i => $data) {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make('password'),
-                'role' => 'caretaker',
-                'email_verified_at' => now(),
-                'is_npc' => true,
-            ]);
+            $user = User::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'caretaker',
+                    'email_verified_at' => now(),
+                    'is_npc' => true,
+                ]
+            );
 
-            $staff = Staff::create([
-                'user_id' => $user->id,
-                'role' => 'caretaker',
-                'base_salary' => 2500,
-                'current_salary' => 2500,
-                'happiness' => $happinessLevels[$i],
-                'performance_score' => rand(40, 90),
-                'honesty_score' => rand(30, 95),
-                'hire_date' => Carbon::now()->subDays(rand(30, 365)),
-                'is_active' => true,
-            ]);
+            $staff = Staff::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'role' => 'caretaker',
+                    'base_salary' => 2500,
+                    'current_salary' => 2500,
+                    'happiness' => $happinessLevels[$i],
+                    'performance_score' => rand(40, 90),
+                    'honesty_score' => rand(30, 95),
+                    'hire_date' => Carbon::now()->subDays(rand(30, 365)),
+                    'is_active' => true,
+                ]
+            );
 
-            foreach ($data['personalities'] as $pName) {
-                $personality = Personality::where('name', $pName)->first();
-                if ($personality) {
-                    $staff->personalities()->attach($personality->id);
-                }
+            $personalityIds = Personality::whereIn('name', $data['personalities'])->pluck('id')->toArray();
+            if ($personalityIds) {
+                $staff->personalities()->syncWithoutDetaching($personalityIds);
             }
         }
     }
@@ -193,26 +195,30 @@ class DatabaseSeeder extends Seeder
 
         foreach ($customers as $data) {
             $slug = strtolower(str_replace(' ', '.', $data['name']));
-            User::create([
-                'name' => $data['name'],
-                'email' => $slug.'@cloudnine.ai',
-                'password' => Hash::make('password'),
-                'role' => 'customer',
-                'email_verified_at' => now(),
-                'is_npc' => true,
-            ]);
+            User::updateOrCreate(
+                ['email' => $slug.'@cloudnine.ai'],
+                [
+                    'name' => $data['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'customer',
+                    'email_verified_at' => now(),
+                    'is_npc' => true,
+                ]
+            );
         }
     }
 
     private function seedLanes(): void
     {
         for ($i = 1; $i <= 12; $i++) {
-            Lane::create([
-                'lane_number' => $i,
-                'status' => 'open',
-                'oil_level' => rand(70, 100),
-                'last_maintained_at' => Carbon::now()->subHours(rand(1, 24)),
-            ]);
+            Lane::updateOrCreate(
+                ['lane_number' => $i],
+                [
+                    'status' => 'open',
+                    'oil_level' => rand(70, 100),
+                    'last_maintained_at' => Carbon::now()->subHours(rand(1, 24)),
+                ]
+            );
         }
     }
 }
