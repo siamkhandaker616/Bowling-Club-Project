@@ -60,7 +60,7 @@ class CrewChatTest extends TestCase
         $this->actingAs($player->user)
             ->getJson(route('caretaker.crew.poll', ['after' => 0]))
             ->assertOk()
-            ->assertJsonStructure(['messages' => [['id', 'mine', 'name', 'initials', 'bubble_type', 'kind', 'body']]]);
+            ->assertJsonStructure(['messages' => [['id', 'mine', 'name', 'initials', 'bubble_type', 'kind', 'body']], 'typing']);
     }
 
     public function test_apologize_nudges_trust_and_writes_a_reply(): void
@@ -177,8 +177,9 @@ class CrewChatTest extends TestCase
         $this->actingAs($player->user)->get(route('caretaker.crew.index'))->assertOk();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => 'Good morning everyone.'])
-            ->assertRedirect(route('caretaker.crew.index'));
+            ->postJson(route('caretaker.crew.send'), ['body' => 'Good morning everyone.'])
+            ->assertOk()
+            ->assertJson(['ok' => true]);
 
         $this->assertDatabaseHas('staff_messages', [
             'staff_id' => $player->id,
@@ -197,12 +198,12 @@ class CrewChatTest extends TestCase
         $before = StaffMessage::count();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => ''])
-            ->assertSessionHasErrors('body');
+            ->postJson(route('caretaker.crew.send'), ['body' => ''])
+            ->assertUnprocessable();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => '   '])
-            ->assertSessionHasErrors('body');
+            ->postJson(route('caretaker.crew.send'), ['body' => '   '])
+            ->assertUnprocessable();
 
         $this->assertSame($before, StaffMessage::count());
     }
@@ -214,19 +215,15 @@ class CrewChatTest extends TestCase
         $this->actingAs($player->user)->get(route('caretaker.crew.index'))->assertOk();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => 'Got a minute?', 'to' => $steward->id])
-            ->assertRedirect(route('caretaker.crew.index', ['with' => $steward->id, 'tab' => 'dm']));
+            ->postJson(route('caretaker.crew.send'), ['body' => 'Got a minute?', 'to' => $steward->id])
+            ->assertOk()
+            ->assertJson(['ok' => true]);
 
         $this->assertDatabaseHas('staff_messages', [
             'staff_id' => $player->id,
             'recipient_staff_id' => $steward->id,
             'kind' => 'reply',
             'body' => 'Got a minute?',
-        ]);
-
-        $this->assertDatabaseHas('staff_messages', [
-            'staff_id' => $steward->id,
-            'recipient_staff_id' => $player->id,
         ]);
 
         $this->actingAs($player->user)
@@ -269,7 +266,7 @@ class CrewChatTest extends TestCase
         $this->actingAs($player->user)->get(route('caretaker.crew.index'))->assertOk();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => 'hi', 'to' => $player->id])
+            ->postJson(route('caretaker.crew.send'), ['body' => 'hi', 'to' => $player->id])
             ->assertForbidden();
     }
 
@@ -280,8 +277,8 @@ class CrewChatTest extends TestCase
         $this->actingAs($player->user)->get(route('caretaker.crew.index'))->assertOk();
 
         $this->actingAs($player->user)
-            ->post(route('caretaker.crew.send'), ['body' => 'Got a minute?', 'to' => $steward->id])
-            ->assertRedirect();
+            ->postJson(route('caretaker.crew.send'), ['body' => 'Got a minute?', 'to' => $steward->id])
+            ->assertOk();
 
         $this->actingAs($player->user)
             ->getJson(route('caretaker.crew.dm', ['with' => $steward->id]))
@@ -291,7 +288,6 @@ class CrewChatTest extends TestCase
                 'chips' => [['label', 'action']],
                 'other' => ['id', 'name', 'initials'],
             ])
-            ->assertJsonCount(2, 'messages')
             ->assertJsonPath('other.id', $steward->id);
     }
 

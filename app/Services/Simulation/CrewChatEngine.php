@@ -12,6 +12,7 @@ use App\Models\StaffEvent;
 use App\Models\StaffMessage;
 use App\Models\StaffRelationship;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -492,7 +493,11 @@ class CrewChatEngine
 
         return StaffMessage::with('staff.user')
             ->whereNull('recipient_staff_id')
+            ->whereNull('confrontation_id')
             ->whereDate('date', Clock::date())
+            ->where(function ($q) {
+                $q->whereNull('respond_at')->orWhere('respond_at', '<=', now());
+            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -502,8 +507,12 @@ class CrewChatEngine
     {
         return StaffMessage::with('staff.user')
             ->whereNull('recipient_staff_id')
+            ->whereNull('confrontation_id')
             ->where('id', '>', $afterId)
             ->whereDate('date', Clock::date())
+            ->where(function ($q) {
+                $q->whereNull('respond_at')->orWhere('respond_at', '<=', now());
+            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -545,6 +554,9 @@ class CrewChatEngine
                 $q->where('staff_id', $player->id)->where('recipient_staff_id', $other->id)
                     ->orWhere('staff_id', $other->id)->where('recipient_staff_id', $player->id);
             })
+            ->where(function ($q) {
+                $q->whereNull('respond_at')->orWhere('respond_at', '<=', now());
+            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -564,20 +576,192 @@ class CrewChatEngine
         $body = trim($body);
 
         if ($body === '') {
-            return ['sent' => false, 'reply' => null, 'replies' => collect()];
+            return ['sent' => false];
         }
 
         $this->write($player, 'speech', 'reply', $body, $to);
 
         if ($to) {
-            $reply = $this->dmReply($player, $to, $body);
-
-            return ['sent' => true, 'reply' => $reply, 'replies' => $reply ? collect([$reply]) : collect()];
+            $this->scheduleDmInteraction($player, $to, $body);
+        } else {
+            $this->scheduleGroupReactions($player, $body);
         }
 
-        $replies = $this->groupReaction($player, $body);
+        return ['sent' => true];
+    }
 
-        return ['sent' => true, 'reply' => $replies->first(), 'replies' => $replies];
+    public function scheduleGroupReactions(Staff $player, string $body): void
+    {
+        $crew = $this->crewToday($player)
+            ->filter(fn (Staff $s) => $s->role === 'caretaker' && $s->id !== $player->id)
+            ->values();
+
+        $now = now();
+        $used = [];
+
+        foreach ($crew as $npc) {
+            if (mt_rand(1, 100) > 70) {
+                continue;
+            }
+
+            $willRespond = mt_rand(1, 100) <= 55;
+
+            if ($willRespond) {
+                $delay = mt_rand(3, 15);
+                $respondAt = $now->copy()->addSeconds($delay);
+
+                $fallback = $this->pick(self::GROUP_REACTIONS, $used);
+                $line = $this->groqLine(
+                    $fallback,
+                    $player->user->name ?? 'a coworker',
+                    $body,
+                    $npc,
+                    0.6,
+                    $used
+                );
+                $used[] = $line;
+
+                $this->writeScheduled($npc, 'speech', 'chatter', $line, $respondAt);
+
+                $typingDuration = max(2, $delay - mt_rand(1, 4));
+                Cache::put("typing:group:{$npc->id}", [
+                    'name' => $npc->user->name ?? 'Crew',
+                    'initials' => $this->initials($npc),
+                ], $typingDuration);
+            } else {
+                $typingDuration = mt_rand(2, 5);
+                Cache::put("typing:group:{$npc->id}", [
+                    'name' => $npc->user->name ?? 'Crew',
+                    'initials' => $this->initials($npc),
+                ], $typingDuration);
+            }
+        }
+    }
+
+    public function scheduleDmInteraction(Staff $player, Staff $other, string $playerBody): void
+    {
+        $now = now();
+
+        StaffMessage::where('staff_id', $player->id)
+            ->where('recipient_staff_id', $other->id)
+            ->whereDate('date', Clock::date())
+            ->whereNull('seen_at')
+            ->orderByDesc('created_at')
+            ->limit(1)
+            ->update(['seen_at' => $now]);
+
+        $tone = $this->levelFor($this->relationship($player, $other)->score);
+        $responseChance = match ($tone) {
+            'trusted' => 85,
+            'friendly' => 70,
+            'neutral' => 50,
+            'hostile' => 30,
+            default => 50,
+        };
+
+        if (mt_rand(1, 100) > $responseChance) {
+            return;
+        }
+
+        $delay = mt_rand(3, 20);
+        $respondAt = $now->copy()->addSeconds($delay);
+
+        $reply = $this->generateDmReply($player, $other, $playerBody);
+        $this->writeScheduled($other, 'speech', 'chat', $reply, $respondAt, $player);
+
+        $typingDuration = max(2, $delay - mt_rand(1, 5));
+        Cache::put("typing:dm:{$other->id}:{$player->id}", [
+            'name' => $other->user->name ?? 'Crew',
+            'initials' => $this->initials($other),
+        ], $typingDuration);
+    }
+
+    private function generateDmReply(Staff $player, Staff $other, string $playerBody): string
+    {
+        if (preg_match('/sorry|apolog|won.t happen|my fault|slipped/i', $playerBody)) {
+            return $this->groqLine(
+                $this->pick([
+                    'Apology accepted. Do not let it happen again.',
+                    'It is okay. I was more annoyed than mad.',
+                    'Fine. I am keeping an eye on you, though.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            );
+        }
+
+        if (preg_match('/\?|who|what|when|where|why|how/i', $playerBody)) {
+            return $this->groqLine(
+                $this->pick([
+                    'Honestly? I am still figuring that out myself.',
+                    'Not sure, but I would ask the steward before the shift.',
+                    'Good question. I will check the log later.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            );
+        }
+
+        $tone = $this->levelFor($this->relationship($player, $other)->score);
+
+        if (($other->happiness <= 50 || $tone === 'hostile') && mt_rand(1, 100) <= 30) {
+            return $this->groqLine(
+                $this->pick([
+                    'Between us, payroll has been short the last two weeks and management will not explain.',
+                    'Do not say it loudly, but I saw the steward trimming the overtime log.',
+                    'Keep this between us — they are watching who clocks out early.',
+                ]),
+                $other->user->name ?? 'Coworker',
+                $playerBody,
+                $other,
+                1.0
+            );
+        }
+
+        $bank = self::DM_REPLIES[$tone] ?? self::DM_REPLIES['neutral'];
+
+        return $this->groqLine(
+            $this->pick($bank),
+            $other->user->name ?? 'Coworker',
+            $playerBody,
+            $other,
+            1.0
+        );
+    }
+
+    public function typingFor(Staff $player, string $context, ?Staff $other = null): array
+    {
+        $typing = [];
+
+        if ($context === 'group') {
+            $crew = $this->crewToday($player)
+                ->filter(fn (Staff $s) => $s->role === 'caretaker' && $s->id !== $player->id);
+
+            foreach ($crew as $npc) {
+                $cacheKey = "typing:group:{$npc->id}";
+                if (Cache::has($cacheKey)) {
+                    $typing[] = Cache::get($cacheKey);
+                }
+            }
+        } elseif ($context === 'dm' && $other) {
+            $cacheKey = "typing:dm:{$other->id}:{$player->id}";
+            if (Cache::has($cacheKey)) {
+                $typing[] = Cache::get($cacheKey);
+            }
+        }
+
+        return $typing;
+    }
+
+    public function markSeen(StaffMessage $message, Staff $viewer): void
+    {
+        if (! $message->seen_at) {
+            $message->update(['seen_at' => now()]);
+        }
     }
 
     public function dmReply(Staff $player, Staff $other, string $playerBody): ?StaffMessage
@@ -675,6 +859,7 @@ class CrewChatEngine
     public function vibeChips(Staff $player): array
     {
         $recent = StaffMessage::whereNull('recipient_staff_id')
+            ->whereNull('confrontation_id')
             ->whereDate('date', Clock::date())
             ->where('staff_id', '!=', $player->id)
             ->orderByDesc('created_at')
@@ -1101,6 +1286,23 @@ class CrewChatEngine
             'kind' => $kind,
             'body' => $body,
             'date' => Clock::date(),
+        ]);
+    }
+
+    private function writeScheduled(?Staff $staff, string $bubbleType, string $kind, string $body, \Illuminate\Support\Carbon $respondAt, ?Staff $to = null): ?StaffMessage
+    {
+        if (! $staff || trim($body) === '') {
+            return null;
+        }
+
+        return StaffMessage::create([
+            'staff_id' => $staff->id,
+            'recipient_staff_id' => $to?->id,
+            'bubble_type' => $bubbleType,
+            'kind' => $kind,
+            'body' => $body,
+            'date' => Clock::date(),
+            'respond_at' => $respondAt,
         ]);
     }
 

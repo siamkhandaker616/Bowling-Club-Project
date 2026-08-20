@@ -52,10 +52,26 @@ class ConfrontationController extends Controller
     public function respond(Request $request, Confrontation $confrontation)
     {
         if ($confrontation->staff_response) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Already answered.'], 409);
+            }
+
             return redirect()->route('manager.confrontations.index');
         }
 
         $this->service->autoRespond($confrontation);
+
+        if ($request->expectsJson()) {
+            $confrontation->refresh();
+
+            return response()->json([
+                'ok' => true,
+                'staff_response' => $confrontation->staff_response,
+                'investigation_result' => $confrontation->investigation_result,
+                'response_text' => $confrontation->response_text ?? $confrontation->staff_response,
+            ]);
+        }
+
         session()->flash('success', 'Investigation complete — the accused was weighed against the records.');
 
         return redirect()->route('manager.confrontations.index');
@@ -105,13 +121,29 @@ class ConfrontationController extends Controller
         ]);
     }
 
-    public function conclude(Confrontation $confrontation)
+    public function conclude(Request $request, Confrontation $confrontation)
     {
         if ($confrontation->staff_response) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Already answered.'], 409);
+            }
+
             return redirect()->route('manager.confrontations.index');
         }
 
         app(InterrogationEngine::class)->conclude($confrontation);
+
+        if ($request->expectsJson()) {
+            $confrontation->refresh();
+
+            return response()->json([
+                'ok' => true,
+                'staff_response' => $confrontation->staff_response,
+                'investigation_result' => $confrontation->investigation_result,
+                'response_text' => $confrontation->response_text ?? $confrontation->staff_response,
+            ]);
+        }
+
         session()->flash('success', 'Investigation concluded.');
 
         return redirect()->route('manager.confrontations.index');
@@ -126,6 +158,16 @@ class ConfrontationController extends Controller
 
         $this->service->verdict($confrontation, $data['verdict'], $data['penalty_amount'] ?? null);
 
+        if ($request->expectsJson()) {
+            $confrontation->refresh();
+
+            return response()->json([
+                'ok' => true,
+                'manager_verdict' => $confrontation->manager_verdict,
+                'investigation_result' => $confrontation->investigation_result,
+            ]);
+        }
+
         session()->flash('success', 'Verdict applied.');
 
         return redirect()->route('manager.confrontations.index');
@@ -134,9 +176,11 @@ class ConfrontationController extends Controller
     private function payload(StaffMessage $message): array
     {
         $staff = $message->staff;
+        $managerId = auth()->user()?->staff?->id;
 
         return [
             'id' => $message->id,
+            'mine' => (int) $message->staff_id === (int) $managerId,
             'name' => $staff->user->name ?? 'Crew',
             'initials' => app(InterrogationEngine::class)->initials($staff),
             'bubble_type' => $message->bubble_type,

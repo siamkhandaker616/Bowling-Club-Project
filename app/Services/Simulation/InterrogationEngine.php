@@ -81,6 +81,45 @@ class InterrogationEngine
         'liar' => ['I saw them at the front desk the whole shift.', 'They were nowhere near the lanes. I am sure of it.', 'Honestly, I have heard the reporter twists things.'],
     ];
 
+    private const PERSONALITY_INTERROGATION = [
+        'where' => [
+            'stoner' => ['Honestly dude, I was just vibing at my lane. I do not remember exact times.', 'I was where I always am, man. Break room, lane, repeat.'],
+            'overtly_friendly' => ['Oh gosh, I was helping out on the lanes! I promise I was not near anything bad.', 'I was right where I am supposed to be — you can check with anyone!'],
+            'creepy' => ['I was... around. You know how I move.', 'I keep to myself. Always have. You will not find me near trouble.'],
+            'nerd' => ['I was at my assigned station. The shift log should confirm my position.', 'Statistically, I am always in the same spot. Check the rack sheet data.'],
+            'rude' => ['Where do you think? I work the same lane every day.', 'Not your business where I was. I did my job.'],
+            'cliquey' => ['I was with my people. We stick together.', 'I was where the group was. You know how shifts work.'],
+            'opportunistic' => ['I could tell you, but what is it worth to clear my name?', 'I was working. Maybe we can work something out here.'],
+        ],
+        'log' => [
+            'stoner' => ['Dude, I barely even look at logs. I just show up and do the thing.', 'Logs are just paperwork, man. I do not sweat that stuff.'],
+            'overtly_friendly' => ['Oh no, the log? I am so sorry if there is a mistake — I did not mean to cause trouble!', 'I can explain! I was just trying to help out!'],
+            'creepy' => ['I know how logs work. And I know who writes them.', 'Logs tell a story. But not always the right one.'],
+            'nerd' => ['The log data is only as good as the input. Human error is the most common variable.', 'I review my logs regularly. The data should be consistent with my pattern.'],
+            'rude' => ['Logs are management garbage. I do not care what some paper says.', 'Fine. Whatever. The log says what it says.'],
+            'cliquey' => ['My people handle the logs. There is no issue.', 'The log reflects my shift. I stand by it.'],
+            'opportunistic' => ['A log can be interpreted different ways. Let us talk about what it really means.', 'I might have an answer for you, depending on where this goes.'],
+        ],
+        'witness' => [
+            'stoner' => ['A witness? Man, everyone is just chilling. Nobody is watching nobody.', 'Whoever saw something was probably seeing things.'],
+            'overtly_friendly' => ['Oh wow, a witness? That is kind of intense. I hope they are being fair!', 'I trust that whoever saw something will be honest about it!'],
+            'creepy' => ['Witnesses are unreliable. I have seen enough to know.', 'People see what they want to see. Especially about me.'],
+            'nerd' => ['Eyewitness testimony is the least reliable form of evidence. Look at the data instead.', 'A witness statement without corroborating data is statistically weak.'],
+            'rude' => ['Oh great, now somebody is making stuff up about me.', 'A witness? Really? Bring them in. I dare them.'],
+            'cliquey' => ['My crew backs me up. Ask them instead.', 'I was with people who will vouch for me. Period.'],
+            'opportunistic' => ['A witness could help me too, you know. Depends on what they say.', 'Witnesses can be useful. Let us see what they have to say.'],
+        ],
+        'reporter' => [
+            'stoner' => ['Man, that person has had it out for me since day one. It is whatever.', 'I do not even know why they would say that. Weird vibes.'],
+            'overtly_friendly' => ['Oh no, I hope they are not upset with me! I thought we were cool!', 'I do not want any drama — maybe we can all just talk it out?'],
+            'creepy' => ['I know exactly why they named me. And they will regret it.', 'People who point fingers usually have something to hide themselves.'],
+            'nerd' => ['The reporter-s accused relationship is a confounding variable. The data should speak for itself.', 'Personal bias in reporting is well-documented. I would scrutinize the motive.'],
+            'rude' => ['They are full of it. Always have been.', 'That reporter is trash and everyone knows it.'],
+            'cliquey' => ['They are not in our circle. That tells you everything.', 'People outside the group always talk. I do not waste energy on it.'],
+            'opportunistic' => ['I know things about them too. Maybe we should consider that.', 'There is always more to the story. What is it worth to hear my side?'],
+        ],
+    ];
+
     private const NARRATIVES = [
         'confessed' => 'After {n} rounds of questioning, {accused} confessed. The story lined up with the report.',
         'bs' => '{accused} brushed the claims off after {n} rounds of questioning, but the records still back the report.',
@@ -305,7 +344,20 @@ class InterrogationEngine
     private function groqInterrogationLine(Confrontation $confrontation, string $key, string $transcript, string $tier): string
     {
         $answerKey = $confrontation->db_verified ? 'verified' : 'unverified';
-        $fallback = $this->pick(self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral']);
+        $basePool = self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral'];
+
+        $accused = $confrontation->accused;
+        $personalityNames = $accused->personalities->pluck('name')->all();
+        $personalityPool = [];
+
+        foreach ($personalityNames as $pName) {
+            if (isset(self::PERSONALITY_INTERROGATION[$key][$pName])) {
+                $personalityPool = array_merge($personalityPool, self::PERSONALITY_INTERROGATION[$key][$pName]);
+            }
+        }
+
+        $mergedPool = array_merge($basePool, $personalityPool);
+        $fallback = $this->pick($mergedPool);
 
         if (! config('services.groq.enabled', false)) {
             return $fallback;
@@ -315,8 +367,7 @@ class InterrogationEngine
             return $fallback;
         }
 
-        $accused = $confrontation->accused;
-        $personality = $accused->personalities->pluck('name')->implode(', ') ?: 'ordinary';
+        $personality = implode(', ', $personalityNames) ?: 'ordinary';
         $role = $accused->role;
 
         $systemPrompt = "You are being interrogated at a bowling alley. You are a {$role} with a {$personality} personality. "

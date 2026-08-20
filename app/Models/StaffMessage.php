@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StaffMessage extends Model
 {
     protected $fillable = [
-        'staff_id', 'recipient_staff_id', 'confrontation_id', 'bubble_type', 'kind', 'body', 'date', 'read_at',
+        'staff_id', 'recipient_staff_id', 'confrontation_id', 'bubble_type', 'kind', 'body', 'date', 'read_at', 'respond_at', 'seen_at',
     ];
 
     public function confrontation(): BelongsTo
@@ -21,6 +21,8 @@ class StaffMessage extends Model
         return [
             'date' => 'date',
             'read_at' => 'datetime',
+            'respond_at' => 'datetime',
+            'seen_at' => 'datetime',
         ];
     }
 

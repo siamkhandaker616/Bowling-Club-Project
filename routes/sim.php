@@ -137,6 +137,7 @@ Route::middleware(['auth', 'verified', 'role:caretaker', \App\Http\Middleware\Ca
     Route::get('/crew', [CrewController::class, 'index'])->name('crew.index');
     Route::get('/crew/messages', [CrewController::class, 'poll'])->name('crew.poll');
     Route::get('/crew/dm', [CrewController::class, 'dm'])->name('crew.dm');
+    Route::get('/crew/typing', [CrewController::class, 'typing'])->name('crew.typing');
     Route::post('/crew/send', [CrewController::class, 'send'])->name('crew.send');
     Route::post('/crew/messages/{message}/reply', [CrewController::class, 'reply'])->name('crew.reply');
     Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');

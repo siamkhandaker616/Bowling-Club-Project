@@ -55,6 +55,11 @@
                             @endforelse
                         </div>
 
+                        <div class="sim-typing" id="sim-group-typing">
+                            <div class="sim-typing-av" id="sim-group-typing-av"></div>
+                            <div class="sim-typing-text"><span id="sim-group-typing-name"></span> <span class="typing-dots"><span></span><span></span><span></span></span></div>
+                        </div>
+
                         <div style="border-top:2px dashed var(--fog);margin-top:.9rem;padding-top:.9rem;">
                             <div class="sim-crew-chips" id="sim-group-chips">
                                 @foreach ($vibe as $chip)
@@ -109,12 +114,20 @@
                                                     <div class="bubble {{ $message->bubble_type === 'exclamation' ? 'exclam' : $message->bubble_type }}">
                                                         <span class="b-name">{{ $mine ? 'You' : strtoupper($open->user->name ?? 'Crew') }}</span>{{ $message->body }}
                                                     </div>
+                                                    @if ($mine && $message->seen_at)
+                                                        <div class="sim-seen">Seen</div>
+                                                    @endif
                                                 </div>
                                                 @if ($mine)
                                                     <div class="sim-crew-av sm mine">{{ $engine->initials($me) }}</div>
                                                 @endif
                                             </div>
                                         @endforeach
+                                    </div>
+
+                                    <div class="sim-typing" id="sim-dm-typing">
+                                        <div class="sim-typing-av" id="sim-dm-typing-av"></div>
+                                        <div class="sim-typing-text"><span id="sim-dm-typing-name"></span> <span class="typing-dots"><span></span><span></span><span></span></span></div>
                                     </div>
 
                                     <div class="sim-crew-chips" id="sim-dm-chips">
@@ -336,6 +349,8 @@
         .sim-crew .bubble.thought{border-style:dashed;background:var(--cloud);color:var(--slate);font-style:italic}
         .sim-crew .bubble.exclam{border-color:var(--coral);border-width:3px;background:var(--mist)}
         .sim-crew .bubble.question{background:var(--sky-dark);border-color:var(--navy)}
+        .sim-crew-row.mine .bubble{background:var(--coral);color:var(--pin-white);border-color:var(--coral-dark)}
+        .sim-crew-row.mine .bubble .b-name{color:var(--gold-light)}
         .sim-crew-row.mine .bubble::before{left:auto;right:-12px;border-right-color:transparent;border-left-color:var(--navy)}
         .sim-crew-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.55rem}
         .sim-crew-chip{border:2px solid var(--navy);border-radius:40px;background:var(--cloud);font-family:var(--font-sub);font-size:.62rem;padding:.35rem .75rem;cursor:pointer;box-shadow:var(--hard);color:var(--navy);transition:transform .12s ease,box-shadow .12s ease}
@@ -366,6 +381,16 @@
         .sim-crew .rel-tag.neutral{color:var(--gold-dust)}
         .sim-crew .rel-tag.friendly{color:var(--ok)}
         .sim-crew .rel-tag.trusted{color:var(--ok)}
+        .sim-typing{display:none;align-items:center;gap:.5rem;padding:.4rem .6rem;margin-top:.3rem}
+        .sim-typing.on{display:flex}
+        .sim-typing-av{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--font-header);font-size:.5rem;font-weight:700;border:2px solid var(--navy)}
+        .sim-typing-text{font-family:var(--font-sub);font-size:.62rem;color:var(--slate);font-style:italic}
+        .typing-dots{display:inline-flex;gap:3px;margin-left:4px}
+        .typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--slate);animation:typingBounce .8s infinite ease-in-out}
+        .typing-dots span:nth-child(2){animation-delay:.15s}
+        .typing-dots span:nth-child(3){animation-delay:.3s}
+        @keyframes typingBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+        .sim-seen{font-family:var(--font-mono);font-size:.48rem;color:var(--slate);text-align:right;margin-top:.15rem;letter-spacing:.5px}
         @media (max-width:1100px){
             .sim-dm-split{grid-template-columns:1fr}
             .sim-dm-side{border-right:none;border-bottom:2px dashed var(--fog);padding-right:0;padding-bottom:.6rem}
@@ -384,15 +409,23 @@
             var groupForm = document.getElementById('sim-group-form');
             var groupInput = document.getElementById('sim-group-input');
             var groupChips = document.getElementById('sim-group-chips');
+            var groupTyping = document.getElementById('sim-group-typing');
+            var groupTypingAv = document.getElementById('sim-group-typing-av');
+            var groupTypingName = document.getElementById('sim-group-typing-name');
 
             var dmRoom = document.getElementById('sim-dm-room');
             var dmForm = document.getElementById('sim-dm-form');
             var dmInput = document.getElementById('sim-dm-input');
             var dmChips = document.getElementById('sim-dm-chips');
+            var dmTyping = document.getElementById('sim-dm-typing');
+            var dmTypingAv = document.getElementById('sim-dm-typing-av');
+            var dmTypingName = document.getElementById('sim-dm-typing-name');
 
             var csrf = @json(csrf_token());
             var groupPollUrl = @json(route('caretaker.crew.poll'));
+            var groupSendUrl = @json(route('caretaker.crew.send'));
             var dmPollUrl = @json(route('caretaker.crew.dm'));
+            var dmSendUrl = @json(route('caretaker.crew.send'));
             var replyUrl = @json(route('caretaker.crew.reply', ['message' => '__ID__']));
 
             var lastGroup = {{ $thread->last()?->id ?? 0 }};
@@ -402,6 +435,8 @@
             var validTabs = ['crew', 'dm', 'reported', 'relationships', 'ledger', 'history'];
             var tab = @json($tab);
             if (validTabs.indexOf(tab) < 0) tab = 'crew';
+
+            var flickerTimers = {};
 
             function scroll(el) { if (el) el.scrollTop = el.scrollHeight; }
 
@@ -437,8 +472,9 @@
                 row.className = 'sim-crew-row' + (m.mine ? ' mine' : '');
                 row.setAttribute('data-mid', m.id);
 
+                var isDm = !!dmRoom;
                 var av = document.createElement('div');
-                av.className = 'sim-crew-av' + (dmRoom ? ' sm' : '') + (m.mine ? ' mine' : '');
+                av.className = 'sim-crew-av' + (isDm ? ' sm' : '') + (m.mine ? ' mine' : '');
                 av.textContent = m.initials;
 
                 var bwrap = document.createElement('div');
@@ -455,6 +491,13 @@
                 bubble.appendChild(document.createTextNode(m.body || ''));
 
                 bwrap.appendChild(bubble);
+
+                if (m.mine && m.seen_at) {
+                    var seen = document.createElement('div');
+                    seen.className = 'sim-seen';
+                    seen.textContent = 'Seen';
+                    bwrap.appendChild(seen);
+                }
 
                 if (m.mine) { row.appendChild(bwrap); row.appendChild(av); }
                 else { row.appendChild(av); row.appendChild(bwrap); }
@@ -489,6 +532,28 @@
                 });
             }
 
+            function ajaxSend(body, toId, successCb) {
+                var payload = { body: body };
+                if (toId) payload.to = toId;
+
+                var url = toId ? dmSendUrl : groupSendUrl;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.ok && successCb) successCb();
+                })
+                .catch(function () {});
+            }
+
             function disableForm(form) {
                 if (!form) return;
                 var btn = form.querySelector('button[type="submit"]');
@@ -498,13 +563,29 @@
                 form.setAttribute('data-sent', '1');
             }
 
+            function reEnableForm(form) {
+                if (!form) return;
+                var btn = form.querySelector('button[type="submit"]');
+                var inp = form.querySelector('input[name="body"]');
+                if (btn) btn.disabled = false;
+                if (inp) inp.readOnly = false;
+                form.removeAttribute('data-sent');
+            }
+
             function sendFromChip(btn) {
-                var input = btn.getAttribute('data-to') ? dmInput : groupInput;
-                var form = btn.getAttribute('data-to') ? dmForm : groupForm;
+                var toId = btn.getAttribute('data-to') ? parseInt(btn.getAttribute('data-to'), 10) : null;
+                var body = btn.getAttribute('data-body');
+                if (!body) return;
+
+                var input = toId ? dmInput : groupInput;
+                var form = toId ? dmForm : groupForm;
                 if (!input || !form || form.getAttribute('data-sent')) return;
-                input.value = btn.getAttribute('data-body');
-                disableForm(form);
-                form.submit();
+
+                ajaxSend(body, toId, function () {
+                    input.value = '';
+                    reEnableForm(form);
+                    triggerPoll(toId);
+                });
             }
 
             (groupChips ? Array.prototype.slice.call(groupChips.children) : []).forEach(function (c) {
@@ -516,58 +597,163 @@
                 });
             }
 
-            [groupForm, dmForm].forEach(function (f) {
-                if (!f) return;
-                f.addEventListener('submit', function () {
-                    if (f.getAttribute('data-sent')) { f.preventDefault(); return; }
-                    disableForm(f);
+            if (groupForm) {
+                groupForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var body = groupInput.value.trim();
+                    if (!body || groupForm.getAttribute('data-sent')) return;
+                    disableForm(groupForm);
+
+                    ajaxSend(body, null, function () {
+                        groupInput.value = '';
+                        reEnableForm(groupForm);
+                        triggerPoll(null);
+                    });
                 });
-            });
+            }
+
+            if (dmForm) {
+                dmForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var body = dmInput.value.trim();
+                    if (!body || dmForm.getAttribute('data-sent')) return;
+                    disableForm(dmForm);
+
+                    ajaxSend(body, dmWith, function () {
+                        dmInput.value = '';
+                        reEnableForm(dmForm);
+                        triggerPoll(dmWith);
+                    });
+                });
+            }
+
+            function updateTyping(container, avEl, nameEl, typingData) {
+                if (!container) return;
+                if (!typingData || typingData.length === 0) {
+                    container.classList.remove('on');
+                    stopFlicker(container);
+                    return;
+                }
+                container.classList.add('on');
+                startFlicker(container);
+                var first = typingData[0];
+                if (avEl) avEl.textContent = first.initials || '';
+                if (nameEl) {
+                    if (typingData.length === 1) {
+                        nameEl.textContent = first.name + ' is typing';
+                    } else if (typingData.length === 2) {
+                        nameEl.textContent = first.name + ' and ' + typingData[1].name + ' are typing';
+                    } else {
+                        nameEl.textContent = first.name + ' and ' + (typingData.length - 1) + ' others are typing';
+                    }
+                }
+            }
+
+            function startFlicker(el) {
+                var id = el.id;
+                if (flickerTimers[id]) return;
+                flickerTimers[id] = setInterval(function () {
+                    if (Math.random() < 0.3) {
+                        el.style.opacity = el.style.opacity === '0' ? '1' : '0';
+                    }
+                }, 1500);
+            }
+
+            function stopFlicker(el) {
+                var id = el.id;
+                if (flickerTimers[id]) {
+                    clearInterval(flickerTimers[id]);
+                    delete flickerTimers[id];
+                }
+                el.style.opacity = '1';
+            }
+
+            function triggerPoll(toId) {
+                if (toId) {
+                    fetch(dmPollUrl + '?with=' + toId, { headers: { 'Accept': 'application/json' } })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) { applyDmPoll(data); })
+                        .catch(function () {});
+                } else {
+                    fetch(groupPollUrl + '?after=' + lastGroup, { headers: { 'Accept': 'application/json' } })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) { applyGroupPoll(data); })
+                        .catch(function () {});
+                }
+            }
+
+            function applyGroupPoll(data) {
+                if (data.messages && data.messages.length) {
+                    data.messages.forEach(function (m) {
+                        if (m.id <= lastGroup) return;
+                        group.appendChild(bubbleRow(m));
+                        lastGroup = m.id;
+                    });
+                    stopFlicker(groupTyping);
+                    groupTyping.classList.remove('on');
+                }
+                if (data.chips && groupChips) {
+                    renderChips(groupChips, data.chips, null);
+                    Array.prototype.slice.call(groupChips.children).forEach(function (c) {
+                        c.addEventListener('click', function () { sendFromChip(c); });
+                    });
+                }
+                if (data.typing) {
+                    updateTyping(groupTyping, groupTypingAv, groupTypingName, data.typing);
+                }
+                if (tab === 'crew') scroll(group);
+            }
+
+            function applyDmPoll(data) {
+                if (data.messages && data.messages.length) {
+                    data.messages.forEach(function (m) {
+                        if (m.id <= lastDm) {
+                            if (m.mine && m.seen_at && dmRoom) {
+                                var existing = dmRoom.querySelector('[data-mid="' + m.id + '"]');
+                                if (existing && !existing.querySelector('.sim-seen')) {
+                                    var bwrap = existing.querySelector('.sim-crew-bwrap');
+                                    if (bwrap) {
+                                        var seen = document.createElement('div');
+                                        seen.className = 'sim-seen';
+                                        seen.textContent = 'Seen';
+                                        bwrap.appendChild(seen);
+                                    }
+                                }
+                            }
+                            return;
+                        }
+                        dmRoom.appendChild(bubbleRow(m));
+                        lastDm = m.id;
+                    });
+                    stopFlicker(dmTyping);
+                    dmTyping.classList.remove('on');
+                }
+                if (data.chips && dmChips) {
+                    renderChips(dmChips, data.chips, dmWith);
+                    Array.prototype.slice.call(dmChips.children).forEach(function (c) {
+                        if (c.tagName === 'BUTTON') c.addEventListener('click', function () { sendFromChip(c); });
+                    });
+                }
+                if (data.typing) {
+                    updateTyping(dmTyping, dmTypingAv, dmTypingName, data.typing);
+                }
+                if (tab === 'dm') scroll(dmRoom);
+            }
 
             setInterval(function () {
                 fetch(groupPollUrl + '?after=' + lastGroup, { headers: { 'Accept': 'application/json' } })
                     .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        if (data.messages && data.messages.length) {
-                            data.messages.forEach(function (m) {
-                                if (m.id <= lastGroup) return;
-                                group.appendChild(bubbleRow(m));
-                                lastGroup = m.id;
-                            });
-                        }
-                        if (data.chips && groupChips) {
-                            renderChips(groupChips, data.chips, null);
-                            Array.prototype.slice.call(groupChips.children).forEach(function (c) {
-                                c.addEventListener('click', function () { sendFromChip(c); });
-                            });
-                        }
-                        if (tab === 'crew') scroll(group);
-                    })
+                    .then(function (data) { applyGroupPoll(data); })
                     .catch(function () {});
-            }, 8000);
+            }, 3000);
 
             if (dmRoom && dmWith) {
                 setInterval(function () {
                     fetch(dmPollUrl + '?with=' + dmWith, { headers: { 'Accept': 'application/json' } })
                         .then(function (r) { return r.json(); })
-                        .then(function (data) {
-                            if (data.messages && data.messages.length) {
-                                data.messages.forEach(function (m) {
-                                    if (m.id <= lastDm) return;
-                                    dmRoom.appendChild(bubbleRow(m));
-                                    lastDm = m.id;
-                                });
-                            }
-                            if (data.chips && dmChips) {
-                                renderChips(dmChips, data.chips, dmWith);
-                                Array.prototype.slice.call(dmChips.children).forEach(function (c) {
-                                    if (c.tagName === 'BUTTON') c.addEventListener('click', function () { sendFromChip(c); });
-                                });
-                            }
-                            if (tab === 'dm') scroll(dmRoom);
-                        })
+                        .then(function (data) { applyDmPoll(data); })
                         .catch(function () {});
-                }, 8000);
+                }, 3000);
             }
         })();
     </script>

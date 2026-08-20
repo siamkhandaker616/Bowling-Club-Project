@@ -84,7 +84,11 @@ class CrewController extends Controller
             ->messagesSince((int) $request->query('after', 0))
             ->map(fn (StaffMessage $message) => $this->payload($message, $me));
 
-        return response()->json(['messages' => $messages->values(), 'chips' => $engine->vibeChips($me)]);
+        return response()->json([
+            'messages' => $messages->values(),
+            'chips' => $engine->vibeChips($me),
+            'typing' => $engine->typingFor($me, 'group'),
+        ]);
     }
 
     public function dm(Request $request): JsonResponse
@@ -113,10 +117,24 @@ class CrewController extends Controller
                 'name' => $other->user->name ?? 'Crew',
                 'initials' => $engine->initials($other),
             ],
+            'typing' => $engine->typingFor($me, 'dm', $other),
         ]);
     }
 
-    public function send(Request $request): RedirectResponse
+    public function typing(Request $request): JsonResponse
+    {
+        $me = $request->user()->staff;
+
+        $context = $request->query('context', 'group');
+        $withId = $request->integer('with', 0);
+        $other = $withId ? Staff::find($withId) : null;
+
+        $typing = app(CrewChatEngine::class)->typingFor($me, $context, $other);
+
+        return response()->json(['typing' => $typing]);
+    }
+
+    public function send(Request $request): JsonResponse
     {
         $me = $request->user()->staff;
 
@@ -133,13 +151,7 @@ class CrewController extends Controller
 
         $result = app(CrewChatEngine::class)->sendMessage($me, $data['body'], $to ? Staff::find($to) : null);
 
-        if (! $result['sent']) {
-            session()->flash('error', 'Say something first.');
-        }
-
-        return $to
-            ? redirect()->route('caretaker.crew.index', ['with' => $to, 'tab' => 'dm'])
-            : redirect()->route('caretaker.crew.index');
+        return response()->json(['ok' => $result['sent']]);
     }
 
     public function reply(Request $request, StaffMessage $message): RedirectResponse
@@ -220,6 +232,7 @@ class CrewController extends Controller
             'bubble_type' => $message->bubble_type,
             'kind' => $message->kind,
             'body' => $message->body,
+            'seen_at' => $message->seen_at?->toISOString(),
         ];
     }
 }
