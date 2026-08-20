@@ -71,6 +71,11 @@
                                     @csrf
                                     <button type="submit" class="btn-lane danger" style="font-size:0.55rem;padding:4px 10px;">Reject</button>
                                 </form>
+                            @elseif ($bill->status === 'approved' && (! $bill->payment || ! $bill->payment->isSuccessful()))
+                                <form class="gutter-form" data-accept-form data-accept-url="{{ route('manager.inventory.purchases.pay', $bill) }}" data-payment-url="{{ route('manager.inventory.purchases.status', '__ID__') }}" data-index-url="{{ route('manager.inventory.purchases.index') }}">
+                                    @csrf
+                                    <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:4px 10px;">Pay</button>
+                                </form>
                             @endif
                         </div>
                     </div>

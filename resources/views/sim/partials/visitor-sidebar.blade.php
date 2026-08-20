@@ -3,13 +3,18 @@
     $initials = strtoupper(substr($u->name,0,1)) . strtoupper(substr(str_replace(' ','',$u->name),-1));
     $links = [
         ['route' => 'visitor.dashboard',        'label' => 'Overview',     'num' => '01'],
-        ['route' => 'visitor.bookings.create',  'label' => 'Book a Lane',  'num' => '02'],
-        ['route' => 'visitor.bookings.index',   'label' => 'My Bookings',  'num' => '03'],
-        ['route' => 'site.facility-map',        'label' => 'Facility Map', 'num' => '04'],
-        ['route' => 'public.proshop.index',     'label' => 'Pro Shop',     'num' => '05'],
-        ['route' => 'visitor.queues.index',     'label' => 'Queue',        'num' => '06'],
-        ['route' => 'visitor.reviews.index',    'label' => 'Reviews',      'num' => '07'],
-        ['route' => 'visitor.complaints.index', 'label' => 'Complaints',   'num' => '08'],
+        ['route' => 'visitor.bookings.index',   'label' => 'My Bookings',  'num' => '02'],
+        ['route' => 'game.leaderboard',         'label' => 'My Scores',    'num' => '03'],
+        ['route' => 'site.snackbar',            'label' => 'Snack Bar',    'num' => '04'],
+        ['route' => 'site.facility-map',        'label' => 'Facility Map', 'num' => '05'],
+        ['route' => 'public.events',            'label' => 'Events',       'num' => '06'],
+        ['route' => 'public.fixtures',          'label' => 'Fixtures',     'num' => '07'],
+        ['route' => 'public.touring',           'label' => 'Touring',      'num' => '08'],
+        ['route' => 'public.stats',             'label' => 'Stats',        'num' => '09'],
+        ['route' => 'public.proshop.index',     'label' => 'Pro Shop',     'num' => '10'],
+        ['route' => 'visitor.queues.index',     'label' => 'Queue',        'num' => '11'],
+        ['route' => 'visitor.reviews.index',    'label' => 'Reviews',      'num' => '12'],
+        ['route' => 'visitor.complaints.index', 'label' => 'Complaints',   'num' => '13'],
     ];
     $active = fn($route) => request()->routeIs($route);
 @endphp

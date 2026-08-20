@@ -97,22 +97,35 @@ class InterrogationEngine
         $this->write($confrontation->accused, 'speech', 'interrogation', $this->pick(self::OPENERS[$key][$tier]), $confrontation);
     }
 
-    public function ask(Confrontation $confrontation, string $key): StaffMessage
+    public function ask(Confrontation $confrontation, string $key, ?string $chipLabel = null): array
     {
         if ($key === 'witness') {
-            return $this->witness($confrontation);
+            $reply = $this->witness($confrontation);
+        } else {
+            $answerKey = $confrontation->db_verified ? 'verified' : 'unverified';
+            $tier = $this->tier($confrontation->accused);
+
+            $reply = $this->write(
+                $confrontation->accused,
+                $this->bubbleFor($key),
+                'interrogation',
+                $this->pick(self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral']),
+                $confrontation
+            );
         }
 
-        $answerKey = $confrontation->db_verified ? 'verified' : 'unverified';
-        $tier = $this->tier($confrontation->accused);
+        $userMessage = null;
+        if ($chipLabel && ($manager = auth()->user()?->staff)) {
+            $userMessage = $this->write(
+                $manager,
+                'speech',
+                'interrogation',
+                $chipLabel,
+                $confrontation
+            );
+        }
 
-        return $this->write(
-            $confrontation->accused,
-            $this->bubbleFor($key),
-            'interrogation',
-            $this->pick(self::ANSWERS[$key][$answerKey][$tier] ?? self::ANSWERS[$key]['verified']['neutral']),
-            $confrontation
-        );
+        return ['reply' => $reply, 'userMessage' => $userMessage];
     }
 
     public function witness(Confrontation $confrontation): StaffMessage

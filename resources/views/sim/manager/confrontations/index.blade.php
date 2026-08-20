@@ -240,6 +240,7 @@
             })
                 .then(function (r) { if (!r.ok) throw 0; return r.json(); })
                 .then(function (data) {
+                    if (data.userMessage) appendMessage(data.userMessage);
                     appendMessage(data.reply);
                     renderChips(data.chips);
                 })

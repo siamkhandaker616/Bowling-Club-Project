@@ -12,12 +12,7 @@
 </head>
 <body style="min-height:100vh;">
 
-    @component('site.partials.core-header')
-        <a href="{{ route('public.events') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Events</a>
-        <a href="{{ route('public.proshop.index') }}" class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Pro Shop</a>
-        <a href="{{ route('public.proshop.cart') }}" class="btn btn-coral" style="padding:8px 20px;font-size:0.8rem;position:relative;">Bag
-            @if(($cartCount ?? 0) > 0)<span style="position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--font-mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;">{{ $cartCount }}</span>@endif
-        </a>
+    @component('site.partials.core-header', ['activeRoute' => 'public.proshop.cart'])
     @endcomponent
 
     <main style="padding:6rem 2rem 4rem;max-width:860px;margin:0 auto;">
@@ -101,7 +96,6 @@
 
                     <div class="lane-stage">
                         <div class="pin-rack">
-                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                             <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                             <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                             <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>

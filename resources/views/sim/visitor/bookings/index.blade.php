@@ -12,14 +12,10 @@
 
         @include('sim.partials.module-dock')
 
-        <div style="padding:0 1rem;max-width:900px;margin:0 auto;">
-
-        
-
-        <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;">
             @forelse ($bookings as $booking)
-                <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;">
-                    <div style="display:flex;gap:10px;align-items:center;">
+                <div style="flex:1 1 280px;background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                         <span style="font-family:var(--font-mono);font-size:0.55rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--navy);color:var(--pin-white);">{{ \App\Helpers\Label::timeSlot($booking->time_slot) }}</span>
                         <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);">{{ $booking->date->format('M j, Y') }}</span>
                         <span style="font-family:var(--font-sub);font-size:0.75rem;">Lane {{ $booking->lane?->lane_number ?? '—' }}</span>
@@ -31,18 +27,16 @@
                     @if (in_array($booking->status, ['pending', 'confirmed']))
                         <form method="POST" action="{{ route('visitor.bookings.cancel', $booking) }}">
                             @csrf
-                            <button type="submit" class="btn-lane secondary" style="font-size:0.55rem;padding:5px 12px;">Cancel</button>
+                            <button type="submit" class="btn-lane secondary" style="font-size:0.55rem;padding:5px 12px;flex-shrink:0;">Cancel</button>
                         </form>
                     @endif
                 </div>
             @empty
-                <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;">
+                <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:12px;padding:1rem;text-align:center;width:100%;">
                     <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate);">You have no bookings yet. <a href="{{ route('visitor.bookings.create') }}" style="color:var(--sky-dark);">Book a lane</a>.</span>
                 </div>
             @endforelse
         </div>
-
-    </div>
     </div>
 
     <x-toast />

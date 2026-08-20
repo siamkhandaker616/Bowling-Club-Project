@@ -13,21 +13,8 @@
     <link rel="stylesheet" href="{{ asset('css/bowling/game.css') }}">
 </head>
 <body class="game-page">
-    <header class="game-topbar">
-        <a href="{{ route('home') }}" class="game-brand">
-            <span class="game-brand-ball"></span>
-            <span class="game-brand-name">The Tenth Frame</span>
-            <span class="game-brand-tag">Virtual Bowling</span>
-        </a>
-        <nav class="game-nav">
-            <a href="{{ route('game.leaderboard') }}">Leaderboard</a>
-            @auth
-                <a href="{{ route('dashboard') }}">{{ auth()->user()->name }}</a>
-            @else
-                <a href="{{ route('login') }}">Sign in to track scores</a>
-            @endauth
-        </nav>
-    </header>
+    @component('site.partials.core-header')
+    @endcomponent
 
     <main class="game-main">
         <section class="game-board">

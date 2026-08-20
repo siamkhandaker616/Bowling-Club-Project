@@ -192,10 +192,8 @@ img,svg{user-select:none;-webkit-user-drag:none}
 .btn{display:inline-block;padding:12px 32px;border:3px solid var(--navy);border-radius:var(--radius-sm);background:var(--gold);color:var(--navy);font-family:var(--font-header);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;cursor:pointer;box-shadow:var(--hard);transition:transform 0.12s,box-shadow 0.12s,background 0.15s;text-decoration:none;text-align:center}
 .btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--navy);background:var(--gold-light)}
 .btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--navy)}
-.btn-coral{background:var(--coral);color:var(--pin-white);border-color:var(--coral-dark)}
-.btn-coral:hover{background:var(--coral-light)}
-nav .btn-coral{color:var(--navy)}
-nav .btn-coral:hover{color:var(--navy)}
+.btn.btn-coral{background:var(--coral);color:var(--pin-white);border-color:var(--coral-dark)}
+.btn.btn-coral:hover{background:var(--coral-light);color:var(--pin-white)}
 .btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold-dust)}
 .btn-gold:hover{background:var(--gold-light)}
 .btn-solid{background:var(--navy);color:var(--pin-white);border-color:var(--navy)}

@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Mail\BookingConfirmation;
 use App\Mail\OrderReceipt;
 use App\Mail\RsvpConfirmation;
 use App\Mail\RsvpReceipt;
@@ -98,6 +99,18 @@ class PaymentSettler
             }
 
             $this->clearCartFor($payment, null);
+        } elseif ($payable instanceof LaneBooking) {
+            $payable->load(['lane', 'visitor', 'payment']);
+
+            $email = $payment->customer_email ?? $payable->visitor?->email;
+
+            if ($email) {
+                try {
+                    Mail::to($email)->send(new BookingConfirmation($payable));
+                } catch (\Throwable $e) {
+                    Log::warning('Booking confirmation email failed: '.$e->getMessage());
+                }
+            }
         }
 
         return true;

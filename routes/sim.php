@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
 
     Route::get('/inventory/purchases', [InventoryPurchaseController::class, 'index'])->name('inventory.purchases.index');
     Route::post('/inventory/purchases/{purchase}/accept', [InventoryPurchaseController::class, 'accept'])->name('inventory.purchases.accept');
+    Route::post('/inventory/purchases/{purchase}/pay', [InventoryPurchaseController::class, 'pay'])->name('inventory.purchases.pay');
     Route::post('/inventory/purchases/{purchase}/reject', [InventoryPurchaseController::class, 'reject'])->name('inventory.purchases.reject');
     Route::get('/inventory/purchases/{payment}/status', [InventoryPurchaseController::class, 'status'])->name('inventory.purchases.status');
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');

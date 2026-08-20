@@ -1,29 +1,7 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit Announcement - The Tenth Frame</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
-<body style="min-height:100vh;">
+<x-app-layout>
     @php $rp = 'site.announcements.'; @endphp
-    <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(245,248,250,0.95);backdrop-filter:blur(8px);border-bottom:3px solid var(--navy);padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <div class="ball-accent" style="width:32px;height:32px;"></div>
-            <span style="font-family:var(--font-display);font-size:1.3rem;color:var(--navy);text-transform:uppercase;">The Tenth Frame</span>
-        </a>
-        <nav style="display:flex;align-items:center;gap:1.5rem;">
-            <a href="/" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">Home</a>
-            <a href="{{ route($rp.'index') }}" style="font-family:var(--font-sub);color:var(--navy);text-decoration:none;">All Announcements</a>
-        </nav>
-    </header>
 
-    <main style="max-width:700px;margin:0 auto;padding:6rem 2rem 4rem;">
+    <div style="max-width:700px;margin:0 auto;">
         <h1 style="font-family:var(--font-header);font-size:1.8rem;text-transform:uppercase;margin-bottom:2rem;">Edit Announcement</h1>
 
         @if($errors->any())
@@ -85,7 +63,6 @@
 
             <div class="lane-stage">
                 <div class="pin-rack">
-                    <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                     <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                     <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
                     <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
@@ -99,11 +76,7 @@
                 <a href="{{ route($rp.'index') }}" style="display:inline-block;padding:12px 32px;border:2px solid var(--navy);border-radius:50px;font-family:var(--font-header);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);background:var(--pin-white);text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='var(--mist)'" onmouseout="this.style.background='var(--pin-white)'">Cancel</a>
             </div>
         </form>
-    </main>
-    <x-toast />
+    </div>
 
     @include('sim.partials.fold-controls')
-
-    <script src="/js/datepicker.js"></script>
-</body>
-</html>
+</x-app-layout>
