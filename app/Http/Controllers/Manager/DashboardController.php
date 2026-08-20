@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accident;
 use App\Models\BanRequest;
 use App\Models\ClubConfig;
 use App\Models\Complaint;
@@ -56,6 +57,8 @@ class DashboardController extends Controller
 
         $recentEvents = StaffEvent::with('staff.user')->orderByDesc('created_at')->limit(8)->get();
 
+        $recentIncidents = Accident::with('staff.user')->orderByDesc('created_at')->limit(5)->get();
+
         $dialogue = app(DialogueService::class);
         $chatter = $activeStaff->take(4)->map(fn (Staff $s) => [
             'name' => $s->user->name ?? 'Staff',
@@ -66,6 +69,6 @@ class DashboardController extends Controller
 
         $dayReport = session('day_report');
 
-        return view('dashboards.manager', compact('user', 'stats', 'lanes', 'lowStock', 'recentEvents', 'dayReport', 'chatter'));
+        return view('dashboards.manager', compact('user', 'stats', 'lanes', 'lowStock', 'recentEvents', 'dayReport', 'chatter', 'recentIncidents'));
     }
 }

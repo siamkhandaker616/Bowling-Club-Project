@@ -5,7 +5,7 @@ namespace Tests\Feature\Simulation;
 use App\Models\Accident;
 use App\Models\BookingQueue;
 use App\Models\Complaint;
-use App\Models\LaneBooking;
+use App\Models\Staff;
 use App\Models\StaffReview;
 use App\Models\TouringRequest;
 use App\Services\Simulation\AccidentEngine;
@@ -91,7 +91,7 @@ class AuditRemediationTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'service',
             'description' => 'Bad lane condition',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->actingAs($manager)->post(route('manager.complaints.resolve', $complaint), [
@@ -142,7 +142,7 @@ class AuditRemediationTest extends TestCase
             'visitor_id' => $visitorA->id,
             'type' => 'service',
             'description' => 'Wanted priority next visit',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->actingAs($manager)->post(route('manager.complaints.resolve', $complaint), [
@@ -166,7 +166,7 @@ class AuditRemediationTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'service',
             'description' => 'Compensation request',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->actingAs($manager)->post(route('manager.complaints.resolve', $complaint), [
@@ -287,13 +287,13 @@ class AuditRemediationTest extends TestCase
 
         for ($i = 0; $i < 6; $i++) {
             $this->actingAs($manager)->post(route('manager.staff.store'), [
-                'name' => 'Hiree ' . $i,
-                'email' => 'hiree' . $i . '@test.local',
+                'name' => 'Hiree '.$i,
+                'email' => 'hiree'.$i.'@test.local',
                 'role' => 'caretaker',
                 'base_salary' => 2500,
             ])->assertRedirect();
 
-            $staff = \App\Models\Staff::with('personalities')->whereHas('user', fn ($q) => $q->where('email', 'hiree' . $i . '@test.local'))->first();
+            $staff = Staff::with('personalities')->whereHas('user', fn ($q) => $q->where('email', 'hiree'.$i.'@test.local'))->first();
             $traits = $staff->personalities->pluck('name')->all();
 
             $this->assertGreaterThanOrEqual(2, count($traits));
@@ -330,7 +330,7 @@ class AuditRemediationTest extends TestCase
             'personalities' => [$nerd->id],
         ])->assertRedirect();
 
-        $staff = \App\Models\Staff::whereHas('user', fn ($q) => $q->where('email', 'nomanual@test.local'))->first();
+        $staff = Staff::whereHas('user', fn ($q) => $q->where('email', 'nomanual@test.local'))->first();
         $this->assertSame(1, $staff->personalities()->count());
     }
 

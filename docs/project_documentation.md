@@ -65,13 +65,14 @@ bowling/
 │       └── Simulation/            # DayCycle, Clock, AccidentEngine, ConfrontationService,
 │                                  # InterrogationEngine, CrewChatEngine, DialogueService,
 │                                  # SocialEngine, InventoryService, PurchaseBillService,
-│                                  # MatchService, VisitorSpawner, VisitorRegistry
+│                                  # MatchService, VisitorSpawner, VisitorRegistry,
+│                                  # Personality banks, Groq integration
 ├── database/
 │   ├── factories/                 # Model factories
-│   ├── migrations/                # 48 migration files (~40 domain tables)
+│   ├── migrations/                # 53 migration files (~40 domain tables)
 │   └── seeders/                   # Site, Portal, Event, ProShop, BowlingScore, SimulationData, InventoryCategories, etc.
 ├── docs/
-│   ├── build/                     # Ownership contract (CONTEXT.md), agent reports
+│   ├── docs/build/                 # Ownership contract (CONTEXT.md), agent reports
 │   │   ├── CONTEXT.md
 │   │   └── REPORTS/               # AUDIT_REPORT.md, FEATURES.md, LAYER_A/B/C/D.md, etc.
 │   ├── CSExxx_ID_NAME_ApplicationName.md   # Course submission template
@@ -148,7 +149,7 @@ HTML5 Canvas top-down lane. Ball curve physics (aim, hook, power tiers). Pin phy
 
 ### Manager Dashboard (`/manager`)
 
-End-of-Day report card, day advance (14-step pipeline), Bad-Day toggle, Module Dock. Sub-pages: staff CRUD + bonus/penalty, inventory CRUD + restock + purchase bills, booking overview, ban requests, complaints, confrontations (with DM-style interrogation), league, touring, reviews.
+End-of-Day report card, day advance (14-step pipeline), Bad-Day toggle, Module Dock. Sub-pages: staff CRUD + bonus/penalty, inventory CRUD + restock + purchase bills, booking overview, ban requests, complaints, confrontations (with AJAX-driven interrogation — auto-investigate, conclude, and verdict all update in-place without reload; typing indicators before accused responses), league, touring, reviews.
 
 ### Steward Dashboard (`/steward`)
 
@@ -156,7 +157,7 @@ Shift schedule with Mark Complete, visitor management + staff reviews, ban reque
 
 ### Caretaker Dashboard (`/caretaker`)
 
-Shift list (complete/cancel), inventory view + adjust + restock, crew chat (DM threads, snitch reports, confrontation responses), fixture prep (welcome/kits/lane/training readiness).
+Shift list (complete/cancel), inventory view + adjust + restock, crew chat (DM threads, snitch reports, confrontation responses — with typing indicators, seen indicators, and async NPC responses), fixture prep (welcome/kits/lane/training readiness).
 
 ### Visitor Dashboard (`/visitor`)
 
@@ -172,7 +173,7 @@ Edit profile information, update password, delete account.
 
 ## 5. Database Structure
 
-48 migration files, approximately 40 domain tables across 6 logical groups:
+53 migration files, approximately 40 domain tables across 6 logical groups:
 
 ### Auth & Infrastructure
 
@@ -199,13 +200,13 @@ Edit profile information, update password, delete account.
 
 | Table | Purpose |
 |-------|---------|
-| `staff` | Role (manager/steward/caretaker), salary, happiness, performance, honesty, warnings |
+| `staff` | Role (club_manager/manager/steward/caretaker), salary, happiness, performance, honesty, warnings |
 | `personalities` | 8 seeded personality traits |
 | `staff_personalities` | Pivot: staff ↔ personality |
 | `shifts` | Staff + date + time_slot + lane + status |
 | `staff_events` | Event log (type, severity, happiness_change) |
 | `staff_relationships` | Pairwise relationship level (hostile/neutral/friendly/trusted) + score |
-| `staff_messages` | Chat messages (speech/thought bubble, DM threads) |
+| `staff_messages` | Chat messages (speech/thought bubble, DM threads, confrontation scope via `confrontation_id`, async delivery via `respond_at` and `seen_at`) |
 | `staff_reviews` | Staff review of visitors |
 | `penalties` | Pay dock, extra hours, written warning |
 | `bonuses` | Cash, time off, recognition |
@@ -325,15 +326,15 @@ Edit profile information, update password, delete account.
 
 ### 6.9 Simulation — Confrontation & Interrogation
 
-**What it does:** Staff confrontations follow a lifecycle: reporter accuses → auto-investigation → DM-style interrogation (chip questions: where were you, log check, witness, reporter credibility) → manager verdict (upheld / dismissed / penalized / reporter_penalized). Verdicts create Penalty/Bonus records and adjust happiness.
+**What it does:** Staff confrontations follow a lifecycle: reporter accuses → auto-investigation → DM-style interrogation (chip questions: where were you, log check, witness, reporter credibility) → manager verdict (upheld / dismissed / penalized / reporter_penalized). Verdicts create Penalty/Bonus records and adjust happiness. The entire confrontation workflow (auto-investigate, conclude, apply verdict) is AJAX-driven — cards update in-place without page reload. Typing indicators appear before accused responses during interrogation.
 
-**How it works:** `ConfrontationService` manages the lifecycle. `InterrogationEngine` generates chip-based questions and a conclude narrative. Verdicts: upheld (accused −15 happiness), dismissed (−5), penalized (creates Penalty record), reporter_penalized (accused +5, reporter −12 + warning). Interrogation runs in a modal with chip selection and auto-conclude.
+**How it works:** `ConfrontationService` manages the lifecycle. `InterrogationEngine` generates chip-based questions and a conclude narrative. Chips are context-aware: they filter out already-asked keys and swap in a second tier after half the questions are asked. When Groq is enabled, accused responses are personality-driven via `PERSONALITY_INTERROGATION` constant — 4 context categories (where/log/witness/reporter) × 8 personality types. The personality bank is merged with the base answer pool in `groqInterrogationLine()`. Verdicts: upheld (accused −15 happiness), dismissed (−5), penalized (creates Penalty record), reporter_penalized (accused +5, reporter −12 + warning). Interrogation runs in a modal with chip selection and auto-conclude.
 
 ### 6.10 Simulation — Snitch System & Crew Chat
 
-**What it does:** Staff can vent in crew chat; a snitch roll (0.06 base + personality modifier) generates `SnitchReport` entries. Stewards escalate snitch reports into confrontations. Crew chat supports DM threads, speech/thought bubbles, chip reactions, and JSON-based polling.
+**What it does:** Staff can vent in crew chat; a snitch roll (0.06 base + personality modifier) generates `SnitchReport` entries. Stewards escalate snitch reports into confrontations. Crew chat supports DM threads, speech/thought bubbles, chip reactions, and AJAX-based polling. Messages are delivered asynchronously with typing indicators, variable response delays (0.8–4s), and seen indicators in DM threads.
 
-**How it works:** `CrewChatEngine` generates daily chatter. `SnitchReport` → steward review at `/steward/snitch` → escalate to confrontation or dismiss. Chat polling via `GET /caretaker/crew/messages` returns JSON.
+**How it works:** `CrewChatEngine` generates daily chatter via `scheduleGroupReactions()` and `scheduleDmInteraction()`, which set `respond_at` timestamps for background delivery. `writeScheduled()` publishes pending messages. Typing state is tracked via Laravel Cache keys (`typing:group:{npcId}`, `typing:dm:{npcId}:{playerId}`) with `typingFor()` and `markSeen()` methods. Group chat uses a 55% independent response chance per crew member; multi-NPC reactions are supported. When Groq is enabled (`compound-mini` model), group chat triggers 60% of the time and DMs 100% of the time, with `PERSONALITY_BANKS` providing context-aware fallback (7 topics × 8 personalities). Player messages appear immediately via AJAX send with `triggerPoll()`. Chat polling via `GET /caretaker/crew/poll` returns JSON with typing state, unread DMs, and group messages since last poll. `SnitchReport` → steward review at `/steward/snitch` → escalate to confrontation or dismiss.
 
 ### 6.11 Simulation — Inventory & Purchase Bills
 
@@ -406,17 +407,17 @@ Per-role navigation rail (`.module-dock`) with:
 - Day chip (current simulation day)
 - Next Day button
 - Bad-Day toggle
-- Role-specific links (33 verified routes across 4 roles)
+- Role-specific links (38 verified links across 4 roles)
 - Dashboard link with role-specific icon
 
 ## 8. Notes
 
 - The `APP_ENV` defaults to `production` in `config/app.php`; set to `local` for development.
 - SSL Commerz runs in sandbox mode (`SSLCZ_SANDBOX=true` in `.env`) — no real money moves.
-- Groq LLM integration is wired but disabled (`config('services.groq.enabled', false)`). NPC dialogue is rule-based with fallback.
+- Groq LLM integration is wired and active (`config('services.groq.enabled')` defaults to `true`). Uses `groq/compound-mini` model. Group chat triggers 60% of the time, DMs 100%, interrogation accused 80%. Falls back to rule-based keyword matching + `PERSONALITY_BANKS` when Groq is unavailable.
 - The simulation only advances on manual "Next Day" clicks — no auto/scheduled advancement.
 - 4 seeded league fixtures — no runtime fixture generation, so league play ends after they resolve.
 - 3 of 5 complaint compensation options (refund, discount, apology) are validated and stored but have no runtime effect.
-- 156 tests / 771 assertions cover the simulation, scoring, payments, and booking logic.
+- 158 tests / 773 assertions cover the simulation, scoring, payments, and booking logic.
 - All SQL queries use Eloquent ORM with parameterized bindings — no raw query concatenation.
 - CSRF protection via `@csrf` on all forms; API endpoints use `throttle` middleware.

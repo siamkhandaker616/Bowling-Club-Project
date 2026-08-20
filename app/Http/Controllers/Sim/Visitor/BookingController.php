@@ -252,7 +252,9 @@ class BookingController extends Controller
             ? LaneBooking::with('lane')->where('visitor_id', $visitor->id)->orderByDesc('date')->get()
             : collect();
 
-        return view('sim.visitor.bookings.index', compact('bookings'));
+        $price = (float) ClubConfig::singleton()->lane_booking_price;
+
+        return view('sim.visitor.bookings.index', compact('bookings', 'price'));
     }
 
     public function cancel(Request $request, LaneBooking $booking)
@@ -272,6 +274,125 @@ class BookingController extends Controller
         session()->flash('success', 'Booking cancelled.' . ((($log['queues_promoted'] ?? 0) > 0) ? ' The next visitor in the queue was promoted to your lane.' : ''));
 
         return redirect()->route('visitor.bookings.index');
+    }
+
+    public function pay(Request $request, LaneBooking $booking)
+    {
+        $visitor = $this->visitor($request->user());
+
+        if (! $visitor || $booking->visitor_id !== $visitor->id) {
+            abort(403);
+        }
+
+        if ($booking->status !== 'pending' || $booking->queue_position) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'This booking cannot be paid right now.'], 422);
+            }
+
+            session()->flash('error', 'This booking cannot be paid right now.');
+
+            return redirect()->route('visitor.bookings.index');
+        }
+
+        $amount = (float) ($booking->amount ?? ClubConfig::singleton()->lane_booking_price);
+
+        if ($amount <= 0) {
+            $booking->update(['status' => 'confirmed']);
+
+            if ($request->wantsJson()) {
+                return response()->json(['settled' => true, 'message' => 'This lane is free today — booking confirmed!']);
+            }
+
+            session()->flash('success', 'This lane is free today — booking confirmed!');
+
+            return redirect()->route('visitor.bookings.index');
+        }
+
+        $payment = Payment::where('payable_type', LaneBooking::class)
+            ->where('payable_id', $booking->id)
+            ->whereIn('status', ['pending', 'processing'])
+            ->latest('id')
+            ->first();
+
+        if (! $payment) {
+            $payment = Payment::create([
+                'payable_type' => LaneBooking::class,
+                'payable_id' => $booking->id,
+                'transaction_id' => $this->gateway->generateTransactionId(),
+                'amount' => $amount,
+                'currency' => 'BDT',
+                'status' => 'pending',
+                'customer_name' => $visitor->name ?? $request->user()->name,
+                'customer_email' => $visitor->email ?? $request->user()->email,
+            ]);
+        } elseif ($payment->session_key) {
+            $payment->update([
+                'transaction_id' => $this->gateway->generateTransactionId(),
+                'session_key' => null,
+                'error_message' => null,
+            ]);
+            $payment->refresh();
+        }
+
+        if (! $this->gateway->isConfigured()) {
+            $payment->update(['status' => 'processing']);
+            app(\App\Services\Payments\PaymentSettler::class)->complete($payment, $payment->transaction_id, ['status' => 'VALID']);
+
+            if ($request->wantsJson()) {
+                return response()->json(['settled' => true, 'message' => 'Payment settled (simulated) — booking confirmed!']);
+            }
+
+            session()->flash('success', 'Payment settled (simulated) — booking confirmed!');
+
+            return redirect()->route('visitor.bookings.index');
+        }
+
+        try {
+            $response = $this->gateway->initSession([
+                'total_amount' => (string) $amount,
+                'currency' => 'BDT',
+                'tran_id' => $payment->transaction_id,
+                'success_url' => route('public.pay.success', $payment),
+                'fail_url' => route('public.pay.fail', $payment),
+                'cancel_url' => route('public.pay.cancel', $payment),
+                'ipn_url' => route('public.pay.ipn'),
+                'cus_name' => $visitor->name ?? $request->user()->name,
+                'cus_email' => $visitor->email ?? $request->user()->email,
+                'product_name' => 'Lane booking: Lane ' . ($booking->lane?->lane_number ?? '-') . ' — ' . Carbon::parse($booking->date)->format('M j, Y') . ' ' . Clock::timeSlots()[$booking->time_slot],
+                'product_category' => 'Lane Reservation',
+                'product_profile' => 'general',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('SSLCommerz session failed for booking payment retry: ' . $e->getMessage());
+            $payment->update(['status' => 'failed', 'error_message' => 'Payment service unreachable.']);
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Payment service unreachable — please try again shortly.'], 502);
+            }
+
+            session()->flash('error', 'Payment service unreachable — please try again shortly.');
+
+            return redirect()->route('visitor.bookings.index');
+        }
+
+        if (($response['status'] ?? '') !== 'SUCCESS') {
+            $payment->update(['status' => 'failed', 'error_message' => $response['failedreason'] ?? 'Payment session declined.']);
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Payment gateway declined the session — you can retry.'], 502);
+            }
+
+            session()->flash('error', 'Payment gateway declined the session — you can retry.');
+
+            return redirect()->route('visitor.bookings.index');
+        }
+
+        $payment->update(['status' => 'processing', 'session_key' => $response['sessionkey'] ?? null]);
+
+        return response()->json([
+            'gateway_url' => $response['GatewayPageURL'],
+            'payment_id' => $payment->id,
+        ]);
     }
 
     public function status(Payment $payment): JsonResponse

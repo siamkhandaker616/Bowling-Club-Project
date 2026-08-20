@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Sim\Caretaker\CrewController;
+use App\Http\Controllers\Sim\Caretaker\InventoryController as CaretakerInventoryController;
+use App\Http\Controllers\Sim\Caretaker\LaneController;
+use App\Http\Controllers\Sim\Caretaker\PrepController;
+use App\Http\Controllers\Sim\Caretaker\ShiftController;
 use App\Http\Controllers\Sim\Manager\BanController;
 use App\Http\Controllers\Sim\Manager\BookingController;
 use App\Http\Controllers\Sim\Manager\ComplaintController;
@@ -11,22 +16,21 @@ use App\Http\Controllers\Sim\Manager\LeagueController;
 use App\Http\Controllers\Sim\Manager\ReviewController;
 use App\Http\Controllers\Sim\Manager\StaffController;
 use App\Http\Controllers\Sim\Manager\TouringController;
+use App\Http\Controllers\Sim\ReapplyController;
 use App\Http\Controllers\Sim\Steward\BanRequestController;
 use App\Http\Controllers\Sim\Steward\ComplaintController as StewardComplaintController;
+use App\Http\Controllers\Sim\Steward\IncidentController;
+use App\Http\Controllers\Sim\Steward\PayrollController;
+use App\Http\Controllers\Sim\Steward\ReviewController as StewardReviewController;
 use App\Http\Controllers\Sim\Steward\ScheduleController as StewardScheduleController;
 use App\Http\Controllers\Sim\Steward\SnitchController;
-use App\Http\Controllers\Sim\Steward\ReviewController as StewardReviewController;
 use App\Http\Controllers\Sim\Steward\VisitorController;
-use App\Http\Controllers\Sim\Caretaker\CrewController;
-use App\Http\Controllers\Sim\Caretaker\InventoryController as CaretakerInventoryController;
-use App\Http\Controllers\Sim\Caretaker\LaneController;
-use App\Http\Controllers\Sim\Caretaker\PrepController;
-use App\Http\Controllers\Sim\Caretaker\ShiftController;
 use App\Http\Controllers\Sim\Visitor\BookingController as VisitorBookingController;
 use App\Http\Controllers\Sim\Visitor\ComplaintController as VisitorComplaintController;
 use App\Http\Controllers\Sim\Visitor\QueueController;
 use App\Http\Controllers\Sim\Visitor\ReviewController as VisitorReviewController;
-use App\Http\Controllers\Sim\ReapplyController;
+use App\Http\Middleware\CatchUpSim;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,7 +43,7 @@ use Illuminate\Support\Facades\Route;
 | working. All names live under the sim layer via these prefixes.
 */
 
-Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchUpSim::class])->prefix('manager')->name('manager.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', CatchUpSim::class])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/day/stats', [DayController::class, 'stats'])->name('day.stats');
     Route::post('/day/advance', [DayController::class, 'advance'])->name('day.advance');
     Route::post('/day/toggle-bad-day', [DayController::class, 'toggleBadDay'])->name('day.toggleBadDay');
@@ -79,7 +83,6 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
     Route::post('/complaints/{complaint}/dismiss', [ComplaintController::class, 'dismiss'])->name('complaints.dismiss');
 
     Route::get('/confrontations', [ConfrontationController::class, 'index'])->name('confrontations.index');
-    Route::post('/confrontations', [ConfrontationController::class, 'store'])->name('confrontations.store');
     Route::get('/confrontations/{confrontation}/interview', [ConfrontationController::class, 'interview'])->name('confrontations.interview');
     Route::post('/confrontations/{confrontation}/interrogate', [ConfrontationController::class, 'interrogate'])->name('confrontations.interrogate');
     Route::post('/confrontations/{confrontation}/conclude', [ConfrontationController::class, 'conclude'])->name('confrontations.conclude');
@@ -98,15 +101,15 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\CatchU
 
 Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/success', [InventoryPurchaseController::class, 'success'])
     ->name('manager.inventory.purchases.success')
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+    ->withoutMiddleware(ValidateCsrfToken::class);
 Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/fail', [InventoryPurchaseController::class, 'fail'])
     ->name('manager.inventory.purchases.fail')
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+    ->withoutMiddleware(ValidateCsrfToken::class);
 Route::match(['get', 'post'], '/manager/inventory/purchases/{payment}/cancel', [InventoryPurchaseController::class, 'cancel'])
     ->name('manager.inventory.purchases.cancel')
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+    ->withoutMiddleware(ValidateCsrfToken::class);
 
-Route::middleware(['auth', 'verified', 'role:steward', \App\Http\Middleware\CatchUpSim::class])->prefix('steward')->name('steward.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:steward', CatchUpSim::class])->prefix('steward')->name('steward.')->group(function () {
     Route::get('/schedule', [StewardScheduleController::class, 'index'])->name('schedule.index');
     Route::post('/shifts/{shift}/complete', [StewardScheduleController::class, 'complete'])->name('schedule.complete');
 
@@ -120,12 +123,18 @@ Route::middleware(['auth', 'verified', 'role:steward', \App\Http\Middleware\Catc
     Route::post('/complaints', [StewardComplaintController::class, 'store'])->name('complaints.store');
     Route::post('/complaints/{complaint}/escalate', [StewardComplaintController::class, 'escalate'])->name('complaints.escalate');
 
+    Route::get('/incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
+
+    Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
+    Route::post('/payroll/{staff}', [PayrollController::class, 'update'])->name('payroll.update');
+
     Route::get('/snitch', [SnitchController::class, 'index'])->name('snitch.index');
     Route::post('/snitch/{report}/escalate', [SnitchController::class, 'escalate'])->name('snitch.escalate');
     Route::post('/snitch/{report}/dismiss', [SnitchController::class, 'dismiss'])->name('snitch.dismiss');
 });
 
-Route::middleware(['auth', 'verified', 'role:caretaker', \App\Http\Middleware\CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:caretaker', CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
     Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
     Route::post('/shifts/{shift}/complete', [ShiftController::class, 'complete'])->name('shifts.complete');
     Route::post('/shifts/{shift}/cancel', [ShiftController::class, 'cancel'])->name('shifts.cancel');
@@ -148,15 +157,16 @@ Route::middleware(['auth', 'verified', 'role:caretaker', \App\Http\Middleware\Ca
 });
 
 // Lane maintenance — caretaker AND admin may run it (A_1's facility-map panel buttons call this).
-Route::middleware(['auth', 'verified', 'role:caretaker,admin', \App\Http\Middleware\CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:caretaker,admin', CatchUpSim::class])->prefix('caretaker')->name('caretaker.')->group(function () {
     Route::post('/lanes/{lane}/maintenance', [LaneController::class, 'maintain'])->name('lanes.maintain');
 });
 
-Route::middleware(['auth', 'verified', 'role:customer', \App\Http\Middleware\CatchUpSim::class])->prefix('visitor')->name('visitor.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:customer', CatchUpSim::class])->prefix('visitor')->name('visitor.')->group(function () {
     Route::get('/book', [VisitorBookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [VisitorBookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings', [VisitorBookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings/{booking}/cancel', [VisitorBookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/bookings/{booking}/pay', [VisitorBookingController::class, 'pay'])->name('bookings.pay');
     Route::get('/bookings/payment/{payment}/status', [VisitorBookingController::class, 'status'])->name('bookings.payment.status');
 
     Route::get('/queue', [QueueController::class, 'index'])->name('queues.index');
@@ -177,4 +187,4 @@ Route::middleware(['auth', 'verified'])->name('reapply.')->group(function () {
 // SSLCommerz IPN callback for inventory purchase bills — server-to-server, no CSRF/session.
 Route::post('/sim/inventory/purchases/ipn', [InventoryPurchaseController::class, 'ipn'])
     ->name('sim.inventory.purchases.ipn')
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+    ->withoutMiddleware(ValidateCsrfToken::class);

@@ -41,12 +41,11 @@
                             @endif
                         </div>
 
-                        @if (in_array($complaint->status, ['open', 'investigating']))
-                            <form method="POST" action="{{ route('manager.complaints.resolve', $complaint) }}" class="gutter-form" style="min-width:220px;display:flex;flex-direction:column;gap:6px;">
-                                @csrf
-                                <textarea name="resolution" placeholder="Resolution..." class="input textarea"></textarea>
+                        @if ($complaint->status === 'investigating')
+                            <div class="comp-actions" data-id="{{ $complaint->id }}" style="min-width:220px;display:flex;flex-direction:column;gap:6px;">
+                                <textarea name="resolution" id="res-{{ $complaint->id }}" placeholder="Resolution..." class="input textarea"></textarea>
                                 <div class="select-wrap">
-                                    <select name="compensation_type" class="input select">
+                                    <select name="compensation_type" id="comp-{{ $complaint->id }}" class="input select">
                                         <option value="">No compensation</option>
                                         <option value="free_game">Free Game</option>
                                         <option value="refund">Refund</option>
@@ -57,11 +56,12 @@
                                     <span class="select-arrow">&#9662;</span>
                                 </div>
                                 <div style="display:flex;gap:6px;">
-                                    <button type="submit" class="btn-lane primary" style="flex:1;font-size:0.55rem;padding:5px 10px;">Resolve</button>
-                                    <button type="submit" form="dismiss-{{ $complaint->id }}" class="btn-lane secondary" style="flex:1;font-size:0.55rem;padding:5px 10px;">Dismiss</button>
+                                    <button type="button" class="btn-lane primary comp-resolve" data-id="{{ $complaint->id }}" data-url="{{ route('manager.complaints.resolve', $complaint) }}" style="flex:1;font-size:0.55rem;padding:5px 10px;">Resolve</button>
+                                    <button type="button" class="btn-lane secondary comp-dismiss" data-id="{{ $complaint->id }}" data-url="{{ route('manager.complaints.dismiss', $complaint) }}" style="flex:1;font-size:0.55rem;padding:5px 10px;">Dismiss</button>
                                 </div>
-                            </form>
-                            <form id="dismiss-{{ $complaint->id }}" method="POST" action="{{ route('manager.complaints.dismiss', $complaint) }}">@csrf</form>
+                            </div>
+                        @elseif ($complaint->status === 'open')
+                            <span style="min-width:170px;max-width:190px;text-align:right;font-family:var(--font-mono);font-size:0.55rem;color:var(--coral-dark);">&#128274; AWAITING STEWARD<br>ESCALATION</span>
                         @endif
                     </div>
                 @empty
@@ -75,6 +75,73 @@
     </div>
 
     <x-toast />
+
+    <script>
+    (function () {
+        var csrf = @json(csrf_token());
+
+        function closeActions(id, okHtml) {
+            var actions = document.querySelector('.comp-actions[data-id="' + id + '"]');
+            if (!actions) return;
+            var wrap = document.createElement('div');
+            wrap.style.minWidth = '220px';
+            wrap.style.display = 'flex';
+            wrap.style.flexDirection = 'column';
+            wrap.style.gap = '4px';
+            wrap.innerHTML = okHtml;
+            actions.replaceWith(wrap);
+        }
+
+        function post(url, body, btn, onOk) {
+            btn.disabled = true;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: JSON.stringify(body)
+            })
+            .then(function (r) {
+                if (!r.ok) { throw new Error('blocked'); }
+                return r.json();
+            })
+            .then(function (d) { onOk(d); })
+            .catch(function () { btn.disabled = false; });
+        }
+
+        document.querySelectorAll('.comp-resolve').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-id');
+                var res = document.getElementById('res-' + id);
+                var body = { resolution: (res ? res.value : '').trim() };
+                if (!body.resolution) { if (res) res.style.borderColor = 'var(--coral)'; return; }
+                var comp = document.getElementById('comp-' + id);
+                if (comp && comp.value) body.compensation_type = comp.value;
+                post(btn.getAttribute('data-url'), body, btn, function (d) {
+                    closeActions(id,
+                        '<div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--ok);">RESOLVED · ' + (d.compensation_label || 'NO COMPENSATION') + '</div>' +
+                        '<div style="font-family:var(--font-body);font-size:0.62rem;color:var(--slate);">' + d.resolution + '</div>'
+                    );
+                });
+            });
+        });
+
+        document.querySelectorAll('.comp-dismiss').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-id');
+                post(btn.getAttribute('data-url'), {}, btn, function (d) {
+                    closeActions(id,
+                        '<div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">DISMISSED</div>' +
+                        '<div style="font-family:var(--font-body);font-size:0.62rem;color:var(--slate);">' + d.resolution + '</div>'
+                    );
+                });
+            });
+        });
+    })();
+    </script>
 
     @include('sim.partials.fold-controls')
     @include('sim.partials.responsive')

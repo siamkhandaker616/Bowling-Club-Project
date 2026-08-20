@@ -22,57 +22,6 @@
 
         <div style="padding:1.25rem;overflow:hidden;">
 
-            <div class="con-card" style="margin-bottom:1.25rem;">
-                <div class="dash-section-label">Log a Confrontation</div>
-                <form method="POST" action="{{ route('manager.confrontations.store') }}" class="con-form gutter-form">
-                    @csrf
-                    <div class="select-wrap">
-                        <select name="reporter_staff_id" class="input select">
-                            <option value="" disabled selected>Reporter…</option>
-                            @foreach ($activeStaff as $s)
-                                <option value="{{ $s->id }}">{{ $s->user->name }}</option>
-                            @endforeach
-                        </select>
-                        <span class="select-arrow">&#9662;</span>
-                    </div>
-                    <div class="select-wrap">
-                        <select name="accused_staff_id" class="input select">
-                            <option value="" disabled selected>Accused…</option>
-                            @foreach ($activeStaff as $s)
-                                <option value="{{ $s->id }}">{{ $s->user->name }}</option>
-                            @endforeach
-                        </select>
-                        <span class="select-arrow">&#9662;</span>
-                    </div>
-                    <div class="select-wrap">
-                        <select name="incident_type" class="input select">
-                            <option value="theft">Theft</option>
-                            <option value="sabotage">Sabotage</option>
-                            <option value="harassment">Harassment</option>
-                            <option value="negligence">Negligence</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <span class="select-arrow">&#9662;</span>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <input name="incident_description" type="text" placeholder="What happened…" class="input" style="flex:1;">
-                        <label class="pin-check" style="font-size:0.55rem;margin:0;">
-                            <input type="checkbox" name="db_verified" value="1"><span class="pin-box"></span> Backed by records
-                        </label>
-                        <button type="submit" class="btn-lane primary" style="font-size:0.55rem;padding:5px 12px;">Log</button>
-                    </div>
-                    <div class="lane-stage">
-                        <div class="pin-rack">
-                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
-                            <div class="pin-row"><span class="pin"></span><span class="pin"></span><span class="pin"></span></div>
-                            <div class="pin-row"><span class="pin"></span><span class="pin"></span></div>
-                            <div class="pin-row"><span class="pin"></span></div>
-                        </div>
-                        <span class="ball-dot"></span>
-                    </div>
-                </form>
-            </div>
-
             <div style="display:flex;flex-direction:column;gap:10px;">
                 @forelse ($confrontations as $confrontation)
                     <div class="con-card">
@@ -202,6 +151,8 @@
         var intTypingAv = document.getElementById('intTypingAv');
         var intTypingName = document.getElementById('intTypingName');
         var csrf = @json(csrf_token());
+        @php($managerStaff = auth()->user()->staff)
+        var myInitials = @json($managerStaff ? app(\App\Services\Simulation\InterrogationEngine::class)->initials($managerStaff) : '??');
         var active = 0;
         var accusedData = null;
         var urls = {
@@ -251,7 +202,7 @@
                 } else {
                     var key = c.key || c.action;
                     btn.textContent = c.label;
-                    btn.addEventListener('click', function () { ask(key); });
+                    btn.addEventListener('click', function () { ask(key, c.label); });
                 }
 
                 chips.appendChild(btn);
@@ -269,29 +220,40 @@
             intTyping.classList.remove('on');
         }
 
-        function ask(key) {
+        function ask(key, label) {
             chips.innerHTML = '';
+
+            if (label) {
+                appendMessage({
+                    mine: true,
+                    initials: myInitials,
+                    name: 'You',
+                    bubble_type: 'speech',
+                    body: label
+                });
+            }
+
             if (accusedData) {
                 showTyping(accusedData.name, accusedData.initials);
             }
 
-            var delay = 1200 + Math.floor(Math.random() * 2000);
+            var minDelay = 1200 + Math.floor(Math.random() * 2000);
 
-            setTimeout(function () {
-                fetch(urlFor('interrogate'), {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                    body: JSON.stringify({ key: key })
+            var fetchPromise = fetch(urlFor('interrogate'), {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ key: key })
+            })
+                .then(function (r) { if (!r.ok) throw 0; return r.json(); });
+
+            Promise.all([fetchPromise, new Promise(function (res) { setTimeout(res, minDelay); })])
+                .then(function (results) {
+                    var data = results[0];
+                    hideTyping();
+                    appendMessage(data.reply);
+                    renderChips(data.chips);
                 })
-                    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-                    .then(function (data) {
-                        hideTyping();
-                        if (data.userMessage) appendMessage(data.userMessage);
-                        appendMessage(data.reply);
-                        renderChips(data.chips);
-                    })
-                    .catch(function () { hideTyping(); });
-            }, delay);
+                .catch(function () { hideTyping(); });
         }
 
         function openInterview(id, name) {

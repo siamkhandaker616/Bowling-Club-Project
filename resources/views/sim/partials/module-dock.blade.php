@@ -38,8 +38,10 @@
                 ['num' => '03', 'label' => 'Visitors',      'route' => 'steward.visitors.index'],
                 ['num' => '04', 'label' => 'Facility Map',  'route' => 'site.facility-map'],
                 ['num' => '05', 'label' => 'Complaints',    'route' => 'steward.complaints.index'],
-                ['num' => '06', 'label' => 'Bans',          'route' => 'steward.bans.index'],
-                ['num' => '07', 'label' => 'Snitch Inbox',  'route' => 'steward.snitch.index'],
+                ['num' => '06', 'label' => 'Incidents',     'route' => 'steward.incidents.index'],
+                ['num' => '07', 'label' => 'Bans',          'route' => 'steward.bans.index'],
+                ['num' => '08', 'label' => 'Snitch Inbox',  'route' => 'steward.snitch.index'],
+                ['num' => '09', 'label' => 'Payroll',       'route' => 'steward.payroll.index'],
             ],
             'actions' => null,
         ],
@@ -81,7 +83,6 @@
     ][$role] ?? null;
 
     $cfg = \App\Models\ClubConfig::singleton();
-    $day = $role === 'admin' ? $cfg->current_day : null;
     $roleLabels = [
         'admin' => 'MANAGER &middot; REPUTATION ' . $cfg->reputation,
         'steward' => 'STEWARD',
@@ -92,21 +93,6 @@
 @endphp
 <div class="mod-rail rail-{{ $roleCss[$role] ?? $role }}" data-rail data-role="{{ $role }}" data-active="{{ $active }}">
     <div class="rail-head"><span class="rail-led"></span>{{ $dock['head'] }}<span class="rail-led"></span></div>
-
-    @if ($day !== null)
-    <div class="rail-day">
-        <span class="rd-label">Day</span>
-        <span class="rd-num">{{ $day }}</span>
-        <form method="POST" action="{{ route('manager.day.advance') }}" style="margin:0;display:flex;margin-left:auto;">
-            @csrf
-            <button type="submit" class="rd-btn">Next Day &rarr;</button>
-        </form>
-        <form method="POST" action="{{ route('manager.day.toggleBadDay') }}" style="margin:0 0 0 .35rem;display:flex;">
-            @csrf
-            <button type="submit" class="rd-btn rd-bad {{ $cfg->bad_day_mode ? 'bad-on' : '' }}">Bad Day</button>
-        </form>
-    </div>
-    @endif
 
     @foreach ($dock['links'] as $link)
             <a href="{{ route($link['route']) }}" class="mod-link {{ $on($link['route']) ? 'on' : '' }}">

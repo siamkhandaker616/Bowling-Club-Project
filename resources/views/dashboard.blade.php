@@ -16,6 +16,8 @@
             'steward' => [
                 ['label' => 'Steward Desk', 'route' => 'steward.dashboard', 'icon' => '&#128722;', 'desc' => 'Manage the schedule, visitors, bans and complaints.'],
                 ['label' => 'My Schedule', 'route' => 'steward.schedule.index', 'icon' => '&#128197;', 'desc' => 'View and complete your shifts.'],
+                ['label' => 'Incident Reports', 'route' => 'steward.incidents.index', 'icon' => '&#128220;', 'desc' => 'Log staff incidents for the manager to confront.'],
+                ['label' => 'Crew Payroll', 'route' => 'steward.payroll.index', 'icon' => '&#128176;', 'desc' => 'Adjust crew salaries — raises, cuts and restorations.'],
             ],
             'caretaker' => [
                 ['label' => 'Caretaker Desk', 'route' => 'caretaker.dashboard', 'icon' => '&#127919;', 'desc' => 'Inspect lanes, watch stock, keep the club running.'],

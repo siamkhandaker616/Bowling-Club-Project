@@ -182,6 +182,39 @@
                             <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--slate);">MATCH PREP PENALTIES</div>
                         </div>
                     </div>
+                    @php
+                        $dayAccidents = $dayReport['accidents'] ?? collect();
+                        $sevBadge = ['minor' => 'var(--gold)', 'moderate' => 'var(--coral-dark)', 'major' => 'var(--coral)'];
+                        $cancelNote = ($dayReport['accidents_cancelled_bookings'] ?? 0) > 0
+                            ? ' · ' . $dayReport['accidents_cancelled_bookings'] . ' booking(s) cancelled'
+                            : '';
+                    @endphp
+                    @if ($dayAccidents->isNotEmpty())
+                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--coral);letter-spacing:1px;">ACCIDENT REPORT &middot; {{ $dayAccidents->count() }} ON THE FLOOR</span>
+                                <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">COST ${{ number_format($dayReport['accident_cost'] ?? 0, 0) }}{{ $cancelNote }}</span>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                @foreach ($dayAccidents as $a)
+                                    <div style="background:var(--pin-white);border:1px solid var(--navy);border-radius:8px;padding:7px 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                                        <span style="font-family:var(--font-mono);font-size:0.5rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $sevBadge[$a['severity']] ?? 'var(--slate)' }};color:var(--pin-white);">{{ strtoupper($a['severity']) }}</span>
+                                        <span style="font-family:var(--font-sub);font-size:0.68rem;color:var(--navy);min-width:110px;">{{ $a['staff_name'] }}</span>
+                                        <span style="font-family:var(--font-body);font-size:0.66rem;color:var(--slate);flex:1;min-width:160px;">{{ $a['description'] }}</span>
+                                        <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--coral);">-${{ $a['cost'] }}</span>
+                                        <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark);">mood {{ $a['happiness_change'] >= 0 ? '+' : '' }}{{ $a['happiness_change'] }}</span>
+                                        @if (($a['inventory_damage'] ?? 0) > 0)
+                                            <span style="font-family:var(--font-mono);font-size:0.5rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:var(--mist);color:var(--navy);border:1px solid var(--fog);">stock -{{ $a['inventory_damage'] }}</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);">ACCIDENT REPORT · Clean floor today.</span>
+                        </div>
+                    @endif
                     @if (count($dayReport['matches'] ?? []))
                         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--fog);">
                             @foreach (collect($dayReport['matches'])->take(4) as $m)
@@ -195,6 +228,28 @@
                     @endif
                 </div>
             @endif
+
+            <!-- Incident Log (persistent — survives day toggles) -->
+            @php
+                $logSev = ['minor' => 'var(--gold)', 'moderate' => 'var(--coral-dark)', 'major' => 'var(--coral)'];
+            @endphp
+            <div style="margin-bottom:1.25rem;">
+                <div class="dash-section-label" style="margin-bottom:6px;">Incident Log &middot; Last {{ $recentIncidents->count() }} on Record</div>
+                <div style="background:var(--sky-light);border:2px solid var(--navy);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;">
+                    @forelse ($recentIncidents as $incident)
+                        <div style="display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--fog);padding:4px 0;flex-wrap:wrap;">
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--slate);min-width:70px;">{{ $incident->created_at->format('M j, H:i') }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.5rem;padding:2px 8px;border-radius:50px;text-transform:uppercase;background:{{ $logSev[$incident->severity] ?? 'var(--slate)' }};color:var(--pin-white);">{{ strtoupper($incident->severity) }}</span>
+                            <span style="font-family:var(--font-sub);font-size:0.68rem;color:var(--navy);">{{ $incident->staff?->user?->name ?? 'Staff' }}</span>
+                            <span style="font-family:var(--font-body);font-size:0.62rem;color:var(--slate);flex:1;min-width:140px;">{{ $incident->description ?? ucfirst(str_replace('_', ' ', $incident->type)) }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--sky-dark);">{{ $incident->shift?->date ? \Carbon\Carbon::parse($incident->shift->date)->format('M j') : '' }}</span>
+                            <span class="badge {{ $incident->resolved ? 'ok' : 'coral' }}" style="font-size:0.5rem;">{{ $incident->resolved ? 'RESOLVED' : 'OPEN' }}</span>
+                        </div>
+                    @empty
+                        <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--slate);">No incidents on record. Spotless floor.</span>
+                    @endforelse
+                </div>
+            </div>
 
             <!-- Recent Events -->
             @if($recentEvents->count())

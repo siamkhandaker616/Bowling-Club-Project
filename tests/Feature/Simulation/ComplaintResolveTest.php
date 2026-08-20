@@ -4,7 +4,6 @@ namespace Tests\Feature\Simulation;
 
 use App\Models\Accident;
 use App\Models\Complaint;
-use Carbon\Carbon;
 use Tests\Concerns\CreatesSimFixtures;
 use Tests\TestCase;
 
@@ -35,7 +34,7 @@ class ComplaintResolveTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'service',
             'description' => 'Lane broke down during my game',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $response = $this->actingAs($admin)->post(route('manager.complaints.resolve', $complaint), [
@@ -63,7 +62,7 @@ class ComplaintResolveTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'service',
             'description' => 'Too noisy',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->actingAs($admin)->post(route('manager.complaints.dismiss', $complaint))->assertRedirect();

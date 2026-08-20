@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             SnackbarSeeder::class,
             BowlingScoreSeeder::class,
             SimulationDataSeeder::class,
+            InventoryCategoriesSeeder::class,
             LivedInDataSeeder::class,
         ]);
     }

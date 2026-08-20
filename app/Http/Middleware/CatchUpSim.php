@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ClubConfig;
+use App\Services\Simulation\AutopilotService;
 use App\Services\Simulation\DayCycle;
 use Closure;
 use Illuminate\Http\Request;
@@ -37,6 +38,8 @@ class CatchUpSim
                 $dayCycle->advance();
             }
         }
+
+        app(AutopilotService::class)->run();
 
         return $next($request);
     }

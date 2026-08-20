@@ -10,18 +10,25 @@ Every frame counts. The club runs a public-facing site for bookings, complaints,
 - Lane booking with date/time slots, wait queues and compensation claims
 - Complaint handling, staff reviews, visitor reviews and voting
 - Staff simulation: hiring, personalities, shifts, accidents, penalties and bonuses
+- Crew chat with async NPC responses, typing indicators, and personality-driven dialogue
+- Confrontation & interrogation system with context-aware chip questions and verdicts
+- Snitch reports escalated from crew chat vents
+- Inventory management with purchase bill approval pipeline
+- League match prep with readiness tracking
 - Google sign-in via Laravel Socialite alongside regular accounts
 - Custom design system (see `resources/css/design-system.css`)
 
-Full feature breakdowns and the 34-table database schema live in the [docs](/docs) folder.
+Full feature breakdowns and the 40+ table database schema live in the [docs](/docs) folder.
 
 ## Tech stack
 
 - **Laravel 12** (Blade templating, Eloquent ORM, migrations, queues)
 - **MySQL**
 - **Tailwind CSS** + **Vite**
-- **Alpine.js**, **Axios**
+- **Vanilla JS** (no frontend framework)
+- **Groq API** (LLM-powered NPC dialogue with rule-based fallback)
 - **Laravel Socialite** (Google OAuth)
+- **SSL Commerz** (Bangladesh payment gateway)
 
 ## Requirements
 
@@ -53,11 +60,11 @@ The seeder creates the club plus role accounts (manager, steward, caretaker, cus
 
 ## Project structure
 
-- `app/` — models, controllers, middleware and view components
-- `routes/` — web and auth routes
-- `database/` — migrations, factories and seeders
-- `resources/views/` — Blade templates and the dashboards
-- `docs/` — wireframes, ER schema, project notes and the CSE391 deliverables
+- `app/` — models, controllers, middleware, and services (Simulation, Bowling, Payments)
+- `routes/` — auth, public site, simulation, and game routes
+- `database/` — 53 migrations, factories, and seeders (including SimulationDataSeeder)
+- `resources/views/` — Blade templates, dashboards, and the mini-game
+- `docs/` — project documentation, design notes, and CSE391 deliverables
 
 ## License
 

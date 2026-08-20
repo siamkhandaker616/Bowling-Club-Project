@@ -42,7 +42,7 @@ class LaneBooking extends Model
 
     public function visitorReview(): HasOne
     {
-        return $this->hasOne(VisitorReview::class);
+        return $this->hasOne(VisitorReview::class, 'booking_id');
     }
 
     public function payment(): MorphOne

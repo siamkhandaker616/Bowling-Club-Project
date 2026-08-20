@@ -11,7 +11,6 @@ use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Penalty;
 use App\Models\ReviewVote;
-use App\Models\Shift;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\VisitorReview;
@@ -35,7 +34,7 @@ class AuditRemediationTwoTest extends TestCase
     private function makeTeam(League $league, string $name): Team
     {
         $team = Team::create(['name' => $name, 'league_id' => $league->id, 'wins' => 0, 'losses' => 0, 'draws' => 0]);
-        TeamMember::create(['team_id' => $team->id, 'name' => $name . ' Member', 'average_score' => 180]);
+        TeamMember::create(['team_id' => $team->id, 'name' => $name.' Member', 'average_score' => 180]);
 
         return $team;
     }
@@ -59,7 +58,7 @@ class AuditRemediationTwoTest extends TestCase
 
         $this->actingAs($manager)
             ->post(route('manager.complaints.resolve', $complaint), [
-                'resolution' => 'Resolved with ' . $compensation . '.',
+                'resolution' => 'Resolved with '.$compensation.'.',
                 'compensation_type' => $compensation,
             ])
             ->assertRedirect(route('manager.complaints.index'));
@@ -116,7 +115,7 @@ class AuditRemediationTwoTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'accident',
             'description' => 'Spilled drink on the approach.',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->resolveComplaint($complaint, 'refund');
@@ -143,7 +142,7 @@ class AuditRemediationTwoTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'staff',
             'description' => 'Rude service.',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->resolveComplaint($complaint, 'discount');
@@ -162,7 +161,7 @@ class AuditRemediationTwoTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'staff',
             'description' => 'Long wait.',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->resolveComplaint($complaint, 'apology');
@@ -178,7 +177,7 @@ class AuditRemediationTwoTest extends TestCase
             'visitor_id' => $visitor->id,
             'type' => 'staff',
             'description' => 'Minor gripe.',
-            'status' => 'open',
+            'status' => 'investigating',
         ]);
 
         $this->resolveComplaint($complaint, 'apology');

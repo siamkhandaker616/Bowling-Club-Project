@@ -7,8 +7,10 @@
         ['route' => 'steward.visitors.index', 'label' => 'Visitors',   'num' => '03'],
         ['route' => 'site.facility-map',      'label' => 'Facility Map', 'num' => '04'],
         ['route' => 'steward.complaints.index','label' => 'Complaints','num' => '05'],
-        ['route' => 'steward.bans.index',     'label' => 'Bans',       'num' => '06'],
-        ['route' => 'steward.snitch.index',   'label' => 'Snitch Inbox','num' => '07'],
+        ['route' => 'steward.incidents.index', 'label' => 'Incidents',  'num' => '06'],
+        ['route' => 'steward.bans.index',      'label' => 'Bans',       'num' => '07'],
+        ['route' => 'steward.snitch.index',    'label' => 'Snitch Inbox','num' => '08'],
+        ['route' => 'steward.payroll.index',   'label' => 'Payroll',    'num' => '09'],
     ];
     $active = fn($route) => request()->routeIs(str_replace('.index','.*',$route));
 @endphp
