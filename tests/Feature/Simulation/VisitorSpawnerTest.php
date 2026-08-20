@@ -4,6 +4,7 @@ namespace Tests\Feature\Simulation;
 
 use App\Models\BookingQueue;
 use App\Models\LaneBooking;
+use App\Models\Visitor;
 use App\Services\Simulation\VisitorSpawner;
 use Carbon\Carbon;
 use Tests\Concerns\CreatesSimFixtures;
@@ -145,6 +146,60 @@ class VisitorSpawnerTest extends TestCase
 
         $this->assertGreaterThanOrEqual(0, $created);
         $this->assertLessThanOrEqual(2, $created);
+    }
+
+    public function test_run_for_day_never_spawns_for_player_linked_visitors(): void
+    {
+        $this->clubConfig();
+        $this->makeLane();
+        $this->makeLane();
+
+        $playerUser = $this->makeUser(['role' => 'customer']);
+        $this->makeVisitor(['user_id' => $playerUser->id]);
+
+        foreach (range(1, 10) as $i) {
+            $log = $this->simLog();
+            app(VisitorSpawner::class)->runForDay(Carbon::today()->addDay(), $log);
+        }
+
+        $playerVisitor = Visitor::where('user_id', $playerUser->id)->first();
+
+        $this->assertSame(
+            0,
+            LaneBooking::where('visitor_id', $playerVisitor->id)
+                ->whereDate('date', Carbon::today()->addDay())
+                ->count()
+        );
+    }
+
+    public function test_run_for_day_skips_visitors_that_already_have_an_active_booking(): void
+    {
+        $this->clubConfig();
+        $lane = $this->makeLane();
+        $this->makeLane();
+
+        $visitor = $this->makeVisitor();
+        $existing = $this->makeBooking([
+            'visitor_id' => $visitor->id,
+            'lane_id' => $lane->id,
+            'date' => Carbon::today()->addDay(),
+            'time_slot' => 'morning',
+            'status' => 'confirmed',
+        ]);
+
+        foreach (range(1, 10) as $i) {
+            $log = $this->simLog();
+            app(VisitorSpawner::class)->runForDay(Carbon::today()->addDay(), $log);
+        }
+
+        $this->assertSame(
+            1,
+            LaneBooking::where('visitor_id', $visitor->id)
+                ->whereDate('date', Carbon::today()->addDay())
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->count()
+        );
+        $this->assertSame($existing->id, LaneBooking::where('visitor_id', $visitor->id)->first()->id);
     }
 
     public function test_run_for_day_queues_visitors_when_every_lane_is_booked(): void

@@ -4,6 +4,8 @@ namespace Tests\Feature\Simulation;
 
 use App\Models\LaneBooking;
 use App\Models\Payment;
+use App\Models\User;
+use App\Models\Visitor;
 use App\Services\Payments\PaymentSettler;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +17,7 @@ class VisitorBookingPayTest extends TestCase
     use CreatesSimFixtures;
 
     /**
-     * @return array{0: \App\Models\User, 1: \App\Models\Visitor, 2: LaneBooking}
+     * @return array{0: User, 1: Visitor, 2: LaneBooking}
      */
     private function linkedVisitorBooking(array $bookingAttrs = []): array
     {

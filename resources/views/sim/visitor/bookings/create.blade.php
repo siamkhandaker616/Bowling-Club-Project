@@ -110,6 +110,13 @@
             btn.textContent = 'Processing...';
             btn.disabled = true;
 
+            var payWindow = window.open('about:blank', 'tenthframe_pay');
+
+            function dropPayWindow() {
+                if (payWindow && !payWindow.closed) { payWindow.close(); }
+                payWindow = null;
+            }
+
             fetch(form.action, {
                 method: 'POST',
                 headers: {
@@ -122,6 +129,7 @@
             .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
             .then(function(result) {
                 if (!result.ok) {
+                    dropPayWindow();
                     btn.textContent = originalText;
                     btn.disabled = false;
                     var msg = (result.data && result.data.error) ? result.data.error : 'Something went wrong — try again.';
@@ -132,13 +140,23 @@
                 var d = result.data;
 
                 if (d.redirect) {
+                    dropPayWindow();
                     window.location = d.redirect;
                     return;
                 }
 
                 if (d.gateway_url) {
-                    window.open(d.gateway_url, '_blank');
-                    btn.textContent = 'Waiting for payment...';
+                    if (payWindow && !payWindow.closed) {
+                        payWindow.location = d.gateway_url;
+                        payWindow.focus();
+                        btn.textContent = 'Waiting for payment...';
+                    } else {
+                        btn.textContent = 'Open Secure Checkout';
+                        btn.disabled = false;
+                        btn.onclick = function() { window.open(d.gateway_url, 'tenthframe_pay'); };
+                        gutterToast('Your browser blocked the payment tab — press the button to open it.');
+                        return;
+                    }
                     var poll = setInterval(function() {
                         fetch('{{ route("visitor.bookings.payment.status", "__ID__") }}'.replace('__ID__', d.payment_id))
                             .then(function(r) { return r.json(); })
@@ -159,6 +177,7 @@
                 }
             })
             .catch(function() {
+                dropPayWindow();
                 btn.textContent = originalText;
                 btn.disabled = false;
                 gutterToast('Connection error — try again.');

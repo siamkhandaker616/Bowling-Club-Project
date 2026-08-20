@@ -16,7 +16,13 @@ class VisitorSpawner
         $cfg = ClubConfig::singleton();
         $created = 0;
 
-        $visitors = Visitor::where('is_banned', false)->get();
+        $visitors = Visitor::where('is_banned', false)
+            ->whereNull('user_id')
+            ->whereDoesntHave('bookings', function ($q) use ($date) {
+                $q->whereDate('date', $date)
+                    ->whereIn('status', ['pending', 'confirmed']);
+            })
+            ->get();
         $slots = array_keys(Clock::timeSlots());
         $chance = $cfg->bad_day_mode ? 0.4 : 0.65;
 

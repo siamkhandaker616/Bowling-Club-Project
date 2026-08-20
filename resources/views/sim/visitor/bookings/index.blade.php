@@ -82,6 +82,12 @@
             const msgEl = document.getElementById('pay-msg');
             let payUrl = '';
             let poller = null;
+            let payWindow = null;
+
+            function dropPayWindow() {
+                if (payWindow && !payWindow.closed) { payWindow.close(); }
+                payWindow = null;
+            }
 
             function say(text, bad) {
                 msgEl.style.display = 'block';
@@ -96,11 +102,14 @@
                 msgEl.style.display = 'none';
                 goBtn.disabled = false;
                 goBtn.textContent = 'Proceed to Secure Checkout';
+                goBtn.onclick = null;
                 modal.style.display = 'flex';
+                payWindow = window.open('about:blank', 'tenthframe_pay');
             }
 
             function close() {
                 if (poller) { clearInterval(poller); poller = null; }
+                dropPayWindow();
                 modal.style.display = 'none';
             }
 
@@ -133,7 +142,7 @@
             }
 
             goBtn.addEventListener('click', function () {
-                if (!payUrl) return;
+                if (!payUrl || goBtn.disabled) return;
                 goBtn.disabled = true;
                 say('Opening secure checkout…');
                 fetch(payUrl, {
@@ -148,19 +157,30 @@
                     .then(function (res) {
                         const d = res.data || {};
                         if (d.settled) {
+                            dropPayWindow();
                             say(d.message || 'Payment settled!');
                             setTimeout(function () { location.reload(); }, 900);
                             return;
                         }
                         if (res.ok && d.gateway_url) {
-                            window.open(d.gateway_url, '_blank');
-                            startPolling(d.payment_id);
+                            if (payWindow && !payWindow.closed) {
+                                payWindow.location = d.gateway_url;
+                                payWindow.focus();
+                                startPolling(d.payment_id);
+                            } else {
+                                say('Your browser blocked the payment tab — press the button again to open it.', true);
+                                goBtn.disabled = false;
+                                goBtn.textContent = 'Open Secure Checkout';
+                                goBtn.onclick = function () { window.open(d.gateway_url, 'tenthframe_pay'); startPolling(d.payment_id); };
+                            }
                             return;
                         }
+                        dropPayWindow();
                         say(d.error || 'Something went wrong — please try again.', true);
                         goBtn.disabled = false;
                     })
                     .catch(function () {
+                        dropPayWindow();
                         say('Network error — please try again.', true);
                         goBtn.disabled = false;
                     });

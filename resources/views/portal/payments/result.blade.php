@@ -19,6 +19,7 @@
 
         @php
             $order = $payload['order'];
+            $booking = $payload['booking'] ?? null;
             $event = $payload['event'];
             $headline = $payload['headline'];
             $emoji = $payload['emoji'];
@@ -44,6 +45,19 @@
                         <span style="color:var(--slate);">Total</span>
                         <span style="font-weight:600;">&#2547; {{ number_format((float) $order->total(), 0) }}</span>
                     </div>
+                @if($booking)
+                    <div style="display:flex;justify-content:space-between;font-family:var(--font-sub);font-size:0.8rem;color:var(--navy);padding:4px 0;">
+                        <span style="color:var(--slate);">Lane</span>
+                        <span style="font-weight:600;">Lane {{ $booking->lane?->lane_number ?? '—' }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-family:var(--font-sub);font-size:0.8rem;color:var(--navy);padding:4px 0;">
+                        <span style="color:var(--slate);">When</span>
+                        <span style="font-weight:600;">{{ $booking->date?->format('M j, Y') }} · {{ $booking->time_slot }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-family:var(--font-sub);font-size:0.8rem;color:var(--navy);padding:4px 0;">
+                        <span style="color:var(--slate);">Amount</span>
+                        <span style="font-weight:600;">&#2547; {{ number_format((float) $payment->amount, 0) }}</span>
+                    </div>
                 @else
                     <div style="display:flex;justify-content:space-between;font-family:var(--font-sub);font-size:0.8rem;color:var(--navy);padding:4px 0;">
                         <span style="color:var(--slate);">Event</span>
@@ -67,12 +81,22 @@
             </div>
 
             <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-                @if($status !== 'success')
-                    <a href="{{ $order ? route('public.proshop.cart') : route('public.events.show', $event) }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">{{ $order ? 'Retry Checkout' : 'Retry RSVP' }}</a>
+                @if($booking)
+                    @if($status !== 'success' && $booking->status === 'pending')
+                        <a href="{{ route('visitor.bookings.index') }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">Pay Now from My Bookings</a>
+                    @else
+                        <a href="{{ route('visitor.bookings.index') }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">My Bookings</a>
+                    @endif
+                    <a href="{{ route('visitor.bookings.create') }}" class="btn" style="padding:10px 22px;font-size:0.8rem;">Book Another Lane</a>
+                @elseif($order)
+                    @if($status !== 'success')
+                        <a href="{{ route('public.proshop.cart') }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">Retry Checkout</a>
+                    @else
+                        <a href="{{ route('public.proshop.index') }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">Back to the Pro Shop</a>
+                    @endif
                 @else
-                    <a href="{{ $order ? route('public.proshop.index') : route('public.events.show', $event) }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">{{ $order ? 'Back to the Pro Shop' : 'View Event' }}</a>
+                    <a href="{{ route('public.events.show', $event) }}" class="btn btn-gold" style="padding:10px 22px;font-size:0.8rem;">View Event</a>
                 @endif
-                <a href="{{ $order ? route('public.proshop.index') : route('public.events') }}" class="btn" style="padding:10px 22px;font-size:0.8rem;">{{ $order ? 'Pro Shop' : 'Events Hub' }}</a>
             </div>
         </div>
 

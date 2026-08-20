@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PublicPortal;
 
 use App\Http\Controllers\Controller;
+use App\Models\LaneBooking;
 use App\Models\Payment;
 use App\Models\ProductOrder;
 use App\Models\Rsvp;
@@ -14,9 +15,7 @@ use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    public function __construct(private PaymentSettler $settler)
-    {
-    }
+    public function __construct(private PaymentSettler $settler) {}
 
     public function success(Request $request, Payment $payment): View
     {
@@ -43,7 +42,7 @@ class PaymentController extends Controller
             }
         }
 
-        $payment->loadMorph('payable', [ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
+        $payment->loadMorph('payable', [LaneBooking::class => ['lane'], ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
 
         if ($payment->isSuccessful() && $payment->payable instanceof ProductOrder) {
             $this->settler->clearCartFor($payment, $sessionId);
@@ -63,7 +62,7 @@ class PaymentController extends Controller
             $this->voidRsvp($payment);
         }
 
-        $payment->loadMorph('payable', [ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
+        $payment->loadMorph('payable', [LaneBooking::class => ['lane'], ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
 
         return view('portal.payments.result', [
             'payment' => $payment,
@@ -79,7 +78,7 @@ class PaymentController extends Controller
             $this->voidRsvp($payment);
         }
 
-        $payment->loadMorph('payable', [ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
+        $payment->loadMorph('payable', [LaneBooking::class => ['lane'], ProductOrder::class => ['items.product'], Rsvp::class => ['event']]);
 
         return view('portal.payments.result', [
             'payment' => $payment,
@@ -170,13 +169,14 @@ class PaymentController extends Controller
     {
         $payable = $payment->payable;
         $order = $payable instanceof ProductOrder ? $payable : null;
-        $rsvp = $order ? null : $payable;
-        $event = $order ? null : $rsvp?->event;
+        $booking = ! $order && $payable instanceof LaneBooking ? $payable : null;
+        $rsvp = $order || $booking ? null : $payable;
+        $event = $order || $booking ? null : $rsvp?->event;
 
         $confirmed = $payment->isSuccessful();
 
         $headline = match ($status) {
-            'success' => $confirmed ? ($order ? 'Order Paid!' : 'Payment Confirmed!') : 'Payment Underway',
+            'success' => $confirmed ? ($order ? 'Order Paid!' : ($booking ? 'Lane Booked!' : 'Payment Confirmed!')) : 'Payment Underway',
             'fail' => 'Payment Didn\'t Land',
             default => 'Payment Cancelled',
         };
@@ -195,16 +195,22 @@ class PaymentController extends Controller
 
         $copy = match ($status) {
             'success' => $confirmed
-                ? ($order
-                    ? 'Payment received — your gear is held at the front desk. Show this receipt to collect it.'
-                    : 'Your spot is locked in — the club secretary has been notified. See you on the lanes.')
-                : 'The payment is still clearing — we\'ll confirm by email the moment it lands. No action needed.',
+                ? match (true) {
+                    $order !== null => 'Payment received — your gear is held at the front desk. Show this receipt to collect it.',
+                    $booking !== null => 'Your lane is locked in. See you on the approach!',
+                    default => 'Your spot is locked in — the club secretary has been notified. See you on the lanes.'
+                }
+            : 'The payment is still clearing — we\'ll confirm by email the moment it lands. No action needed.',
             'fail' => $order
                 ? 'The payment didn\'t go through. Your bag is still there — you can try checkout again.'
-                : 'The payment didn\'t go through. Your RSVP has been cleared — head back to the event page and try again.',
+                : ($booking
+                    ? 'The payment didn\'t go through. Your booking is still pending — head to My Bookings and press Pay Now to retry.'
+                    : 'The payment didn\'t go through. Your RSVP has been cleared — head back to the event page and try again.'),
             default => $order
                 ? 'The payment was cancelled before completion. Your bag is still there if you want to roll again.'
-                : 'The payment was cancelled before completion. Your RSVP has been cleared — you can roll again anytime.',
+                : ($booking
+                    ? 'The payment was cancelled before completion. Your booking is still pending — you can pay from My Bookings anytime.'
+                    : 'The payment was cancelled before completion. Your RSVP has been cleared — you can roll again anytime.')
         };
 
         $statusLabel = match ($payment->status) {
@@ -216,8 +222,9 @@ class PaymentController extends Controller
         };
 
         return [
-            'type' => $order ? 'order' : 'rsvp',
+            'type' => $order ? 'order' : ($booking ? 'booking' : 'rsvp'),
             'order' => $order,
+            'booking' => $booking,
             'rsvp' => $rsvp,
             'event' => $event,
             'headline' => $headline,

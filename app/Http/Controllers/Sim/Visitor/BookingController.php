@@ -9,6 +9,7 @@ use App\Models\Lane;
 use App\Models\LaneBooking;
 use App\Models\Payment;
 use App\Models\Visitor;
+use App\Services\Payments\PaymentSettler;
 use App\Services\Payments\SslCommerzGateway;
 use App\Services\Simulation\Clock;
 use App\Services\Simulation\VisitorRegistry;
@@ -20,9 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-    public function __construct(private SslCommerzGateway $gateway)
-    {
-    }
+    public function __construct(private SslCommerzGateway $gateway) {}
 
     public function create(Request $request)
     {
@@ -49,7 +48,7 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'lane_id' => ['required', 'exists:lanes,id'],
-            'time_slot' => ['required', 'in:' . implode(',', array_keys(Clock::timeSlots()))],
+            'time_slot' => ['required', 'in:'.implode(',', array_keys(Clock::timeSlots()))],
             'date' => ['required', 'date', 'after_or_equal:today'],
         ]);
 
@@ -117,12 +116,12 @@ class BookingController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Lane is busy — you were added to the waiting queue at position ' . $position . '.',
+                    'message' => 'Lane is busy — you were added to the waiting queue at position '.$position.'.',
                     'redirect' => route('visitor.queues.index'),
                 ]);
             }
 
-            session()->flash('success', 'Lane is busy — you were added to the waiting queue at position ' . $position . '.');
+            session()->flash('success', 'Lane is busy — you were added to the waiting queue at position '.$position.'.');
 
             return redirect()->route('visitor.queues.index');
         }
@@ -141,12 +140,12 @@ class BookingController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Lane ' . $lane->lane_number . ' booked for ' . $data['date'] . ' (' . Clock::timeSlots()[$data['time_slot']] . ').',
+                    'message' => 'Lane '.$lane->lane_number.' booked for '.$data['date'].' ('.Clock::timeSlots()[$data['time_slot']].').',
                     'redirect' => route('visitor.bookings.index'),
                 ]);
             }
 
-            session()->flash('success', 'Lane ' . $lane->lane_number . ' booked for ' . $data['date'] . ' (' . Clock::timeSlots()[$data['time_slot']] . ').');
+            session()->flash('success', 'Lane '.$lane->lane_number.' booked for '.$data['date'].' ('.Clock::timeSlots()[$data['time_slot']].').');
 
             return redirect()->route('visitor.bookings.index');
         }
@@ -173,18 +172,18 @@ class BookingController extends Controller
 
         if (! $this->gateway->isConfigured()) {
             $payment->update(['status' => 'processing']);
-            app(\App\Services\Payments\PaymentSettler::class)->complete($payment, $payment->transaction_id, ['status' => 'VALID']);
+            app(PaymentSettler::class)->complete($payment, $payment->transaction_id, ['status' => 'VALID']);
             $payment->refresh();
 
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Lane ' . $lane->lane_number . ' booked (simulated payment).',
+                    'message' => 'Lane '.$lane->lane_number.' booked (simulated payment).',
                     'redirect' => route('visitor.bookings.index'),
                 ]);
             }
 
-            session()->flash('success', 'Lane ' . $lane->lane_number . ' booked (simulated payment).');
+            session()->flash('success', 'Lane '.$lane->lane_number.' booked (simulated payment).');
 
             return redirect()->route('visitor.bookings.index');
         }
@@ -200,12 +199,12 @@ class BookingController extends Controller
                 'ipn_url' => route('public.pay.ipn'),
                 'cus_name' => $visitor->name ?? $request->user()->name,
                 'cus_email' => $visitor->email ?? $request->user()->email,
-                'product_name' => 'Lane booking: Lane ' . $lane->lane_number . ' — ' . $data['date'] . ' ' . Clock::timeSlots()[$data['time_slot']],
+                'product_name' => 'Lane booking: Lane '.$lane->lane_number.' — '.$data['date'].' '.Clock::timeSlots()[$data['time_slot']],
                 'product_category' => 'Lane Reservation',
                 'product_profile' => 'general',
             ]);
         } catch (\Throwable $e) {
-            Log::warning('SSLCommerz session failed for lane booking: ' . $e->getMessage());
+            Log::warning('SSLCommerz session failed for lane booking: '.$e->getMessage());
             $payment->update(['status' => 'failed', 'error_message' => 'Payment service unreachable.']);
             $booking->update(['status' => 'cancelled']);
 
@@ -271,7 +270,7 @@ class BookingController extends Controller
         $log = [];
         app(VisitorSpawner::class)->promoteForSlot(Carbon::parse($booking->date), $booking->time_slot, $log);
 
-        session()->flash('success', 'Booking cancelled.' . ((($log['queues_promoted'] ?? 0) > 0) ? ' The next visitor in the queue was promoted to your lane.' : ''));
+        session()->flash('success', 'Booking cancelled.'.((($log['queues_promoted'] ?? 0) > 0) ? ' The next visitor in the queue was promoted to your lane.' : ''));
 
         return redirect()->route('visitor.bookings.index');
     }
@@ -336,7 +335,7 @@ class BookingController extends Controller
 
         if (! $this->gateway->isConfigured()) {
             $payment->update(['status' => 'processing']);
-            app(\App\Services\Payments\PaymentSettler::class)->complete($payment, $payment->transaction_id, ['status' => 'VALID']);
+            app(PaymentSettler::class)->complete($payment, $payment->transaction_id, ['status' => 'VALID']);
 
             if ($request->wantsJson()) {
                 return response()->json(['settled' => true, 'message' => 'Payment settled (simulated) — booking confirmed!']);
@@ -358,12 +357,12 @@ class BookingController extends Controller
                 'ipn_url' => route('public.pay.ipn'),
                 'cus_name' => $visitor->name ?? $request->user()->name,
                 'cus_email' => $visitor->email ?? $request->user()->email,
-                'product_name' => 'Lane booking: Lane ' . ($booking->lane?->lane_number ?? '-') . ' — ' . Carbon::parse($booking->date)->format('M j, Y') . ' ' . Clock::timeSlots()[$booking->time_slot],
+                'product_name' => 'Lane booking: Lane '.($booking->lane?->lane_number ?? '-').' — '.Carbon::parse($booking->date)->format('M j, Y').' '.Clock::timeSlots()[$booking->time_slot],
                 'product_category' => 'Lane Reservation',
                 'product_profile' => 'general',
             ]);
         } catch (\Throwable $e) {
-            Log::warning('SSLCommerz session failed for booking payment retry: ' . $e->getMessage());
+            Log::warning('SSLCommerz session failed for booking payment retry: '.$e->getMessage());
             $payment->update(['status' => 'failed', 'error_message' => 'Payment service unreachable.']);
 
             if ($request->wantsJson()) {
