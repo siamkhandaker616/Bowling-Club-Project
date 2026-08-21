@@ -149,6 +149,7 @@ Route::middleware(['auth', 'verified', 'role:caretaker', CatchUpSim::class])->pr
     Route::get('/crew/typing', [CrewController::class, 'typing'])->name('crew.typing');
     Route::post('/crew/send', [CrewController::class, 'send'])->name('crew.send');
     Route::post('/crew/messages/{message}/reply', [CrewController::class, 'reply'])->name('crew.reply');
+    Route::post('/crew/report', [CrewController::class, 'report'])->name('crew.report');
     Route::post('/crew/vent', [CrewController::class, 'vent'])->name('crew.vent');
     Route::post('/crew/respond/{confrontation}', [CrewController::class, 'respond'])->name('crew.respond');
 

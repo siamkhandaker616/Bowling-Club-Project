@@ -177,6 +177,37 @@ class CrewController extends Controller
             : redirect()->route('caretaker.crew.index');
     }
 
+    public function report(Request $request): RedirectResponse
+    {
+        $me = $request->user()->staff;
+
+        if (! $me || ! $me->is_active) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'target_id' => ['required', 'integer'],
+            'body' => ['required', 'string', 'min:3', 'max:300'],
+            'with' => ['nullable', 'integer'],
+        ]);
+
+        $engine = app(CrewChatEngine::class);
+
+        $target = Staff::where('is_active', true)->find($data['target_id']);
+
+        if (! $target || (int) $target->id === (int) $me->id || ! $engine->crewToday($me)->pluck('id')->contains((int) $target->id)) {
+            abort(403);
+        }
+
+        app(CrewChatEngine::class)->fileReport($me, $target, $data['body']);
+
+        session()->flash('success', 'Report filed with the steward. The crew remembers...');
+
+        $with = (int) ($data['with'] ?? 0);
+
+        return redirect()->route('caretaker.crew.index', $with ? ['with' => $with, 'tab' => 'dm'] : ['tab' => 'ledger']);
+    }
+
     public function respond(Request $request, Confrontation $confrontation): RedirectResponse
     {
         $me = $request->user()->staff;
@@ -211,10 +242,10 @@ class CrewController extends Controller
         $result = app(CrewChatEngine::class)->vent($me);
 
         if ($result['snitched']) {
-            session()->flash('error', 'You vented... and ' . ($result['snitch_name'] ?? 'somebody') . ' snitched on you. Expect a confrontation.');
+            session()->flash('error', 'You vented... and '.($result['snitch_name'] ?? 'somebody').' snitched on you. Expect a confrontation.');
         } else {
-            $listeners = count($result['heard_by']) > 0 ? implode(', ', array_slice($result['heard_by'], 0, 3)) . (count($result['heard_by']) > 3 ? '...' : '') : 'no one';
-            session()->flash('success', 'You got that off your chest. ' . ucfirst($listeners) . ' was nearby and heard it.');
+            $listeners = count($result['heard_by']) > 0 ? implode(', ', array_slice($result['heard_by'], 0, 3)).(count($result['heard_by']) > 3 ? '...' : '') : 'no one';
+            session()->flash('success', 'You got that off your chest. '.ucfirst($listeners).' was nearby and heard it.');
         }
 
         return redirect()->route('caretaker.crew.index');

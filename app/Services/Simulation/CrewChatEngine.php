@@ -11,6 +11,7 @@ use App\Models\Staff;
 use App\Models\StaffEvent;
 use App\Models\StaffMessage;
 use App\Models\StaffRelationship;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -1184,7 +1185,7 @@ class CrewChatEngine
 
         $parts = preg_split('/\s+/', $name);
 
-        return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
+        return strtoupper(substr($parts[0], 0, 1).substr($parts[count($parts) - 1], 0, 1));
     }
 
     private function crewVibe(Staff $player): string
@@ -1217,7 +1218,7 @@ class CrewChatEngine
 
         $this->write($player, 'speech', 'reply', 'Sorry about that. I will watch it next time.');
 
-        return ['flash' => 'Apologized to ' . ($sender->user->name ?? 'your coworker') . ' — trust nudged up.', 'type' => 'success'];
+        return ['flash' => 'Apologized to '.($sender->user->name ?? 'your coworker').' — trust nudged up.', 'type' => 'success'];
     }
 
     private function stayQuiet(Staff $player, Staff $sender): array
@@ -1230,6 +1231,11 @@ class CrewChatEngine
         $this->write($player, 'thought', 'reply', '...kept my mouth shut.');
 
         return ['flash' => 'Stayed quiet — no change.', 'type' => 'success'];
+    }
+
+    public function fileReport(Staff $player, Staff $target, string $body): array
+    {
+        return $this->snitch($player, $target, trim($body));
     }
 
     private function snitch(Staff $player, Staff $target, ?string $quote): array
@@ -1260,7 +1266,7 @@ class CrewChatEngine
             'staff_id' => $player->id,
             'event_type' => 'snitch_report',
             'severity' => null,
-            'description' => 'Filed a snitch report on ' . ($target->user->name ?? 'a coworker') . ' to the steward.',
+            'description' => 'Filed a snitch report on '.($target->user->name ?? 'a coworker').' to the steward.',
             'date' => Clock::date(),
             'happiness_change' => 0,
         ]);
@@ -1268,7 +1274,7 @@ class CrewChatEngine
         $this->write($player, 'thought', 'reply', 'Someone should know about that.');
 
         return [
-            'flash' => 'Snitch report #' . $report->id . ' sent to the steward. The crew remembers...',
+            'flash' => 'Snitch report #'.$report->id.' sent to the steward. The crew remembers...',
             'type' => 'success',
         ];
     }
@@ -1289,7 +1295,7 @@ class CrewChatEngine
         ]);
     }
 
-    private function writeScheduled(?Staff $staff, string $bubbleType, string $kind, string $body, \Illuminate\Support\Carbon $respondAt, ?Staff $to = null): ?StaffMessage
+    private function writeScheduled(?Staff $staff, string $bubbleType, string $kind, string $body, Carbon $respondAt, ?Staff $to = null): ?StaffMessage
     {
         if (! $staff || trim($body) === '') {
             return null;
@@ -1379,11 +1385,11 @@ class CrewChatEngine
             $personality = $speaker->personalities->pluck('name')->implode(', ') ?: 'standard';
         }
 
-        $systemPrompt = "You are {$speakerName}, a bowling alley " . ($speaker->role ?? 'staff member') . ". "
-            . "Your personality: {$personality}. Your mood: {$tone}. "
-            . "You speak in short, casual sentences that match your personality. "
-            . "Never break character. Never mention being an AI. "
-            . "Stay in 1-2 sentences max. Respond naturally to what was said.";
+        $systemPrompt = "You are {$speakerName}, a bowling alley ".($speaker->role ?? 'staff member').'. '
+            ."Your personality: {$personality}. Your mood: {$tone}. "
+            .'You speak in short, casual sentences that match your personality. '
+            .'Never break character. Never mention being an AI. '
+            .'Stay in 1-2 sentences max. Respond naturally to what was said.';
 
         $result = $this->groqChat($systemPrompt, $playerMessage);
 
@@ -1435,7 +1441,7 @@ class CrewChatEngine
             }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
+                'Authorization' => 'Bearer '.$apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(5)->post('https://api.groq.com/openai/v1/chat/completions', [
                 'model' => 'groq/compound-mini',

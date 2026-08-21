@@ -144,6 +144,19 @@
                                         @endforeach
                                     </div>
 
+                                    <details class="sim-false-report">
+                                        <summary>File a report &#128037;</summary>
+                                        <form method="POST" action="{{ route('caretaker.crew.report') }}">
+                                            @csrf
+                                            <input type="hidden" name="target_id" value="{{ $open->id }}">
+                                            <input type="hidden" name="with" value="{{ $open->id }}">
+                                            <textarea name="body" rows="2" maxlength="300" required placeholder="Tell the steward what you heard — nobody can fact-check it…"></textarea>
+                                            <div style="display:flex;justify-content:flex-end;">
+                                                <button type="submit">Send to Steward</button>
+                                            </div>
+                                        </form>
+                                    </details>
+
                                     <form method="POST" action="{{ route('caretaker.crew.send') }}" class="sim-crew-bar" id="sim-dm-form">
                                         @csrf
                                         <input type="hidden" name="to" value="{{ $open->id }}">
@@ -356,6 +369,10 @@
         .sim-crew-chip{border:2px solid var(--navy);border-radius:40px;background:var(--cloud);font-family:var(--font-sub);font-size:.62rem;padding:.35rem .75rem;cursor:pointer;box-shadow:var(--hard);color:var(--navy);transition:transform .12s ease,box-shadow .12s ease}
         .sim-crew-chip:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--navy)}
         .sim-crew-chip.snitch{border-color:var(--coral-dark);background:var(--coral);color:var(--pin-white)}
+        .sim-false-report{margin-bottom:.55rem;border:2px dashed var(--coral-dark);border-radius:var(--radius-sm);background:var(--mist);padding:.45rem .6rem}
+        .sim-false-report summary{font-family:var(--font-sub);font-size:.62rem;color:var(--coral-dark);cursor:pointer;letter-spacing:.5px}
+        .sim-false-report textarea{width:100%;margin-top:.45rem;padding:.45rem .6rem;border:2px solid var(--navy);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.75rem;background:var(--pin-white);color:var(--navy);resize:vertical}
+        .sim-false-report button{border:2px solid var(--navy);border-radius:40px;background:var(--coral);color:var(--pin-white);font-family:var(--font-sub);font-size:.6rem;padding:.35rem .85rem;cursor:pointer;box-shadow:var(--hard)}
         .sim-crew-bar{display:flex;gap:.5rem;align-items:center}
         .sim-crew-input{flex:1;min-width:0;padding:.55rem .8rem;border:2px solid var(--navy);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.78rem;background:var(--pin-white);color:var(--navy);box-shadow:var(--hard);outline:none}
         .sim-crew-dmrow{display:flex;gap:.6rem;align-items:center;padding:.55rem .4rem;border-bottom:1px dashed var(--fog);text-decoration:none;border-radius:10px}

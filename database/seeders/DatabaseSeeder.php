@@ -63,8 +63,13 @@ class DatabaseSeeder extends Seeder
                 'reputation' => 75,
                 'total_revenue' => 0,
                 'total_expenses' => 0,
+                'lane_booking_price' => 500,
             ]
         );
+
+        if ((float) ClubConfig::singleton()->lane_booking_price <= 0) {
+            ClubConfig::where('id', 1)->update(['lane_booking_price' => 500]);
+        }
     }
 
     private function seedPersonalities(): void

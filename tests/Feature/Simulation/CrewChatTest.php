@@ -118,6 +118,53 @@ class CrewChatTest extends TestCase
         ]);
     }
 
+    public function test_player_can_file_a_report_from_a_dm(): void
+    {
+        $player = $this->caretaker();
+        $npc = $this->coworker();
+        $this->actingAs($player->user)->get(route('caretaker.crew.index'))->assertOk();
+
+        $body = 'They said they unplugged the pin machine on purpose.';
+
+        $this->actingAs($player->user)
+            ->post(route('caretaker.crew.report'), [
+                'target_id' => $npc->id,
+                'body' => $body.' ', // trailing space proves input is trimmed into the quote
+                'with' => $npc->id,
+            ])
+            ->assertRedirect(route('caretaker.crew.index', ['with' => $npc->id, 'tab' => 'dm']));
+
+        $this->assertDatabaseHas('snitch_reports', [
+            'reporter_staff_id' => $player->id,
+            'accused_staff_id' => $npc->id,
+            'quote' => $body,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_report_rejects_crew_not_on_today_s_roster(): void
+    {
+        $player = $this->caretaker();
+        $onShiftA = $this->coworker();
+        $onShiftB = $this->makeStaff(['name' => 'Shift B']);
+        $stranger = $this->makeStaff(['name' => 'Off Shift']);
+
+        $this->makeShift(['staff_id' => $onShiftA->id]);
+        $this->makeShift(['staff_id' => $onShiftB->id]);
+
+        $this->actingAs($player->user)
+            ->post(route('caretaker.crew.report'), [
+                'target_id' => $stranger->id,
+                'body' => 'Fabricated accusation against someone off shift.',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('snitch_reports', [
+            'reporter_staff_id' => $player->id,
+            'accused_staff_id' => $stranger->id,
+        ]);
+    }
+
     public function test_reply_rejects_unknown_action(): void
     {
         $player = $this->caretaker();

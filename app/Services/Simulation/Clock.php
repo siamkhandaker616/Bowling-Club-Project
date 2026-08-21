@@ -20,12 +20,19 @@ class Clock
     {
         $cfg = ClubConfig::singleton();
 
-        return Carbon::today()->addDays(max(0, (int) $cfg->current_day - 1));
+        return self::anchor()->addDays(max(0, (int) $cfg->current_day - 1));
     }
 
     public static function dateForDay(int $day): Carbon
     {
-        return Carbon::today()->addDays(max(0, $day - 1));
+        return self::anchor()->addDays(max(0, $day - 1));
+    }
+
+    private static function anchor(): Carbon
+    {
+        $cfg = ClubConfig::singleton();
+
+        return ($cfg->last_advanced_at ? Carbon::parse($cfg->last_advanced_at) : Carbon::today())->startOfDay();
     }
 
     public static function label(): string

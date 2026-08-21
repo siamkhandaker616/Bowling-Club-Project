@@ -45,7 +45,7 @@
                         <span style="color:var(--slate);">Total</span>
                         <span style="font-weight:600;">&#2547; {{ number_format((float) $order->total(), 0) }}</span>
                     </div>
-                @if($booking)
+                @elseif($booking)
                     <div style="display:flex;justify-content:space-between;font-family:var(--font-sub);font-size:0.8rem;color:var(--navy);padding:4px 0;">
                         <span style="color:var(--slate);">Lane</span>
                         <span style="font-weight:600;">Lane {{ $booking->lane?->lane_number ?? '—' }}</span>
